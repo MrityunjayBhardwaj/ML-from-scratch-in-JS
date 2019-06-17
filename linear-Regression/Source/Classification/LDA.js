@@ -1,4 +1,6 @@
-/* its a multiClass Bayes Classifier */
+// it uses Bayes classifier but here, we use a common covariance matrix among all the classes and different
+// mean.
+
 
 /**
  * 
@@ -35,7 +37,7 @@ function gaussianPDF(mean,variance){
  * @param {*} xMean 
  * @description Calcuate the Covariance Matrix
  */
-function calcCoverianceMatrix(x,xMean){
+function calcUniCoverianceMatrix(x,xMean){
 
     const nSamples  = x.shape[0];
     const nFeatures = x.shape[1];

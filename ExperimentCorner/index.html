@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Experiment Corner</title>
+    <summary>this is a place where I test new ideas</summary>
+
+    <!-- <script src="../dependency/plotlyJS/plotly-latest.min.js"></script> -->
+    <script src="../dependency/plotlyJS/plotly.js"></script>
+    <script src="../dependency/ndjs/dist/nd.js"></script>
+    <script src="../../Dependences/p5/p5.min.js"></script>
+    <script src="../dependency/ImageParser/imageParser.js"></script>
+
+    <script src="../dependency/tensorflowJS/tf.js"></script>
+</head>
+<body>
+
+  <!-- importing img -->
+
+  <img src="../Assets/Images/brain_sticker.png" alt="HTML tutorial" >
+
+    <br>
+
+    <div id="tester" style="width:500px;height:500px;display:inline-block;"></div>
+    <div id="screePlot" style="width:500;height:300; display:inline-block;"></div>
+
+    <div id="SVDContainer" >
+      <div id="leftEigenVector" style= "width:400px;height:400px; display:inline-block;"></div>
+      <div id="singularValues" style=  "width:400px;height:400px; display:inline-block;"></div>
+      <div id="rightEigenVector" style="width:400px;height:400px; display:inline-block;"></div>
+    </div>
+
+
+    <br>
+    <hr>
+    <h1 style="font-family: Arial, Helvetica, sans-serif">SVD Compression </h1>
+
+    <div id="compViz0" style="width:500px;display:inline-block;"></div>
+    <div id="cummCompViz" style="width:500px;display:inline-block;"></div>
+    <div id="pctDiff"style="width:300px;display:inline-block;font-size:100px;font-family: Arial, Helvetica, sans-serif">90%</div>
+
+    <div>
+  <input type="range" min="0" max="1" value=".1" step=".01" class="slider" id="compNum">
+    <div id='currCompNum'></div>
+</div>
+
+    <hr>
+    <h3>console logs:-</h3>
+    <div id="console"></div>
+    <br>
+    <br>
+<div class="slidecontainer">
+
+  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="mtx0">
+    <div id='val0'></div>
+  <input type="range" min="1" max="100" value="50" step="1" class="slider" id="mtx1">
+    <div id='val1'></div>
+</div>
+
+  <script src="Source/SVDExp.js"></script>
+   <!-- <script src="Source/main.js"></script> -->
+</body>
+</html>

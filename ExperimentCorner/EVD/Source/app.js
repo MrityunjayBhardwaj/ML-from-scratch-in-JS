@@ -1,5 +1,17 @@
 let matrix = nd.array([[1,2],[1,2]]);
 
+/*
+what are eigen value and vectors ? i know that eigen vectors are those which when transformed by the 
+matrix 'A' gives the same effect as if we are scaling that vector 
+i.e, Av = lambda*v {where, lambda is a scalar a.k.a eigen value}
+we can also view eigen vectors as a null space of (A - lambda*I )
+but why/How does it give my, the  basis vector for the column space of A?
+
+Answer: it doesn't always gives you the basis for the column space of A because the collection directions to which the vector * A is invariant doen't necesserly 
+span the eitire space. 
+and we are confused with the U of USV decomposition of SVD in U its a collection of orthogonal basis vector of the column space and null space of matrix A .
+
+*/
 let layout = {
 	margin: {
 	t: 0}  ,

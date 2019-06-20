@@ -1,42 +1,12 @@
-// import { svd_decomp } from "../../dependency/ndjs/src/la";
 
 
-function convert2dArray(ndArr){
-  // storing the shape of ndArray
-  const shape = ndArr.shape;
+// Remove dependency of p5js
 
-  const nElems=  shape[0];
-  const nFeatures = shape[1] || 1  ; 
 
-  // fetch all the elements
-  const arraySerialized = Array.from(ndArr.elems());
-
-  // console.log
-  const jsArray = Array(shape[0]);
-
-  for(let i=0;i<nElems;i++){
-
-    const cArrayRow = Array(nFeatures);
-    for(let j=0;j<nFeatures;j++){
-      const index = i*nFeatures + j;
-
-      if (nFeatures === 1 ){
-        jsArray[i] = arraySerialized[index][1];
-      }
-      else{
-        cArrayRow[j] = arraySerialized[index][1] ;
-      }
-
-    }
-    if(nFeatures !== 1)
-    jsArray[i] = cArrayRow;
-  }
-  return jsArray;
-}
-
+function SVD(matrix ){
 
 // Singular Value Decomposition:-
-let matrix = nd.array([[1,2],[3,1]]);
+matrix = matrix || nd.array([[1,2],[3,1]]);
 
 let dSize = [40,40];
 
@@ -54,7 +24,7 @@ const g2d = tf.exp( tf.div( tf.mul( tf.scalar(-1) , tf.add(tf.pow( xMatrix,2) , 
 const A = tf.truncatedNormal([m,m])
 // const W = tf.conv2d(A,g2d.reshape([k,k,1,1]));
 
-matrix = nd.array(A.arraySync());
+console.log("resume ")
 
 // const IM = new ImageParser();
 // const Im =p5.LoadImage('../Assets/Images/brain_sticker.png', ()=>{ console.log("it Works!")},()=>{ console.log("it Works!")});
@@ -66,23 +36,23 @@ for(let i=0;i<5;i++){
   }
 } 
 
-const plotMatrix = convert2dArray(matrix);
 
 var data = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z: plotMatrix,
+    z: matrix,
+    colorscale: 'Greys',
     type: 'heatmap'
   },
   
 ];
 
-Plotly.newPlot('tester', data,{title:'original Matrix \'A\''});
+Plotly.newPlot('tester', data,{title:'original Matrix \'A\''},{staticPlot: true});
 // Plotly.react()
 
 
 // SVD :-
-const matrixSvd = nd.la.svd_decomp(plotMatrix);
+const matrixSvd = nd.la.svd_decomp(matrix);
 
 const matrixLEVec =  convert2dArray(matrixSvd[0]);
 const matrixSEVal =  convert2dArray(nd.la.diag_mat(matrixSvd[1]));
@@ -150,7 +120,7 @@ for(let i=0;i<tfS.shape[0];i++){
   compArray.push(cComp);
 }
 
-const originalImg = tf.tensor(plotMatrix);
+const originalImg = tf.tensor(matrix);
 
 setInterval(() => {
 
@@ -175,6 +145,7 @@ setInterval(() => {
   const compData = [
     {
       z: currComp.arraySync(),
+      // colorscale: 'Greys',
       type: 'heatmap'
     }
   ];
@@ -183,18 +154,19 @@ setInterval(() => {
   const cummCompData = [
     {
       z: cummulativeComp.arraySync(),
+      colorscale: 'Greys',
       type:'heatmap'
     }
   ];
 
   // updating  plotly
-Plotly.react('compViz0',compData,{title: "Component " +compNum})
-Plotly.react('cummCompViz',cummCompData,{title: "Cummulative Component Image"})
-
+Plotly.react('compViz0',compData,{title: "Component " +compNum},{staticPlot: true})
+Plotly.react('cummCompViz',cummCompData,{title: "Cummulative Component Image"},{staticPlot: true})
   
 }, 250);
 
 
+}
 
 
 

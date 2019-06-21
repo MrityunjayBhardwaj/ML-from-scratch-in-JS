@@ -11,14 +11,18 @@ function PCA(matrix){
     // normalizing the matrix
     ndMatrix = nd.array( [convert2dArray(ndMatrix.sliceElems('...',0)), convert2dArray(ndMatrix.sliceElems('...',1)) ]).T;
 
+    // calculating mean
     let mean = nd.array(tf.fill(ndMatrix.shape,1/ndMatrix.shape[0]).arraySync());
     mean = nd.la.matmul(ndMatrix.T,mean).sliceElems('...',0);
 
+    // making the ndMatrix mean centric
     ndMatrix.forElems( (elem,i,j) => ndMatrix.set([i,j] ,elem - mean((ndMatrix.shape[1]-1)*0+j) ) );
 
+    // TEST:
     console.log(ndMatrix.T.shape,mean);
     window.mean = mean;
     window.mtx = ndMatrix;
+
 
     console.log(ndMatrix)
     // calculating covariance matrix
@@ -27,6 +31,8 @@ function PCA(matrix){
     // decomposing covariance matrix using SVD
     const covSVD = nd.la.svd_decomp(covMatrix);
 
+    // TODO: Normalize covariance Matrix in order to prevent having to normalize eigenvals and vecs.
+    // decomposing covriance matrix using eigenDecomposition (which is preferred.)
     const eigenDecomp = nd.la.eigen(covMatrix);
 
     console.log(eigenDecomp[1]);
@@ -39,77 +45,20 @@ function PCA(matrix){
     /* Visualization Using Plotly.js */
 
 
-    // console.log(lBasis.sliceElems('...',0).reshape(1,2).shape,ndMatrix.T.shape);
-
     // Visualizing the principle Component
     // const pCompVec = convert2dArray(nd.la.matmul(lBasis.sliceElems('...',0).reshape(1,2),ndMatrix.T ));
     const pCompVec = convert2dArray(eigenDecomp[1]);
-    let eigenVals = convert2dArray(eigenDecomp[0]);
+
+    let eigenVec = eigenDecomp[1];
+    let eigenVals  = convert2dArray(eigenDecomp[0]);
+
+    // normalizing eigenValues.
     let eValMag = (eigenVals[0] +eigenVals[1]);
     eigenVals[0] = eigenVals[0]/eValMag;
     eigenVals[1] = eigenVals[1]/eValMag;
 
     console.log(pCompVec[0][0].re,covMatrix,eigenVals);
 
-
-
-const vizData = { x: convert2dArray( ndMatrix.sliceElems('...',0) ),
-     y: convert2dArray( ndMatrix.sliceElems('...',1) )};
-
-var trace1 = {
-  x: vizData.x,
-  y: vizData.y,
-  mode: 'markers',
-  name: 'points',
-  marker: {
-    color: 'rgb(102,0,0)',
-    size: 2,
-    opacity: 0.4
-  },
-  type: 'scatter'
-};
-var trace2 = {
-  x: vizData.x,
-  y: vizData.y,
-  name: 'density',
-  ncontours: 20,
-  colorscale: 'Hot',
-  reversescale: true,
-  showscale: false,
-  type: 'histogram2dcontour'
-};
-var trace3 = {
-  x: vizData.x,
-  name: 'x density',
-  marker: {color: 'rgb(30,30,40)'},
-  yaxis: 'y2',
-  type: 'histogram'
-};
-var trace4 = {
-  y: vizData.y,
-  name: 'y density',
-  marker: {color: 'rgb(30,30,40)'},
-  xaxis: 'x2',
-  type: 'histogram'
-};
-
-// var data = [trace1, trace2, trace3, trace4,
-//         {
-//             x : [0, pCompVec[0][0].re],
-//             y : [0, pCompVec[0][1].re],
-//             mode: 'lines',
-//             type: 'Lines',
-//             line: {width: 5,color:'violet'},
-//         },
-//         {
-//             x : [0, pCompVec[1][0].re],
-//             y : [0, pCompVec[1][1].re],
-//             mode: 'lines',
-//             type: 'Lines',
-//             line: {width: 5,color:'violet'},
-
-//         },
-//     ];
 
 var layout = {
   showlegend: false,
@@ -200,7 +149,7 @@ var layout = {
     
     ];
 
-    // scree Plot
+    // Visualizing Eigen Vectors using scree Plot
     const eigenValsPlot = [
     {
         y : convert2dArray(sVals),
@@ -212,19 +161,18 @@ var layout = {
     }
     ];
 
+    // calling plotly for creating new plots
+
     Plotly.newPlot('leftEigenVector',lVecData,{title: "U"});
     Plotly.newPlot('singularValues',sVecData,{title: "E"});
     Plotly.newPlot('rightEigenVector',rVecData,{title: "V"});
 
     Plotly.newPlot('screePlot',eigenValsPlot,{title: "SingularValues"});
 
-
-
     Plotly.plot('inputSpace',data,layout);
     Plotly.plot('covMatrixPlot',covMatrixData,{title:'Covariance Matrix'});
 
     // Calculating Covariance Surface
-
     const res = 15;
     const w = tf.linspace(-2,2,res);
     const tfCovMatrix = tf.tensor(convert2dArray(covMatrix));
@@ -243,24 +191,66 @@ var layout = {
 
     console.log(covSurf);
 
-    // Visualizing Covariance Surfaces:
-var covSurfData = [{
-           z: covSurf,
-           type: 'surface'
-        }];
-  
-var covSurfLayout = {
-  title: 'Covariance Surface',
-  autosize: false,
-  width: 500,
-  height: 500,
-};
+  // Visualizing Covariance Surfaces:
+  var covSurfData = [{
+            z: covSurf,
+            type: 'surface'
+          }];
+    
+  var covSurfLayout = {
+    title: 'Covariance Surface',
+    autosize: false,
+    width: 500,
+    height: 500,
+  };
 
-Plotly.newPlot('covSurfViz', covSurfData, covSurfLayout);
+  Plotly.newPlot('covSurfViz', covSurfData, covSurfLayout);
 
 // Karuna-Loeve transform : Projecting z-score of the data onto the eigenvectors(new basis)
 
+// Calculating Z-score
+const xMatrix = tf.tensor(matrix.x);
 
+const originalShape =  xMatrix.shape;
+
+// coverting to vector:
+const xVector = xMatrix.reshape([xMatrix.shape[0]*xMatrix.shape[1],1]);
+
+const xVecMean  = xVector.mean();
+const xVecStdev = tf.sum( tf.pow(tf.pow(xVector.sub(xVecMean),2),1/2 ) );
+
+// coverting to ndArray
+const zScoreX = nd.array(tf.div( tf.sub(xMatrix,xVecMean) , xVecStdev ).arraySync());
+
+// taking the subset of the eigenVectors (for compression)
+
+// T = Z*E;
+const KLT = ( nd.la.matmul(zScoreX,covMatrix) );
+
+
+console.log(KLT);
+
+// Visualizing KLT
+// TODO: fix reconstruction  DONE: 
+// TODO: find why z-score method doesn't work
+
+const p = 2 ;
+const eigenVec02p = eigenVec.sliceElems('...',[0,p]);
+
+
+console.log(nd.array(matrix.x))
+const xHat = nd.la.matmul(nd.la.matmul(eigenVec02p,eigenVec02p.T),nd.array(matrix.x).T).T;
+
+window.eVec = eigenVec;
+const KLTData = [{
+  x: convert2dArray( xHat.sliceElems('...',0) ),
+  y: convert2dArray( xHat.sliceElems('...',1) ),
+  mode: 'markers',
+  type: 'scatter',
+  markers: {width: 2}
+}];
+
+Plotly.newPlot('KLT',KLTData,{title: 'K-Loeve Transform'})
 }
 
 

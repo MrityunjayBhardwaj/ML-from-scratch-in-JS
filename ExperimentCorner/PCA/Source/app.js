@@ -56,16 +56,15 @@ var t = new Array(N), x = new Array(N), y = new Array(N);
 
 for(var i = 0; i < N; i++){
   t[i] = a + step * i;
-  x[i] = (Math.pow(t[i], 1))*1 + (.3 * normal() );
+  x[i] = (Math.pow(t[i], 1))*1 + (.8 * normal() );
   y[i] = (Math.pow(t[i], 1))*1 + (.3 * normal() );
 
   x[i] = [x[i],y[i]];
 }
 
 
-let data0 =   tf.randomNormal([1,500],0,1).transpose();
+let data0 = tf.randomNormal([1,500],0,1).transpose();
 let data1 = tf.randomNormal([1,500],0,1).transpose();
-
 
 
 let data = data0.concat(data1,axis=1).arraySync();

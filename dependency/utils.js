@@ -17,11 +17,12 @@ function convert2dArray(ndArr){
     for(let j=0;j<nFeatures;j++){
       const index = i*nFeatures + j;
 
+      const currVal = arraySerialized[index][1];
       if (nFeatures === 1 ){
-        jsArray[i] = arraySerialized[index][1];
+        jsArray[i] = ( typeof currVal === 'object')? currVal.re : currVal;
       }
       else{
-        cArrayRow[j] = arraySerialized[index][1] ;
+        cArrayRow[j] =  ( typeof currVal === 'object')? currVal.re : currVal;
       }
 
     }

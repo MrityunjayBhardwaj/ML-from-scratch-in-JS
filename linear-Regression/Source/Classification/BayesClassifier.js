@@ -90,22 +90,6 @@ function BayesClassifier(x,y){
 
     const likeNPriorList = [] ;
 
-    function classwiseDataSplit(x,y){
-        // make sure y is a one hot encoded vector.
-
-
-        const yArray = y.arraySync();
-        const xArray = x.arraySync();
-
-        const xSplit = []
-        for(let i=0;i<nClasses;i++){
-            let currClassSplit = xArray.filter(function(_,index){ return this[index][i]; },yArray);
-            xSplit.push( tf.tensor( currClassSplit ) );
-        }
-
-        return xSplit; 
-        
-    }
     this.train = function(){
 
         // calculate prior

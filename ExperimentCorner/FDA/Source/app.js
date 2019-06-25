@@ -72,7 +72,7 @@ for(let i=0;i<sY.shape[0];i++){
 }
 
 // normalized Data X
-const normX =   normalize(mIrisX,1)
+const normX = normalize(mIrisX,1)
 
 // sY = sY.flatten().arraySync();
 
@@ -153,41 +153,87 @@ Plotly.newPlot('projOut',projOutDta,{title: 'FDA projected X'})
 
 // 3d plotting
 
-const for3d = mIrisX.slice([0,0],[-1,1]).concat(sY,axis=1).concat(mIrisX.slice([0,-1],[-1,1]),axis=1).transpose().arraySync();
+// const for3d = mIrisX.slice([0,0],[-1,1]).concat(sY,axis=1).concat(mIrisX.slice([0,-1],[-1,1]),axis=1).transpose().arraySync();
 // const for3d = mIrisX.concat(sY,axis=1).arraySync();
 
-  // Experiment
-const modX = tf.tensor(iris).slice([0,0],[-1,3]).arraySync();
+
+
+
+
+
+
+// Experiment | ---------------------
+
+
+
+
+
+
+
+
+
+
+
+let  modX = tf.tensor(iris).slice([0,0],[p*2,3]).arraySync();
+// modX = mIrisX.arraySync() ;
+
 const multiIrisY = Array(150).fill([1,0,0],0,50).fill([0,1,0],50,100).fill([0,0,1],100);
 
 const multmodel = new FDAmc();
-const wts = multmodel.train({x:  modX, y: mIrisY /* 2 classes */ });
+const wts = multmodel.train({x:  modX , y: mIrisY /* 2 classes */ });
+const modWts = tf.tensor(wts).slice([0,1],[-1,2]);
+let tfModX = tf.tensor(modX);
+let pridX = tf.matMul( tfModX, modWts );
 
-const pridX = tf.matMul( tf.tensor(modX), wts );
+// preprocess for plotting:-
+pridX = pridX.concat(tf.zeros([pridX.shape[0],3-pridX.shape[1]]),axis=1);
+tfModX = tfModX.concat(tf.zeros([tfModX.shape[0],3-tfModX.shape[1]]),axis=1);
 
-const tfModX = tf.tensor(modX);
+const qrModWts = tf.linalg.qr(modWts)[0];
+let basis0 = qrModWts.slice([0,0], [-1,1]).flatten().arraySync();
+let basis1 = qrModWts.slice([0,1], [-1,1]).flatten().arraySync();
+
+const spanLen = 5;
+
+const spanMesh = [];
+
+const vec0 = basis0.map( (a)=> a*spanLen);
+const vec1 = basis1.map( (a)=> a*spanLen);
+
+// spanMesh.push()
+let meshPlane = [
+                [-vec0[0],vec1[0],vec0[0],-vec1[0]],
+                [-vec0[1],vec1[1],vec0[1],-vec1[1]],
+                [-vec0[2],vec1[2],vec0[2],-vec1[2]],
+              ];
+
+basis0 = modWts.slice([0,0], [-1,1]).flatten().arraySync();
+basis1 = modWts.slice([0,1], [-1,1]).flatten().arraySync();
+// meshPlane  =[
+//    [0, 0, 1, 1, ],
+//    [0, 1, 1, 0, ],
+//    [0, 0, 0, 0, ],
+// ];
 
   var dataFDA = [{
-            x: pridX.slice([0,0],[p,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: pridX.slice([0,0],[p,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: pridX.slice([0,0],[p,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
+            x: pridX.slice([0,0],[p,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            y: pridX.slice([0,0],[p,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
             mode: 'markers',
-            type: 'scatter3d',
+            type: 'scatter',
          },
         {
-            x: pridX.slice([p,0],[100,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: pridX.slice([p,0],[100,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: pridX.slice([p,0],[100,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
+            x: pridX.slice([p,0],[-1,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            y: pridX.slice([p,0],[-1,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
             mode: 'markers',
-            type: 'scatter3d',
+            type: 'scatter',
           },
-{
-            x: pridX.slice([p*2,0],[-1,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: pridX.slice([p*2,0],[-1,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: pridX.slice([p*2,0],[-1,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
-            mode: 'markers',
-            type: 'scatter3d',
-          }
+//      {
+//             x: pridX.slice([p*2,0],[-1,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+//             y: pridX.slice([p*2,0],[-1,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+//             z: pridX.slice([p*2,0],[-1,-1]).slice([0,2],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+//             mode: 'markers',
+//             type: 'scatter3d',
+//           }
         ];
     
   var FDALayout = {
@@ -199,26 +245,62 @@ const tfModX = tf.tensor(modX);
 
   Plotly.newPlot('3dPlot',dataFDA,FDALayout);
 
-  var dataOriginal = [{
-            x: tfModX.slice([0,0],[p,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: tfModX.slice([0,0],[p,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: tfModX.slice([0,0],[p,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
+  var dataOriginal = [
+        {
+            x: tfModX.slice([0,0],[p,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            y: tfModX.slice([0,0],[p,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            z: tfModX.slice([0,0],[p,-1]).slice([0,2],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
             mode: 'markers',
             type: 'scatter3d',
          },
+        // {
+        //     x: tfModX.slice([p,0],[100,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+        //     y: tfModX.slice([p,0],[100,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+        //     z: tfModX.slice([p,0],[100,-1]).slice([0,2],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+        //     mode: 'markers',
+        //     type: 'scatter3d',
+        //   },
         {
-            x: tfModX.slice([p,0],[100,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: tfModX.slice([p,0],[100,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: tfModX.slice([p,0],[100,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
+            x: tfModX.slice([p*1,0],[-1,-1]).slice([0,0],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            y: tfModX.slice([p*1,0],[-1,-1]).slice([0,1],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
+            z: tfModX.slice([p*1,0],[-1,-1]).slice([0,2],[-1,1]).flatten().arraySync() || Array(tfModX.shape[0]).fill(0),
             mode: 'markers',
             type: 'scatter3d',
-          },
+        },
+        // plotting Basis of this projected X subspace:-
 {
-            x: tfModX.slice([p*2,0],[-1,-1]).slice([0,0],[-1,1]).flatten().arraySync(),
-            y: tfModX.slice([p*2,0],[-1,-1]).slice([0,1],[-1,1]).flatten().arraySync(),
-            z: tfModX.slice([p*2,0],[-1,-1]).slice([0,2],[-1,1]).flatten().arraySync(),
-            mode: 'markers',
-            type: 'scatter3d',
+          x: [-vec0[0]*0,basis0[0]],
+          y: [-vec0[1]*0,basis0[1]],
+          z: [-vec0[2]*0,basis0[2]],
+          mode: 'lines',
+          type: 'scatter3d',
+          opacity : 1,
+          line: {
+            width: 5 
           }
-        ];
-   Plotly.newPlot('originalData',dataOriginal,{title: 'Original Data X'})
+
+
+        },
+{
+          x: [-vec1[0]*0,basis1[0]],
+          y: [-vec1[1]*0,basis1[1]],
+          z: [-vec1[2]*0,basis1[2]],
+          mode: 'lines',
+          type: 'scatter3d',
+          opacity : 1,
+          line : {
+            width: 5 
+          }
+
+        },
+        {  
+    type: "mesh3d",
+    x: meshPlane[0],
+    y: meshPlane[1],
+    z: meshPlane[2],
+    opacity : 0.7,
+    color: 'pink'
+  }
+      ];
+
+   Plotly.newPlot('originalData',dataOriginal,{title: 'Original Data X',})

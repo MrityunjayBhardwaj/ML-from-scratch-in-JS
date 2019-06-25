@@ -67,6 +67,8 @@ function FDA(data){
 
 function FDAmc(){
 
+    // TODO: account for the case when N_k of all the classes are unequal.
+
     this.train = function(data){
         // TODO: make the input to always be a tf.tensor object
         const tfDataX = tf.tensor(data.x);
@@ -105,6 +107,7 @@ function FDAmc(){
         const {0 : eigenVals , 1 : eigenVecs} = nd.la.eigen( tf2nd(matrixA) );
         // const {0 : lsVec , 1 : singularVals, 2: rsVec } = aSVD ;
 
+        console.log( eigenVals)
         return convert2dArray(eigenVecs);
         // console.log(eigenVals,eigenVecs);
     }

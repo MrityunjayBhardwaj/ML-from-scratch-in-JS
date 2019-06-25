@@ -62,7 +62,7 @@ return imgArray;
 function classwiseDataSplit(x,y){
     // make sure y is a one hot encoded vector.
 
-    const nClasses = x.shape[1];
+    const nClasses = y.shape[1];
 
     const yArray = y.arraySync();
     const xArray = x.arraySync();
@@ -100,4 +100,56 @@ function nd2tf(x){
 
   console.warn('the input is not nd.array');
   return x;
+}
+
+/**
+ * 
+ * @param {*} x must be a javascript array
+ * @description using moore-penrose psudoinverse procedure for calculating inverse of X
+ * @returns return javascript Array of the pinv of X
+ */
+function pinv(x){
+
+  // convert js array to nd array
+  const ndX = nd.array(x);
+
+  // compute SVD NOTE: nd svd automatically remove the zero components in the singular matrix
+  const xSVD = nd.la.svd_decomp(ndX);
+
+  const {0:lSVec , 1: singularVal , 2: rSVec} = xSVD;
+
+  // compute the inverse of singularVec
+  const singularDiag = nd.la.diag_mat(singularVal);
+
+  const modDiag = singularDiag.forElems( (val,i,j) =>{ if (i===j)singularDiag.set([i,j], 1/val) });
+
+
+  // now construct back the matrix in order to get our matrix psudo-inverse.
+  const xInv = nd.la.matmul( lSVec, singularDiag, rSVec );
+
+  return convert2dArray(xInv);
+}
+
+/**
+ * 
+ * @param {*} x input must be a tf.tensor object where, shape[0] = no. of samples and shape[1] = no. of features
+ * @param {*} meanCenter should input be mean centric before normalizing?
+ * @returns normalized input matrix
+ */
+function normalize(x,meanCenter=0){
+
+  // make the matrix mean centric.
+  if (meanCenter){
+    const meanX = tf.mean(x,axis=0);
+    x = x.sub(meanX);
+  }
+
+  // calculating the norm of all the axis 
+  let normVec =( x.norm(axis=1).reshape([1,1]) )
+  for(let i=2;i< x.shape[1]+1;i++){
+    normVec = normVec.concat( x.norm(axis=i).reshape([1,1]) ,axis=1)
+  }
+
+  // dividing x with its norm to get normalized x;
+  return x.div(normVec);
 }

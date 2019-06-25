@@ -177,7 +177,6 @@ Plotly.newPlot('projOut',projOutDta,{title: 'FDA projected X'})
 let  modX = tf.tensor(iris).slice([0,0],[p*2,3]).arraySync();
 // modX = mIrisX.arraySync() ;
 
-const multiIrisY = Array(150).fill([1,0,0],0,50).fill([0,1,0],50,100).fill([0,0,1],100);
 
 const multmodel = new FDAmc();
 const wts = multmodel.train({x:  modX , y: mIrisY /* 2 classes */ });
@@ -304,3 +303,72 @@ basis1 = modWts.slice([0,1], [-1,1]).flatten().arraySync();
       ];
 
    Plotly.newPlot('originalData',dataOriginal,{title: 'Original Data X',})
+
+
+
+
+
+
+
+
+//  3 Class Classification :-
+  
+// initializing the Data
+const cls3DataX = iris;
+const c3IrisY   = Array(150).fill([1,0,0],0,50).fill([0,1,0],50,100).fill([0,0,1],100);
+
+// calculating the projection Matrix
+const c3Model = new FDAmc;
+const c3ProjMtx = c3Model.train( {x : cls3DataX , y : c3IrisY} );
+
+// convert to tf.tensor
+const tfC3DataX   = tf.tensor( cls3DataX );
+const tfC3ProjMtx = tf.tensor( c3ProjMtx ).slice([0,1],[-1,-1]); // extracting the last 3 eigen Vectors.
+
+// Projecting X onto this ProjMtx
+const c3ProjX = tf.matMul( tfC3DataX, tfC3ProjMtx );
+
+const c3ProjX0 = c3ProjX.slice( [0,0], [p,-1]   ).transpose().arraySync();
+const c3ProjX1 = c3ProjX.slice( [p,0], [p*2,-1] ).transpose().arraySync();
+const c3ProjX2 = c3ProjX.slice( [p*2,0], [-1,-1]  ).transpose().arraySync();
+
+
+// Plotting the projected X
+const c3ProjXData = [
+  {
+  x:c3ProjX0[0],
+  y:c3ProjX0[1],
+  z:c3ProjX0[2],
+  type: 'scatter3d',
+  mode: 'markers',
+  marker : {
+    width: 1
+    }
+  },
+  {
+  x:c3ProjX1[0],
+  y:c3ProjX1[1],
+  z:c3ProjX1[2],
+  type: 'scatter3d',
+  mode: 'markers',
+  marker : {
+    width: 1
+    }
+  },
+  {
+  x:c3ProjX2[0],
+  y:c3ProjX2[1],
+  z:c3ProjX2[2],
+  type: 'scatter3d',
+  mode: 'markers',
+  marker : {
+    width: 1
+  }
+  },
+
+]
+
+Plotly.newPlot('class3ProjData',c3ProjXData,{title: '3 Class Projected Data'});
+
+// Projecting 3 class to 2d 
+

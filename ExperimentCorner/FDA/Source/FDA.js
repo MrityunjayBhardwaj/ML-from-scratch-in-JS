@@ -112,3 +112,15 @@ function FDAmc(){
         // console.log(eigenVals,eigenVecs);
     }
 }
+
+
+// function FDAClassify2D(){
+//     const model = { weights: 0}
+//     this.train(){
+//         const fda = new FDA();
+//         model.weights = fda.train();
+
+//         // compute the mean and variance:-
+
+//     }
+// }

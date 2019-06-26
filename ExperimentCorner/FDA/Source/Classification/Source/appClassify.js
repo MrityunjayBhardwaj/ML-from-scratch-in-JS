@@ -1,0 +1,208 @@
+  // import NormalDistribution from "../../../dependency/gaussDist";
+
+  // initializing data
+  const mIrisX = tf.tensor(iris).slice([0,0],[100,2])
+  // // one hot encoded
+  const mIrisY = Array(100).fill([1,0],0,50).fill([0,1],50);
+  /**
+   * 
+   * @param {number} x pointer location X
+   * @param {number} y pointer location Y
+   * @param {object} cvsRange of x and y-axis { x : [min,max], y: [min,max] }
+   * @param {object} coordRange range of x and y-axis { x : [min,max], y: [min,max] }
+   * @param {number} shift left-shift the entire system
+   * @returns returns the coordinate points according to the parameters.
+   */
+  function calcPts(x,y,cvsRange,coordRange,shift=0){
+
+    const coordX = remap(x,cvsRange.x[0],cvsRange.x[1],coordRange.x[0],coordRange.x[1]);
+    const coordY = remap(y,cvsRange.y[0],cvsRange.y[1],coordRange.y[0],coordRange.y[1]);
+
+    return [coordX,coordY];
+
+  }
+
+  const data0 = {x: [0,5] , y : [0, 5]};
+  const data1 = {x: [0,5] , y : [0, 5]};
+
+  var traces = [{
+    x: data0.x,
+    y: data0.y,
+    mode: 'markers',
+    type: 'scatter'
+  },
+  {
+    x: data1.x,
+    y: data1.y,
+    mode: 'markers',
+    type: 'scatter'
+  }
+  ];
+
+  var myPlot = document.getElementById('intractiveInput')
+  Plotly.newPlot('interactiveInput', traces, {hovermode: 'closest', /* margin: {l: 100} */ },{staticPlot: true});
+
+  Number.prototype.between = function(min, max) {
+    return this >= min && this <= max;
+  };
+
+  let selClass = document.getElementById('myCheck').checked;
+
+  console.log(selClass);
+
+
+  // document.getElementsByClassName('svg-container')[1]
+  Plotly.d3.select(".plotly").on('click', function(d, i) {
+    var e = Plotly.d3.event;
+    // var bg = document.getElementsByClassName('svg-container')[1];
+    let plotContainer = document.getElementsByClassName('svg-container')[1];
+
+    const divCoord = {x: e.layerX, y: e.layerY};
+    const margin = 100;
+    // console.log(plotContainer.offsetWidth,100,divCoord)
+    if( divCoord.x.between( margin, plotContainer.offsetWidth - margin) &&
+        divCoord.y.between( margin, plotContainer.offsetHeight - margin ) ){
+          const graphPix = {x: divCoord.x -margin*1 , y : (plotContainer.offsetHeight - divCoord.y) - margin}
+
+          const cvsRange = { x : [0, plotContainer.offsetWidth -margin*2 - 28] , y: [0, plotContainer.offsetHeight - margin*2 - 28]} ;
+          const graphCoords = calcPts(graphPix.x,graphPix.y,cvsRange, {x : [0,5],y: [0,5]});
+
+          selClass = document.getElementById('myCheck').checked;
+          console.log(selClass);
+
+          const classData = traces[selClass*1];
+            
+          classData.x.push(graphCoords[0]);
+          classData.y.push(graphCoords[1]);
+
+          // console.log(traces)
+
+          Plotly.newPlot('interactiveInput', traces, {hovermode: 'closest', /* margin: {l: 100} */ },{staticPlot: true});
+
+          console.log(graphCoords);
+
+          if ( (traces[0].x.length > 3) && (traces[1].x.length > 3) ){
+
+            let dataC0 = tf.tensor( [ traces[0].x.slice(2,), traces[0].y.slice(2,) ]).transpose();
+            let dataC1 = tf.tensor( [ traces[1].x.slice(2,), traces[1].y.slice(2,) ]).transpose();
+
+            
+            let dataX = dataC0.concat(dataC1, axis=0);
+            let dataY = Array(dataC0.shape[0] + dataC1.shape[0]).fill([1,0],0,dataC0.shape[0]).fill([0,1],dataC0.shape[0],);
+
+            console.log(dataX);
+            console.log(dataY);
+
+            plotDist(dataX.arraySync(),dataY);
+          }
+
+          // TODO:  FIX:  1 unequal sample size and only add when its > 2
+
+        }
+
+    window.dum = e;
+    // console.log(e.layerX,e.layerY);
+  });
+
+  plotDist(mIrisX.arraySync(),mIrisY);
+
+
+
+
+
+function plotDist(dataX,dataY){
+
+  const model = new FDA();
+
+  const tfDataX = tf.tensor(dataX);
+  const tfDataY = tf.tensor(dataY);
+
+  // calculating the projection vector
+  const projVec = model.train({x:dataX, y:dataY });
+
+  // projecting the data X
+  let clfProjX = tf.matMul(tfDataX,projVec);
+
+
+  const dataSplit = classwiseDataSplit(clfProjX,tfDataY);
+
+  // split the data
+  const clfProjX0 =  dataSplit[0];
+  const clfProjX1 =  dataSplit[1];
+
+  // calculating parameters of gaussian
+
+  // calculating mean
+  const clfProjX0mean = tf.mean(clfProjX0).flatten().arraySync()[0];
+  const clfProjX1mean = tf.mean(clfProjX1).flatten().arraySync()[0];
+
+  // calculating variance
+  const clfProjX0var =  tf.mul( tf.sum( tf.pow( tf.sub(clfProjX0,clfProjX0mean), 2 ) ), 1/clfProjX0.shape[0] ).flatten().arraySync()[0];
+  const clfProjX1var =  tf.mul( tf.sum( tf.pow( tf.sub(clfProjX1,clfProjX1mean), 2 ) ), 1/clfProjX1.shape[0] ).flatten().arraySync()[0];
+
+  // using calculated parameter to form a gaussian
+  function gauss (x,mu,sigma){ return ( 1/Math.sqrt(2*Math.PI*(sigma**2)) ) * Math.exp( -1/2 * ((x - mu)**2)/sigma**2 ); };
+
+  // using gaussians to calculate the probability of each data point
+  // const clfProjX0prob = clfProjX0.flatten().arraySync().map( (x)=> gauss(x,clfProjX0mean,Math.sqrt(clfProjX0var)) );
+  // const clfProjX1prob = clfProjX1.flatten().arraySync().map( (x)=> gauss(x,clfProjX1mean,Math.sqrt(clfProjX1var)) );
+
+  const gauss0 = new NormalDistribution(clfProjX0mean, 1*Math.sqrt(clfProjX0var));
+  const gauss1 = new NormalDistribution(clfProjX1mean, 1*Math.sqrt(clfProjX1var));
+
+  console.log(clfProjX0var,clfProjX1var)
+  // parameters for generationg psudo Data
+  let margin0 = Math.abs(tf.min(clfProjX0).arraySync() - tf.max(clfProjX0).arraySync()) *(20/clfProjX0.shape[0]);
+  let margin1 = Math.abs(tf.min(clfProjX1).arraySync() - tf.max(clfProjX1).arraySync()) *(20/clfProjX1.shape[0]);
+
+  margin0 = Math.sqrt(clfProjX0var)*3;
+  margin1 = Math.sqrt(clfProjX1var)*3;
+  const resolution = 100;
+
+  // creating psudoData
+  const psudoX0 = tf.linspace(tf.min(clfProjX0).flatten().arraySync()[0]-margin0,tf.max(clfProjX0).flatten().arraySync()[0]+margin0,resolution);
+  const psudoX1 = tf.linspace(tf.min(clfProjX1).flatten().arraySync()[0]-margin1,tf.max(clfProjX1).flatten().arraySync()[0]+margin1,resolution);
+
+  // calculating the probability of psudo data
+  const psudoX0prob = psudoX0.flatten().arraySync().map( function(x) {return gauss0.pdf(x)});
+  const psudoX1prob = psudoX1.flatten().arraySync().map( function(x) {return gauss1.pdf(x)});
+
+  // console.log(clfProjX0prob);
+  // console.log(clfProjX1prob);
+
+  // plotting projected output
+  const clfProjXData = [
+      {
+          x: psudoX0.flatten().arraySync(), 
+          y: psudoX0prob,
+          mode: 'lines',
+          type: 'scatter',
+          line: {width: 4, color: 'blue'}
+      },
+      {
+          x: psudoX1.flatten().arraySync(),
+          y: psudoX1prob,
+          mode: 'lines',
+          type: 'scatter',
+          line: {width: 4, color: 'orange',lagend : 'hsdf'}
+      },
+      {
+          x: clfProjX0.flatten().arraySync(),
+          y: Array(50).fill(0),
+          mode: 'markers',
+          type: 'scatter',
+          marker: {width: 2, color: 'blue'}
+      },
+      {
+          x: clfProjX1.flatten().arraySync(),
+          y: Array(50).fill(0),
+          mode: 'markers',
+          type: 'scatter',
+          marker: {width: 2, color: 'orange'}
+      },
+      
+  ];
+
+  Plotly.newPlot('2classDistViz',clfProjXData,{title: 'FDA for Classification'})
+
+}

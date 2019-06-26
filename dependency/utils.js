@@ -153,3 +153,8 @@ function normalize(x,meanCenter=0){
   // dividing x with its norm to get normalized x;
   return x.div(normVec);
 }
+
+function remap(n, start1, stop1, start2, stop2, withinBounds) {
+  var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    return newval;
+}

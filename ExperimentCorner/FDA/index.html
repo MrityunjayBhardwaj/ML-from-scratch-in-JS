@@ -31,6 +31,7 @@
     <script src="../../dependency/tensorflowJS/tf.js"></script>
     <script src="../../dependency/ndjs/dist/nd.min.js"></script>
     <script src="../../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <script src="../../dependency/gaussDist.js"></script>
 
     <!-- utility -->
     <script src="../../dependency/utils.js"></script>
@@ -56,9 +57,18 @@
       <h2> > 3-class Data </h2>
       <div id="class3ProjData" style="width:500px;height:500px; display:inline-block;"></div>
 
+      <hr>
+      <br>
+
+      <h2> FDA for Classification</h2>
+      <div id="interactiveInput" style="width:500px;height:500px; display:inline-block;"></div>
+
+      <div id="2classDistViz" style="width:500px;height:500px; display:inline-block;"></div>
+
     <script src="Source/data.js"></script>
     <script src="Source/FDA.js"></script>
     <script src="Source/app.js"></script>
+    <script src="Source/appClassify.js"></script>
   </div>
 </body>
 </html>

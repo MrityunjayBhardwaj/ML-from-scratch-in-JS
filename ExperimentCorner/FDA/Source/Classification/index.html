@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FDA Classifier</title>
+
+    <style>
+      body{
+        font-family: Arial, Helvetica, sans-serif
+      }
+        .Datacontainer{
+            width:500px;
+            height:500px;
+            background-color: red;
+            display: inline-block;
+
+        }
+        .discription {
+          display:inline-block;
+          background: blue;
+          }
+        .vizContainer{
+          display:inline-block;
+        }
+          </style>
+
+
+    <!-- dependencies -->
+    <script src="../../../../dependency/tensorflowJS/tf.js"></script>
+    <script src="../../../../dependency/ndjs/dist/nd.min.js"></script>
+    <script src="../../../../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <script src="../../../../dependency/gaussDist.js"></script>
+    <!-- <script src="../../../../../Dependences/p5/p5.js"></script> -->
+
+    <!-- utility -->
+    <script src="../../../../dependency/utils.js"></script>
+</head>
+<body>
+  <div class="discription" >
+  </div> 
+  <div class="vizContainer">
+    <h1>Fisher's Discriminant Analysis part2</h1>
+
+      <h2> FDA for Classification</h2>
+      <div id="interactiveInput" style="width:500px;height:500px; display:inline-block;"></div>
+<label class="switch" >
+  <input type="checkbox" id="myCheck">
+  <span class="slider"></span>
+</label>
+      <div id="2classDistViz" style="width:500px;height:500px; display:inline-block;"></div>
+
+
+  <!-- <div id="myPlot" style="width:500px;height:500px"></div> -->
+
+    <script src="../data.js"></script>
+    <script src="../FDA.js"></script>
+    <script src="Source/appClassify.js"></script>
+  </div>
+</body>
+</html>

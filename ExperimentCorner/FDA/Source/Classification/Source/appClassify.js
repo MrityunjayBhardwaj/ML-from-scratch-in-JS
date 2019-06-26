@@ -25,22 +25,49 @@
   const data0 = {x: [0,5] , y : [0, 5]};
   const data1 = {x: [0,5] , y : [0, 5]};
 
+  
+  const fac = 2;// projection vector scaling factor
+
+  projVec = [1,0];
+
   var traces = [{
+    name: "Class-A Data",
     x: data0.x,
     y: data0.y,
     mode: 'markers',
     type: 'scatter'
   },
   {
+    name: "Class-B Data",
     x: data1.x,
     y: data1.y,
     mode: 'markers',
     type: 'scatter'
-  }
+  },{
+      name: "FDA's Projection Vector",
+      x : [ -projVec[0]*fac ,projVec[0]*fac ],
+      y : [ -projVec[1]*fac ,projVec[1]*fac ],
+      mode: 'lines',
+      type: 'scatter',
+      line : { width : 4}
+    }
   ];
 
+  let layout = {
+    
+    showlegend : false,
+    xaxis: {
+      range: [-1,5],
+      autorange: false 
+    },
+    yaxis: {
+      range: [-1,5],
+      autorange: false 
+    }
+  };
+
   var myPlot = document.getElementById('intractiveInput')
-  Plotly.newPlot('interactiveInput', traces, {hovermode: 'closest', /* margin: {l: 100} */ },{staticPlot: true});
+  Plotly.newPlot('interactiveInput', traces, layout,{staticPlot: true});
 
   Number.prototype.between = function(min, max) {
     return this >= min && this <= max;
@@ -58,17 +85,18 @@
     let plotContainer = document.getElementsByClassName('svg-container')[1];
 
     const divCoord = {x: e.layerX, y: e.layerY};
-    const margin = 100;
+    const margin = 80;
     // console.log(plotContainer.offsetWidth,100,divCoord)
     if( divCoord.x.between( margin, plotContainer.offsetWidth - margin) &&
         divCoord.y.between( margin, plotContainer.offsetHeight - margin ) ){
-          const graphPix = {x: divCoord.x -margin*1 , y : (plotContainer.offsetHeight - divCoord.y) - margin}
+          const graphPix = {x: divCoord.x -margin*1 , y : (plotContainer.offsetHeight - divCoord.y) - margin*1}
 
-          const cvsRange = { x : [0, plotContainer.offsetWidth -margin*2 - 28] , y: [0, plotContainer.offsetHeight - margin*2 - 28]} ;
-          const graphCoords = calcPts(graphPix.x,graphPix.y,cvsRange, {x : [0,5],y: [0,5]});
+          const offset = 0;
+          const cvsRange = { x : [margin*0, plotContainer.offsetWidth -margin*2 -offset ] , y: [margin*0, plotContainer.offsetHeight - margin*2 - offset]} ;
+          const graphCoords = calcPts(graphPix.x,graphPix.y,cvsRange, {x : [-1,5],y: [-1,5]});
 
           selClass = document.getElementById('myCheck').checked;
-          console.log(selClass);
+          console.log(selClass*1,graphPix);
 
           const classData = traces[selClass*1];
             
@@ -77,7 +105,6 @@
 
           // console.log(traces)
 
-          Plotly.newPlot('interactiveInput', traces, {hovermode: 'closest', /* margin: {l: 100} */ },{staticPlot: true});
 
           console.log(graphCoords);
 
@@ -90,11 +117,29 @@
             let dataX = dataC0.concat(dataC1, axis=0);
             let dataY = Array(dataC0.shape[0] + dataC1.shape[0]).fill([1,0],0,dataC0.shape[0]).fill([0,1],dataC0.shape[0],);
 
-            console.log(dataX);
-            console.log(dataY);
+            // console.log(dataX);
+            // console.log(dataY);
 
-            plotDist(dataX.arraySync(),dataY);
+            const model = new FDAmc();
+            const projVec = model.train({ x:dataX.arraySync(), y:dataY })[1];
+
+            const projVecViz = {
+              name: "FDA's Projection Vector",
+              x : [ -projVec[0]*fac ,projVec[0]*fac ],
+              y : [ -projVec[1]*fac ,projVec[1]*fac ],
+              mode: 'lines',
+              type: 'scatter',
+              line : { width : 4}
+            }
+
+            traces[2] = (projVecViz);
+
+            plotDist(dataX.arraySync(),dataY,'2classDistViz',0);
+            plotDist(dataX.arraySync(),dataY,'2classDistViz',1);
           }
+
+          // updating the plot
+          Plotly.newPlot('interactiveInput', traces, layout ,{staticPlot: true});
 
           // TODO:  FIX:  1 unequal sample size and only add when its > 2
 
@@ -104,25 +149,31 @@
     // console.log(e.layerX,e.layerY);
   });
 
-  plotDist(mIrisX.arraySync(),mIrisY);
+  plotDist(mIrisX.arraySync(),mIrisY,'2classDistViz');
 
 
 
 
 
-function plotDist(dataX,dataY){
+function plotDist(dataX,dataY,containerId,index = 0){
 
-  const model = new FDA();
 
   const tfDataX = tf.tensor(dataX);
   const tfDataY = tf.tensor(dataY);
 
   // calculating the projection vector
-  const projVec = model.train({x:dataX, y:dataY });
+  const model = new FDAmc();
+  let projVec = model.train({ x:dataX, y:dataY });
+  projVec = tf.tensor(projVec)
+  projVec = projVec.slice([0,1],[-1,-1]);
+
+  // ( (new FDA()).train({x : dataX,y: dataY}).print() )
+  // const model = new FDA();
+  // let projVec = model.train({ x:dataX, y:dataY });
+
 
   // projecting the data X
   let clfProjX = tf.matMul(tfDataX,projVec);
-
 
   const dataSplit = classwiseDataSplit(clfProjX,tfDataY);
 
@@ -150,7 +201,7 @@ function plotDist(dataX,dataY){
   const gauss0 = new NormalDistribution(clfProjX0mean, 1*Math.sqrt(clfProjX0var));
   const gauss1 = new NormalDistribution(clfProjX1mean, 1*Math.sqrt(clfProjX1var));
 
-  console.log(clfProjX0var,clfProjX1var)
+  // console.log(clfProjX0var,clfProjX1var)
   // parameters for generationg psudo Data
   let margin0 = Math.abs(tf.min(clfProjX0).arraySync() - tf.max(clfProjX0).arraySync()) *(20/clfProjX0.shape[0]);
   let margin1 = Math.abs(tf.min(clfProjX1).arraySync() - tf.max(clfProjX1).arraySync()) *(20/clfProjX1.shape[0]);
@@ -173,20 +224,26 @@ function plotDist(dataX,dataY){
   // plotting projected output
   const clfProjXData = [
       {
+          name: "Class-A PDF",
+          legendgroup : "Class-A",
           x: psudoX0.flatten().arraySync(), 
           y: psudoX0prob,
           mode: 'lines',
           type: 'scatter',
-          line: {width: 4, color: 'blue'}
+          line: {width: 4, color: 'blue'},
       },
       {
+          name: "Class-B PDF",
+          legendgroup : "Class-B",
           x: psudoX1.flatten().arraySync(),
           y: psudoX1prob,
           mode: 'lines',
           type: 'scatter',
-          line: {width: 4, color: 'orange',lagend : 'hsdf'}
+          line: {width: 4, color: 'orange',lagend : 'hsdf'},
       },
       {
+          name: "Class-A data",
+          legendgroup : "Class-A",
           x: clfProjX0.flatten().arraySync(),
           y: Array(50).fill(0),
           mode: 'markers',
@@ -194,6 +251,8 @@ function plotDist(dataX,dataY){
           marker: {width: 2, color: 'blue'}
       },
       {
+          name: "Class-B data",
+          legendgroup : "Class-B",
           x: clfProjX1.flatten().arraySync(),
           y: Array(50).fill(0),
           mode: 'markers',
@@ -203,6 +262,6 @@ function plotDist(dataX,dataY){
       
   ];
 
-  Plotly.newPlot('2classDistViz',clfProjXData,{title: 'FDA for Classification'})
+  Plotly.newPlot(containerId,clfProjXData,{title: 'FDA for Classification'})
 
 }

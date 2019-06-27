@@ -237,3 +237,26 @@ function prepro4Plotly(x){
 
   return tf.tensor(x).transpose().reverse(axis=0).arraySync();
 }
+
+/**
+ * 
+ * @param {Array} a 
+ * @param {Array} b 
+ * @description calculates the meshgrid just like in Matlab
+ */
+function meshGrid(a,b){
+ // input must be an array
+if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.");
+
+ const gridArray = [];
+ for(let i=0;i<a.length;i++){
+   const cRow = [];// current row
+   const cVal_i = a[i];
+   for(let j=0;j<b.length;j++){
+     const cVal_j = b[j];
+    cRow.push( cVal_j );
+   }
+   gridArray.push( [cRow, Array(cRow.length).fill(cVal_i) ])
+ }
+ return gridArray;
+}

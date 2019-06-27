@@ -24,6 +24,9 @@
 
   const data0 = {x: [0,5] , y : [0, 5]};
   const data1 = {x: [0,5] , y : [0, 5]};
+  let outputData = [
+    {},{},{}
+  ];
 
   
   const fac = 2;// projection vector scaling factor
@@ -71,8 +74,28 @@
     },
   };
 
+  let outlayout = {
+    
+    title: "Output Space",
+    showlegend : false,
+    xaxis: {
+      range: [-1,5],
+      autorange: false 
+    },
+    yaxis: {
+      range: [-1,5],
+      autorange: false 
+    },
+    margin: {
+      autoexpand: false,
+    },
+  };
   var myPlot = document.getElementById('intractiveInput')
   Plotly.newPlot('interactiveInput', traces, layout,{staticPlot: true});
+ 
+
+  // for output Region
+  Plotly.newPlot('outputViz',outputData, layout ,{staticPlot: true});
 
   Number.prototype.between = function(min, max) {
     return this >= min && this <= max;
@@ -163,28 +186,62 @@
             // }
             // traces[3] = (decBoundaryViz);
 
-            const psudoPtsGridRes = 100;
+            const psudoPtsGridRes = 10;
             const psudoPts0 = tf.linspace(-1,5,psudoPtsGridRes);
-            const psudoPts  = tf.tile( psudoPts0.expandDims(1).transpose(),[2,1] ); // mashGrid
-            const psudoPty = model.transform( psudoPts.transpose() );
-            const psudoPtsClassify = model.classify(psudoPts.transpose())
+            const psudoPts  = tf.tile( psudoPts0.expandDims(1).transpose(),[2,1] ).transpose(); // mashGrid
+            const psudoPty = model.transform( psudoPts );
+            const psudoPtsClassify = model.classify(psudoPts)
             window.model  = model;
 
-            
+            const meshGridPsudoPts = meshGrid(psudoPts0.arraySync(),psudoPts0.arraySync());
+            const meshGridPsudoPtsY = meshGridPsudoPts.map( 
+                  function(cRow) {
+                    return model.classify( tf.tensor(cRow).transpose() ).flatten().arraySync()
+                  }
+             );
 
+            const decisionRegionData = {
+              x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
+              y : psudoPts.slice([0,1],[-1,1]).flatten().arraySync(),
+              z : meshGridPsudoPtsY,
+              type: 'contour',
+                 colorscale:[[0, 'rgb(153, 153, 255)'],[1, 'rgb(255, 153, 102)']],
+              contours : {
+                // coloring : 'heatmap',
+                // zsmooth: 'best',
+              },
+              line : {
+                width: 0,
+                 smoothing: 0.85
+              },
 
-            traces[2] = (projVecViz);
+            }
+            console.log(dataX.print())
 
+            traces[2] = projVecViz;
+            outputData[0] = { 
+              x : dataX.slice([0,0],[-1,1]).flatten().arraySync(), 
+              y: dataX.slice([0,1],[-1,-1]).flatten().arraySync(),
+              mode: 'markers',
+              type: 'scatter',
+              marker : {
+                size : 5,
+                 symbol: ["diamond-open"],
+              }
+            }
+            outputData[2] = decisionRegionData;
             // traces[3] = {
             //   x: 
             // }
 
             plotDist(dataX.arraySync(),dataY,'2classDistViz',0);
             plotDist(dataX.arraySync(),dataY,'2classDistViz',1);
+
           }
 
           // updating the plot
           Plotly.newPlot('interactiveInput', traces, layout ,{staticPlot: true});
+          Plotly.newPlot('outputViz', outputData, outlayout ,{staticPlot: true});
 
           // TODO:  FIX:  1 unequal sample size and only add when its > 2
 

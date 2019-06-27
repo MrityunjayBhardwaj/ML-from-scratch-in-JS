@@ -139,7 +139,7 @@ function FDAmc(){
     }
     this.classify = function(x){
         const tf2arr = this.transform(x).arraySync();
-        return tf2arr.map( (pt) => pt = pt.map( (w) => w = (w > model.threshold)*1 ) );
+        return tf.tensor(tf2arr.map( (pt) => pt = pt.map( (w) => w = (w > model.threshold)*1 ) ));
     }
 }
 

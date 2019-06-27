@@ -40,7 +40,7 @@ for(let i=0;i<5;i++){
 var data = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z: matrix,
+    z: prepro4Plotly(matrix),
     colorscale: 'Greys',
     type: 'heatmap'
   },
@@ -62,7 +62,7 @@ const eigenVals = convert2dArray(matrixSvd[1])
 var lVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z:matrixLEVec,
+    z: prepro4Plotly( matrixLEVec ),
     type: 'heatmap'
   },
   
@@ -70,7 +70,7 @@ var lVecData = [
 var sVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z: matrixSEVal,
+    z: prepro4Plotly( matrixSEVal ),
     type: 'heatmap'
   },
   
@@ -79,7 +79,7 @@ var sVecData = [
 var rVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z: matrixREVec,
+    z: prepro4Plotly( matrixREVec ),
     type: 'heatmap'
   },
   
@@ -144,7 +144,7 @@ setInterval(() => {
   const currComp = compArray[compNum];
   const compData = [
     {
-      z: currComp.arraySync(),
+      z: prepro4Plotly( currComp.arraySync() ),
       // colorscale: 'Greys',
       type: 'heatmap'
     }
@@ -153,7 +153,7 @@ setInterval(() => {
   // Visualizing the Constructed Commulative Component Image:-
   const cummCompData = [
     {
-      z: cummulativeComp.arraySync(),
+      z: prepro4Plotly( cummulativeComp.arraySync()),
       colorscale: 'Greys',
       type:'heatmap'
     }

@@ -68,7 +68,10 @@ function FDA(data){
 function FDAmc(){
 
     // TODO: account for the case when N_k of all the classes are unequal.
-
+    const model = {
+        weights: null,
+        threshold : 0,
+    }
     this.train = function(data){
         // TODO: make the input to always be a tf.tensor object
         const tfDataX = tf.tensor(data.x);
@@ -102,14 +105,41 @@ function FDAmc(){
         // combining sW and sB
         const matrixA = tf.matMul( sW_inv, sB );
 
+        console.log(matrixA.print());
+
+        window.cov = matrixA;
         // const aSVD = nd.la.svd_decomp( matrixA.arraySync() );
         // calculating eigenVectors for each matrix:-
-        const {0 : eigenVals , 1 : eigenVecs} = nd.la.eigen( tf2nd(matrixA) );
+        let {0 : eigenVals , 1 : eigenVecs} = nd.la.eigen( tf2nd(matrixA) );
+
+        eigenVals = convert2dArray(eigenVals);
+        const eigenVecsT = convert2dArray(eigenVecs.T);
+
         // const {0 : lsVec , 1 : singularVals, 2: rsVec } = aSVD ;
 
-        console.log( eigenVals)
-        return convert2dArray(eigenVecs);
+        // sort the eigenVals and eigenVecs accordingly.
+        let eigenVecsSorted = sortAB(eigenVals,eigenVecsT);
+
+        // TODO: Remove this step in future.
+        // transpose the result 
+        eigenVecsSorted = tf.tensor(eigenVecsSorted).transpose().arraySync();
+
+        // console.log(`eigenVals: ${eigenVals},\n
+        //              eigenVecs: ${eigenVecs},\n
+        //              eigenVecsSorted: ${eigenVecsSorted}\n`);
+        // console.log(nd)
+
+        model.weights = tf.tensor(eigenVecsSorted).slice([0,1],[-1,-1]);
+        return eigenVecsSorted;
         // console.log(eigenVals,eigenVecs);
+    }
+
+    this.transform = function(x){
+        return tf.matMul(x,model.weights);
+    }
+    this.classify = function(x){
+        const tf2arr = this.transform(x).arraySync();
+        return tf2arr.map( (pt) => pt = pt.map( (w) => w = (w > model.threshold)*1 ) );
     }
 }
 

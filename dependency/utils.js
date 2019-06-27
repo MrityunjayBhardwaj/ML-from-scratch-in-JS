@@ -158,3 +158,82 @@ function remap(n, start1, stop1, start2, stop2, withinBounds) {
   var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
     return newval;
 }
+
+function relativeMap(arrA, arrA_prime, arrB) {
+      // this function takes arrA_prime and then replace arrA values with the corresponding arrB values assuming that B = f(A)
+
+      /**
+       * Example:-
+       *      A = [1,2,3,4]
+       *      B = [1,4,9,16] // here, B = (f(a) => a**2) i.e, they both somehow related to each other.
+       *      A_prime = [0.0,0.5,1.0 ,1.5,2.0, 2.5,3.0, 3.5,4.0] 
+       *      
+       *      newArrA = [0.0,0.5,1.0 ,1.5,4.0, 2.5,9.0, 3.5,16.0] 
+       */
+
+      let newArrA = arrA.slice(0);
+      for (let i = 0; i < arrA_prime.length; i++) {
+          let cAprimeVal = arrA_prime[i];
+          let idxInArrA = arrA.indexOf(cAprimeVal);
+          if (idxInArrA !== -1)
+              newArrA[idxInArrA] = arrB[i];
+      }
+      return newArrA;
+};
+
+/**
+ * 
+ * @param {*} A 
+ * @param {*} B 
+ * @param {*} A_sorted 
+ * @returns return the sorted B
+ */
+function sortWithIndexMap(B,indexMap){
+  // indexMap = [3,1,2]
+
+  if (B.length != indexMap.length){
+    throw new Error(`Error: Invalid Inputs, \n inputs must be of same size,but given:\n B: ${B.length} and indexMap: ${indexMap.length}`) ;
+    return false;}
+
+  const B_sorted =  Array(indexMap.length).fill(0);
+  for(let i = 0; i<B_sorted.length;i++){
+    const g = indexMap[i];
+    B_sorted[g] = B[i];
+  }
+
+  return B_sorted;
+}
+
+function sortAB(A,B){
+
+  const sortedIndexA = [];
+  for(let i=0;i<A.length;i++){
+    sortedIndexA.push(i);
+  };
+
+  const sortedA = A;
+  for(let i=0;i<A.length;i++){
+    let cVal_i = sortedA[i];
+    for(let j=i;j<A.length ;j++){
+    let cVal_j = sortedA[j];
+      if (cVal_i > cVal_j){
+        // swap `em
+        let foo =  cVal_i;
+        cVal_i  = cVal_j;
+        cVal_j  = foo;
+
+        // swap the indexArray as well
+        foo = sortedIndexA[i];
+        sortedIndexA[i] = sortedIndexA[j];
+        sortedIndexA[j] = foo;
+      }
+    }
+  }
+  return sortWithIndexMap(B,sortedIndexA);
+}
+
+function prepro4Plotly(x){
+  if ( x.constructor.toString().indexOf("Array") == -1 )throw new Error("Error: Input Must Be of Type \"Array\"  " );
+
+  return tf.tensor(x).transpose().reverse(axis=0).arraySync();
+}

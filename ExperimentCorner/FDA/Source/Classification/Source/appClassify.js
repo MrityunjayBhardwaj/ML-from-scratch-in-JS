@@ -28,7 +28,7 @@
   
   const fac = 2;// projection vector scaling factor
 
-  projVec = [1,0];
+  let projVec = [0,0];
 
   var traces = [{
     name: "Class-A Data",
@@ -50,11 +50,13 @@
       mode: 'lines',
       type: 'scatter',
       line : { width : 4}
-    }
+    },
+    {}
   ];
 
   let layout = {
     
+    title: "Input Space",
     showlegend : false,
     xaxis: {
       range: [-1,5],
@@ -63,7 +65,10 @@
     yaxis: {
       range: [-1,5],
       autorange: false 
-    }
+    },
+    margin: {
+      autoexpand: false,
+    },
   };
 
   var myPlot = document.getElementById('intractiveInput')
@@ -73,10 +78,20 @@
     return this >= min && this <= max;
   };
 
-  let selClass = document.getElementById('myCheck').checked;
+  const toggle =  document.getElementById('myCheck');
+  let selClass = toggle.checked;
 
   console.log(selClass);
 
+  document.addEventListener('keydown',function(event){
+    if (event.key == 1){
+      toggle.checked = false ;
+    }
+    if (event.key == 2){
+      toggle.checked = true ;
+    }
+    //  console.log(event.key == 2)
+    });
 
   // document.getElementsByClassName('svg-container')[1]
   Plotly.d3.select(".plotly").on('click', function(d, i) {
@@ -110,18 +125,22 @@
 
           if ( (traces[0].x.length > 3) && (traces[1].x.length > 3) ){
 
+            // initializing data
             let dataC0 = tf.tensor( [ traces[0].x.slice(2,), traces[0].y.slice(2,) ]).transpose();
             let dataC1 = tf.tensor( [ traces[1].x.slice(2,), traces[1].y.slice(2,) ]).transpose();
 
-            
             let dataX = dataC0.concat(dataC1, axis=0);
             let dataY = Array(dataC0.shape[0] + dataC1.shape[0]).fill([1,0],0,dataC0.shape[0]).fill([0,1],dataC0.shape[0],);
 
-            // console.log(dataX);
-            // console.log(dataY);
-
             const model = new FDAmc();
-            const projVec = model.train({ x:dataX.arraySync(), y:dataY })[1];
+            projVec = model.train({ x:dataX.arraySync(), y:dataY })[1];
+
+            
+            // const projDataX = tf.matMul(dataX,projVec);
+              console.log(projVec,
+                );
+            // const orth2EigVec = nd
+            // const bias = - projDataX;
 
             const projVecViz = {
               name: "FDA's Projection Vector",
@@ -132,7 +151,33 @@
               line : { width : 4}
             }
 
+            // TODO: figure out the decision boundary
+            // let decisionBoundary = tf.linalg.gramSchmidt(tf.tensor(projVec).expandDims(1).transpose()).flatten().arraySync();
+            // const decBoundaryViz = {
+            //   name: "Decision Boundary ",
+            //   x : [ -decisionBoundary[0]*fac ,decisionBoundary[0]*fac ],
+            //   y : [ -decisionBoundary[1]*fac ,decisionBoundary[1]*fac ],
+            //   mode: 'lines',
+            //   type: 'scatter',
+            //   line : { width : 4}
+            // }
+            // traces[3] = (decBoundaryViz);
+
+            const psudoPtsGridRes = 100;
+            const psudoPts0 = tf.linspace(-1,5,psudoPtsGridRes);
+            const psudoPts  = tf.tile( psudoPts0.expandDims(1).transpose(),[2,1] ); // mashGrid
+            const psudoPty = model.transform( psudoPts.transpose() );
+            const psudoPtsClassify = model.classify(psudoPts.transpose())
+            window.model  = model;
+
+            
+
+
             traces[2] = (projVecViz);
+
+            // traces[3] = {
+            //   x: 
+            // }
 
             plotDist(dataX.arraySync(),dataY,'2classDistViz',0);
             plotDist(dataX.arraySync(),dataY,'2classDistViz',1);

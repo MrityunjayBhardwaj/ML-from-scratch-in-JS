@@ -4,8 +4,9 @@ const matrix = tf.tensor( [[ -1,0],[0,0]] );
 function vizQuadSurf(matrix){
 
     // calculating quadratic form
-    const matrixQuadForm = quadForm(matrix,range={min: 0, max: 1},isNormalized=1,res=10); 
+    const matrixQuadForm = quadForm(matrix,range={min: -1, max: 1},isNormalized=1,res=3); 
 
+    console.log(matrixQuadForm)
     // visualizing QuadForm:-
     const quadSurfVizData = [
         { 
@@ -44,3 +45,5 @@ function onSliderChange(){
     // updating quad surf viz
     vizQuadSurf(tfMtx);
 }
+
+

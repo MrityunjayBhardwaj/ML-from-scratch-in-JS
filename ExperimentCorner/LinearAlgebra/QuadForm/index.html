@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Quadratic Form</title>
+
+    <style>
+      body{
+        font-family: Arial, Helvetica, sans-serif
+      }
+        .Datacontainer{
+            width:500px;
+            height:500px;
+            background-color: red;
+            display: inline-block;
+
+        }
+        .discription {
+          display:inline-block;
+          background: blue;
+          }
+        .vizContainer{
+          display:inline-block;
+        }
+        .sliderContainer {
+            display: grid;
+  grid-template-columns: 100px 100px 100px;
+  grid-gap: 10px;
+  background-color: #fff;
+color: #444;
+        }
+        .slider {
+             background-color: #444;
+  color: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  font-size: 150%;
+        }
+          </style>
+
+
+    <!-- dependencies -->
+    <script src="../../../dependency/tensorflowJS/tf.js"></script>
+    <script src="../../../dependency/ndjs/dist/nd.min.js"></script>
+    <script src="../../../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <script src="../../../dependency/gaussDist.js"></script>
+
+    <!-- utility -->
+    <script src="../../../dependency/utils.js"></script>
+</head>
+<body>
+   
+    <div id="quadSurfViz" style="width:800px;height:800px;display:inline-block;"></div>
+    <div class="slideContainer" style="display: inline-block">
+        <input type="range" min="-50" max="50" value="0" class="slider" id="range00" oninput="onSliderChange()">
+        <input type="range" min="-50" max="50" value="0" class="slider" id="range01" oninput="onSliderChange()">
+        <input type="range" min="-50" max="50" value="0" class="slider" id="range10" oninput="onSliderChange()">
+        <input type="range" min="-50" max="50" value="0" class="slider" id="range11" oninput="onSliderChange()">
+    </div>
+
+
+    <script src="Source/QuadForm.js"></script>
+    <script src="Source/app.js"></script>
+</body>

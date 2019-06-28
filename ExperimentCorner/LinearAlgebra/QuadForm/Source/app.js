@@ -1,12 +1,12 @@
 // TODO: make it async
 const matrix = tf.tensor( [[ -1,0],[0,0]] );
 
-function vizQuadSurf(matrix){
+function vizQuadSurf(matrix,res=10){
 
     // calculating quadratic form
-    const matrixQuadForm = quadForm(matrix,range={min: -1, max: 1},isNormalized=1,res=3); 
+    const matrixQuadForm = quadForm(matrix,range={min: -1, max: 1},isNormalized=1,res); 
 
-    console.log(matrixQuadForm)
+    // console.log(matrixQuadForm)
     // visualizing QuadForm:-
     const quadSurfVizData = [
         { 
@@ -30,6 +30,10 @@ const slider01 = document.getElementById("range01");
 const slider10 = document.getElementById("range10");
 const slider11 = document.getElementById("range11");
 
+const matrixVal00 = document.getElementById("matrixValue00");
+const matrixVal01 = document.getElementById("matrixValue01");
+const matrixVal10 = document.getElementById("matrixValue10");
+const matrixVal11 = document.getElementById("matrixValue11");
 
 // creating a matrix:-
 function onSliderChange(){
@@ -38,6 +42,12 @@ function onSliderChange(){
     const mtx10 = slider10.value*1;
     const mtx11 = slider11.value*1;
 
+    // update the ui number 
+    matrixVal00.innerHTML = mtx00;
+    matrixVal01.innerHTML = mtx01;
+    matrixVal10.innerHTML = mtx10;
+    matrixVal11.innerHTML = mtx11;
+    
     // upating the current matrix 
     currMtx = [[mtx00,mtx01],[mtx10,mtx11]];
     // console.log(currMtx)

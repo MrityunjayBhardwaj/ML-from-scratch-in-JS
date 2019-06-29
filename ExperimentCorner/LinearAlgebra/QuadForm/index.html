@@ -25,6 +25,70 @@
             font-size: 30px;
             text-align: center;
           }
+          #matrixContainer {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            padding: 10px;
+          }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+        }
+
+        .switch input { 
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+.toggle {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.toggle:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+        input:checked + .toggle {
+          background-color: #2196F3;
+        }
+
+        input:focus + .toggle {
+          box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .toggle:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .toggle.round {
+          border-radius: 34px;
+        }
+
+        .toggle.round:before {
+          border-radius: 50%;
+        }
           </style>
 
 
@@ -38,36 +102,60 @@
     <script src="../../../dependency/utils.js"></script>
 </head>
 <body>
-  <h1>Quadratic Form Visualizer</h1>
+  <!-- <h1>Quadratic Form Visualizer</h1> -->
  
   <div style="display: inline-flex">
-    <div id="quadSurfViz" style="width:800px;height:800px;display:inline-block;"></div>
-    <div style="display:inline-block;">
-      <h2>Matrix</h2>
+    <div id="quadSurfViz" style="width:800px;height:800px;display:inline-block;">
+  </div>
+  
+
+
+  <div style="display:inline-block;">
+    <h2>Matrix</h2>
+
+
+  <div id="matrixContainer" style="display:inline-grid">
+    <div style="font-size:200px">W</div>
+    <div style="font-size:50px">T</div>
+
     <div class="sliderContainer">
         <div id="matrixUI">
-          <div id="matrixValue00">2</div>
-        <input type="range" min="-50" max="50" value="0" class="slider" id="range00" oninput="onSliderChange()">
+          <div id="matrixValue00">0</div>
+        <input type="range" min="-50" max="50" value="0" step=".2" class="slider" id="range00" oninput="onSliderChange()">
         </div>
 
         <div id="matrixUI">
 
-          <div id="matrixValue01">2</div>
-        <input type="range" min="-50" max="50" value="0" class="slider" id="range01" oninput="onSliderChange()">
+          <div id="matrixValue01">0</div>
+        <input type="range" min="-50" max="50" value="0" step=".2" class="slider" id="range01" oninput="onSliderChange()">
         </div>
 
         <div id="matrixUI">
-          <div id="matrixValue10">2</div>
+          <div id="matrixValue10">0</div>
 
-        <input type="range" min="-50" max="50" value="0" class="slider" id="range10" oninput="onSliderChange()">
+        <input type="range" min="-50" max="50" value="0" step=".2" class="slider" id="range10" oninput="onSliderChange()">
         </div>
 
         <div id="matrixUI">
-          <div id="matrixValue11">2</div>
+          <div id="matrixValue11">0</div>
 
-        <input type="range" min="-50" max="50" value="0" class="slider" id="range11" oninput="onSliderChange()">
+        <input type="range" min="-50" max="50" value="0" step=".2" class="slider" id="range11" oninput="onSliderChange()">
         </div>
+        
     </div>
+    <div style="font-size:200px">W</div>
+  </div>
+    <div >
+      <h3 style="display:inline-block;margin-right:10px;margin-left:10px">Normalize:</h3>
+      <label class="switch" style="display:inline-block">
+      <input id="normalizedToggle" type="checkbox" checked='true' onchange="onNormToggleChange(event);">
+      <span class="toggle round"></span>
+    </label>
+    </div>
+
+  <br>
+  <hr>
+  <div id="quadSurfHeadMapViz" style='width:500px;height:500px;background-color:red;margin-left:200px'></div>
   </div>
 </div>
 

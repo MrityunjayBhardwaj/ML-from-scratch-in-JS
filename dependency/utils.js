@@ -204,6 +204,16 @@ function sortWithIndexMap(B,indexMap){
   return B_sorted;
 }
 
+/**
+ * 
+ * @param {Array} A javascript Array
+ * @param {Array} B javascript Array
+ * @description this function first sort array A and then sort B according to how the indexes of A changed when sorted
+ * @example
+ *  const A = [  5,  4,  8,  2, 1 ]
+ *  const B = ['a','b','c','d','e']
+ *  sortAB(A,B) // returns [ [1,2,4,5,8], ['e','d','b','a','c'] ]
+ */
 function sortAB(A,B){
 
   const sortedIndexA = [];
@@ -229,7 +239,7 @@ function sortAB(A,B){
       }
     }
   }
-  return sortWithIndexMap(B,sortedIndexA);
+  return [ A, sortWithIndexMap(B,sortedIndexA) ];
 }
 
 function prepro4Plotly(x){
@@ -259,4 +269,32 @@ if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.
    gridArray.push( [cRow, Array(cRow.length).fill(cVal_i) ])
  }
  return gridArray;
+}
+
+/**
+ * 
+ * @param {object} matrix input must be a tf.tensor object of shape NxM
+ * @param {function } callbackFn callback function which modifies every element of the tensor object
+ */
+function tfMap(matrix,callbackFn){
+  const array = matrix.arraySync();
+  const modArray = array.map( (cRow) => (cVal) => { callbackFn(cVal) } );
+
+  // return the modified tf.tensor
+  return tf.tensor( modArray );
+}
+
+/**
+ * 
+ * @param {object} vector input must be of shape Nx1 or 1xN 
+ * @return returns the sorted tf.tensor object
+ */
+function tfSort(vector){
+  if ( vector.shape[1] > 1)throw new Error(" input must be of shape nx1 or 1xn.")
+  const array = tensor.flattten().arraySync();
+
+  const sortedArray = quickSort(array);
+
+  // return the sorted tf.tensor;
+  return tf.tensor( sortedArray );
 }

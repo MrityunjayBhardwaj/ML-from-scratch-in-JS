@@ -13,7 +13,9 @@ matrixY.print()
 // adding some noise
 matrixY = tf.add(matrixY, tf.randomNormal(matrixY.shape,0,10));
 
-matrixY.print()
+matrixY.print();
+
+
 function addNDrag(){
 
 }

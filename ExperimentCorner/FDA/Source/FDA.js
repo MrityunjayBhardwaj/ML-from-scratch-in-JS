@@ -118,7 +118,7 @@ function FDAmc(){
         // const {0 : lsVec , 1 : singularVals, 2: rsVec } = aSVD ;
 
         // sort the eigenVals and eigenVecs accordingly.
-        let eigenVecsSorted = sortAB(eigenVals,eigenVecsT);
+        let eigenVecsSorted = sortAB(eigenVals,eigenVecsT)[1];
 
         // TODO: Remove this step in future.
         // transpose the result 

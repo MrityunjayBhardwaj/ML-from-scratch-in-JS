@@ -2,21 +2,21 @@
 
   // initializing data
   const mIrisX = tf.tensor(iris).slice([0,0],[100,2])
-  // // one hot encoded
+  // one hot encoded
   const mIrisY = Array(100).fill([1,0],0,50).fill([0,1],50);
   /**
    * 
-   * @param {number} x pointer location X
-   * @param {number} y pointer location Y
-   * @param {object} cvsRange of x and y-axis { x : [min,max], y: [min,max] }
-   * @param {object} coordRange range of x and y-axis { x : [min,max], y: [min,max] }
-   * @param {number} shift left-shift the entire system
+   * @param {number} x cursor location X
+   * @param {number} y cursor location Y
+   * @param {object} originalRange of x and y-axis { x : [min,max], y: [min,max] }
+   * @param {object} newRange range of x and y-axis { x : [min,max], y: [min,max] }
+   * @description this function just maps the x and y coordinate value to newRange Space given the range of the domain of x and y values. 
    * @returns returns the coordinate points according to the parameters.
    */
-  function calcPts(x,y,cvsRange,coordRange,shift=0){
+  function reMapCoods(x,y,originalRange,newRange){
 
-    const coordX = remap(x,cvsRange.x[0],cvsRange.x[1],coordRange.x[0],coordRange.x[1]);
-    const coordY = remap(y,cvsRange.y[0],cvsRange.y[1],coordRange.y[0],coordRange.y[1]);
+    const coordX = remap(x,originalRange.x[0],originalRange.x[1],newRange.x[0],newRange.x[1]);
+    const coordY = remap(y,originalRange.y[0],originalRange.y[1],newRange.y[0],newRange.y[1]);
 
     return [coordX,coordY];
 
@@ -131,7 +131,7 @@
 
           const offset = 0;
           const cvsRange = { x : [margin*0, plotContainer.offsetWidth -margin*2 -offset ] , y: [margin*0, plotContainer.offsetHeight - margin*2 - offset]} ;
-          const graphCoords = calcPts(graphPix.x,graphPix.y,cvsRange, {x : [-1,5],y: [-1,5]});
+          const graphCoords = reMapCoods(graphPix.x,graphPix.y,cvsRange, {x : [-1,5],y: [-1,5]});
 
           selClass = document.getElementById('myCheck').checked;
           console.log(selClass*1,graphPix);
@@ -140,9 +140,6 @@
             
           classData.x.push(graphCoords[0]);
           classData.y.push(graphCoords[1]);
-
-          // console.log(traces)
-
 
           console.log(graphCoords);
 
@@ -173,6 +170,7 @@
               type: 'scatter',
               line : { width : 4}
             }
+            traces[2] = projVecViz;
 
             // TODO: figure out the decision boundary
             // let decisionBoundary = tf.linalg.gramSchmidt(tf.tensor(projVec).expandDims(1).transpose()).flatten().arraySync();
@@ -186,7 +184,7 @@
             // }
             // traces[3] = (decBoundaryViz);
 
-            const psudoPtsGridRes = 10;
+            const psudoPtsGridRes = 100;
             const psudoPts0 = tf.linspace(-1,5,psudoPtsGridRes);
             const psudoPts  = tf.tile( psudoPts0.expandDims(1).transpose(),[2,1] ).transpose(); // mashGrid
             const psudoPty = model.transform( psudoPts );
@@ -218,15 +216,15 @@
             }
             console.log(dataX.print())
 
-            traces[2] = projVecViz;
             outputData[0] = { 
               x : dataX.slice([0,0],[-1,1]).flatten().arraySync(), 
               y: dataX.slice([0,1],[-1,-1]).flatten().arraySync(),
               mode: 'markers',
               type: 'scatter',
               marker : {
-                size : 5,
-                 symbol: ["diamond-open"],
+                width : 5,
+                //  symbol: ["diamond-open"],
+                 color: 'gray'
               }
             }
             outputData[2] = decisionRegionData;

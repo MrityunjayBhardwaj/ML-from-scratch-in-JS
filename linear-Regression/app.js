@@ -11,12 +11,29 @@ matrixX.print();
 
 let matrixY = matrixXMod.matMul( weights );
 
-let modelLR = new LinearRegression();
-modelLR.train( { x: matrixX, y: matrixY } );
-
 
 /* Visualizing */
 
+const lrVizData = [{
+    x: matrixX.slice([0,0],[-1,1]).flatten().arraySync(),
+    y: matrixX.slice([0,1],[-1,-1]).flatten().arraySync(),
+    z: matrixY.flatten().arraySync(),
+
+    mode: 'markers',
+    type: 'scatter3d',
+    marker : {
+        width : 5
+    }
+}];
+
+const layout = {
+    title: "Linear Regression"
+}
+Plotly.newPlot('linearRegressionViz',lrVizData, layout);
+
+
+let modelLR = new LinearRegression();
+modelLR.train( { x: matrixX, y: matrixY } );
 
 
 

@@ -34,19 +34,6 @@ function PolynomialRegression(x,y,degree = 3){
 
         calcWeights.print();
 
-
-        // tfvis.render.scatterplot(
-        //     {name: 'X v Y'},
-        //     { values: {x: [1,2,3],y:[1,2,5]}},
-        //     {
-        //     xLabel: 'X-axis',
-        //     yLabel: 'Y-axis',
-        //     height: 300
-        //     }
-        // );
-
-
-
     }
 
     this.test = function(){

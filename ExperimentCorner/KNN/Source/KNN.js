@@ -37,15 +37,23 @@ function KNN(){
                 const trainDataY = model.data.y;
                 const nNeigh     = model.params.k;
                 const tfCurrPt   = tf.tensor(currPt);
+                const nCategory  = trainDataY[0].length;
 
                 // calculating the norms.
-                const currPtNorm = tf.norm( tfCurrPt.transpose() );
-                const dataNorm   = tf.norm( trainDataX, 'euclidean',axis=1);
+                const currPtNorm = tfCurrPt.expandDims(1).transpose().tile([2,1]).norm('euclidean',axis=1).slice([0],[1])
+
+                const dataNorm   = trainDataX.norm('euclidean',axis=1);
                 const normMatrix = tf.fill( dataNorm.shape, currPtNorm.flatten().arraySync()  );
 
+                // dist b/w pts and cPt
+                const nPt = tfCurrPt.reshape([1,2]).tile([trainDataX.shape[0],1]);
+                const dist = trainDataX.sub(nPt).pow(2);
+                const finNorm = dist.norm('euclidean',axis=1);
+
+
                 // fetching the nearest data points
-                const nearnest = tf.pow( tf.sub( normMatrix, dataNorm ), 2 );
-                const neighY   = tf.tensor( sortAB( nearnest.flatten().arraySync(), trainDataY )[1] );
+                // const nearnest = tf.abs( tf.sub( normMatrix, dataNorm ) );
+                const neighY   = tf.tensor( sortAB( finNorm.flatten().arraySync(), trainDataY )[1] );
 
                 // fectch the classes of K Nearest Neighbours
                 const kNeighClasses = neighY.slice([0,0],[nNeigh, -1]);
@@ -53,14 +61,16 @@ function KNN(){
                 // calculating the relative frequency table of all the neighbour classes
                 const rf = kNeighClasses.transpose().matMul( tf.ones( [kNeighClasses.shape[0],1] ) );
                 const xCategory = rf.flatten().arraySync().indexOf( rf.max().flatten().arraySync()[0] );
-               
+                
+                // console.log(xCategory);
                 // returns the one hot encoded vector of the best possible category
-                return kNeighClasses.slice([xCategory,0],[1,-1]).flatten().arraySync(); 
+                return Array(nCategory).fill(0).fill(1, xCategory,xCategory+1);
+                // return kNeighClasses.slice([xCategory,0],[1,-1]).flatten().arraySync(); 
 
             }
         )
 
-        return categoryArray ;
+        return tf.tensor(categoryArray) ;
 
     }
 }

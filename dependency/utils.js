@@ -198,7 +198,9 @@ function sortWithIndexMap(B,indexMap){
   const B_sorted =  Array(indexMap.length).fill(0);
   for(let i = 0; i<B_sorted.length;i++){
     const g = indexMap[i];
-    B_sorted[g] = B[i];
+    B_sorted[i] = B[g];
+
+    // console.log(g,B_sorted[g]);
   }
 
   return B_sorted;
@@ -221,16 +223,19 @@ function sortAB(A,B){
     sortedIndexA.push(i);
   };
 
-  const sortedA = A;
+  const sortedA = A.slice();
   for(let i=0;i<A.length;i++){
-    let cVal_i = sortedA[i];
-    for(let j=i;j<A.length ;j++){
-    let cVal_j = sortedA[j];
+
+    for(let j=i+1;j<A.length ;j++){
+
+      let cVal_i = sortedA[i];
+      let cVal_j = sortedA[j];
+
       if (cVal_i > cVal_j){
         // swap `em
         let foo =  cVal_i;
-        cVal_i  = cVal_j;
-        cVal_j  = foo;
+        sortedA[i]  = sortedA[j];
+        sortedA[j] = foo;
 
         // swap the indexArray as well
         foo = sortedIndexA[i];
@@ -239,7 +244,8 @@ function sortAB(A,B){
       }
     }
   }
-  return [ A, sortWithIndexMap(B,sortedIndexA) ];
+  // console.log(sortedIndexA,sortedA,A,Math.min(sortedA));
+  return [ sortedA, sortWithIndexMap(B,sortedIndexA) ];
 }
 
 function prepro4Plotly(x){
@@ -256,7 +262,7 @@ function prepro4Plotly(x){
  */
 function meshGrid(a,b){
  // input must be an array
-if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.");
+// if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.");
 
  const gridArray = [];
  for(let i=0;i<a.length;i++){
@@ -268,6 +274,7 @@ if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.
    }
    gridArray.push( [cRow, Array(cRow.length).fill(cVal_i) ])
  }
+
  return gridArray;
 }
 

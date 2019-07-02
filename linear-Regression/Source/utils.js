@@ -67,8 +67,21 @@ function optimize(x,y,
                             threshold    = 1e-3
                         }
                 ) {
+const {
+        yPridFn  = function(x,w){
+                return tf.matMul(w,x);
+            },
+        costFn   = costFn('mse'),
+        costFnDx = costFnDerivatives('mse'),
+        callback = null,
+        yPred    = null,
+        weights  = null,
+        epoch    = 1000,
+        learningRate = 0.001,
+        threshold    = 1e-3
+    } = params;
 
-
+    console.log("sdfk")
     // initializing weights vector tf.matMul( x, oldWeights).
     if (!weights){
         // works only if x.shape = [m,n...] where, m == no. of training samples.
@@ -95,6 +108,8 @@ function optimize(x,y,
         
         // reAssigning weights 
         oldWeights = newWeights; 
+
+        oldWeights.print();
         
         // invoke the callback function 
         if (callback !== null)

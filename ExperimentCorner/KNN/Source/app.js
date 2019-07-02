@@ -19,7 +19,7 @@ tf.util.shuffle(mIrisXArray);
 mIrisX = tf.tensor(mIrisXArray);
 
 let model = new KNN();
-model.train({ x: mIrisX, y: mIrisY },K=1);
+model.train({ x: mIrisX, y: mIrisY },K=5);
 const predY = model.classify(mIrisX);
 
 

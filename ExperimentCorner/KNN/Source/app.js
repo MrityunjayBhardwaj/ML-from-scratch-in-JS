@@ -14,10 +14,12 @@ let testY =   augIrisData.slice([0,2],[25,-1]);
 // testX = mIrisX.slice([50,0],[-1,-1]);
 // testY = tf.tensor(mIrisY).slice([50,0],[-1,-1]);
 
-mIrisX = tf.tensor(tf.util.shuffle(mIrisX.arraySync()));
+const mIrisXArray = mIrisX.arraySync();
+tf.util.shuffle(mIrisXArray);
+mIrisX = tf.tensor(mIrisXArray);
 
 let model = new KNN();
-model.train({ x: mIrisX, y: mIrisY },K=5);
+model.train({ x: mIrisX, y: mIrisY },K=1);
 const predY = model.classify(mIrisX);
 
 

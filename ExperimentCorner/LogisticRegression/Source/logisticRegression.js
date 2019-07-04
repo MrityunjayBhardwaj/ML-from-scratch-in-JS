@@ -13,10 +13,12 @@ function LogisticRegression(){
     this.getWeights = function(){
         return model.weights;
     }
-    this.logisticFn = (threshold=0.5,convert2Class=1) => {
+    this.logisticFn = (threshold=0.5,convert2Class=1, permWeights=null) => {
 
-            return function(x,weights){
+            return function(x,weights=permWeights){
 
+            // weights.print();
+        
             // calculating logistic function
             const logOdds = tf.matMul( x, weights );
             const expLogOdds = tf.exp( tf.neg( logOdds ) );
@@ -36,23 +38,23 @@ function LogisticRegression(){
         }
     }
 
-    this.train = function(data){
+    this.train = function(data,callbackFn){
         
         // convert data.y one hot into binary and calaculate weights
         const dataBinaryY = tf.tensor( data.y.arraySync().map( (cVec) => { return cVec.indexOf(1) } ) ).expandDims(1);
-        const calcWeights = optimize( data.x, dataBinaryY, { yPredFn: this.logisticFn(model.params.threshold),threshold: model.params.threshold } );
+        const calcWeights = optimize( data.x, dataBinaryY, { yPredFn: this.logisticFn(model.params.threshold),threshold: model.params.threshold,callback: callbackFn } );
 
         // calcWeights.print()
         model.weights = calcWeights;
         return this;
     }
 
-    this.classify = function(testDataX){
+    this.classify = function(testDataX, weights=null, threshold=null){
         // returns a one hot encoded vector
-        const predClass = (this.logisticFn(model.params.threshold)(testDataX, model.weights));
+        const predClass = (this.logisticFn( threshold || model.params.threshold )( testDataX, weights || model.weights ));
 
-        model.weights.print();
-        predClass.print();
+        // model.weights.print();
+        // predClass.print();
         // console.log(model.params.threshold,predProb)
         // converting prob to pred class
 

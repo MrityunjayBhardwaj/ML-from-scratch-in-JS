@@ -78,3 +78,36 @@ decisionRegionData
 
 Plotly.newPlot('logisticRegressionViz',inputSpaceVizData,{title: 'input Space'})
 
+
+
+// EXP
+// Visualizing Simoid prob.
+
+const gridMeshLogit = meshGridPsudoPts.map( 
+        function(cRow) {
+            // console.log(cRow);
+        return model.logisticFn(threshold=0.5,convert2Class=false)( tf.tensor(cRow).transpose(), model.getWeights() ).flatten().arraySync()
+        }
+    );
+
+const logitVizData = [{
+    x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
+    y : psudoPts.slice([0,1],[-1,1]).flatten().arraySync(),
+    z: gridMeshLogit,
+    type: 'contour',
+    line: {
+        width: 0
+        
+    },
+    zsmooth: 'best',
+    contours: {
+        smooting : 1,
+        coloring: 'heatmap'
+    }
+}]
+
+Plotly.newPlot('sigmoidCurveViz',logitVizData,{title: 'Logit Function Viz'})
+
+
+
+

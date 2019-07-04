@@ -384,7 +384,8 @@ function optimize(x,y,
                             weights  : null,
                             epoch    : 1000,
                             learningRate : 0.001,
-                            threshold    : 1e-3
+                            threshold    : 1e-3,
+                            verbose  : false
                         }
                 ) {
 let {
@@ -398,7 +399,8 @@ let {
         weights  = null,
         epoch    = 100,
         learningRate = 0.0005,
-        threshold    = 1e-3
+        threshold    = 1e-3,
+        verbose = false,
     } = params;
 
     // initializing weights vector tf.matMul( x, oldWeights).
@@ -414,8 +416,8 @@ let {
         yPred = yPredFn(x,oldWeights);
         const Loss = costFn(y,yPred);
 
-        // yPred.print();
-        // Loss.print();
+        if(verbose)
+          Loss.print();
 
         // checking convergence.
         if (Loss.arraySync() < threshold){
@@ -429,10 +431,14 @@ let {
         
         // reAssigning weights 
         oldWeights = newWeights; 
-       
+        
+        // console.log(callback)
         // invoke the callback function 
-        if (callback !== null)
-        callback(x,y,yPred,oldWeights);
+        if (callback !== null){
+          console.log("inside Callback")
+          callback(x,y,yPred,oldWeights,Loss);
+
+        }
     }
 
     return oldWeights;

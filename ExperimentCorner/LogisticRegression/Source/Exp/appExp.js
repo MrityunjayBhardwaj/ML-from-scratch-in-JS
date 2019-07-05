@@ -9,27 +9,30 @@ const model = new LogisticRegression();
 const mIrisX_c0  = mIrisX.slice([0,0],[50,-1]);
 const mIrisX_c1  = mIrisX.slice([50,0],[-1,-1]);
 
-Plotly.newPlot('logisticRegressionViz');
+let weightHistory = [];
 
 function trainingCallback(x, y, yPred, Weights, Loss){
+
 
     console.log("inside Traning CallBack Function");
     const mIrisX_c0  = x.slice([0,0],[50,-1]);
     const mIrisX_c1  = x.slice([50,0],[-1,-1]);
 
-    vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.logisticFn(.5,1,Weights).bind(model), divName='logisticRegressionViz', this );
+    weightHistory.push(Weights)
+    Weights.print();
 
-    window.setTimeout(function(){console.log("times Up")},1000)
+    // vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.logisticFn(.5,1,Weights).bind(model), divName='logisticRegressionViz', window );
+
 }
 
-model.train( {x: mIrisX, y: mIrisY}, trainingCallback  );
+model.train( {x: mIrisX, y: mIrisY},   );
 
 console.log("trained");
 
 vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.classify.bind(model), divName='logisticRegressionViz' );
 
 function vizDecisionBoundary(dataX0,dataX1,classifierFn,divName='',bindTo=this,rangeX=null,rangeY=null,gridRes=50,margin=.3){
-    // TODO: if the name is not given then just create one.
+    // TODO: if the divName is not given then just create one.
 
     // console.log("inside")
     const dataX = dataX0.concat(dataX1, axis=0);
@@ -56,9 +59,18 @@ function vizDecisionBoundary(dataX0,dataX1,classifierFn,divName='',bindTo=this,r
     const meshGridPsudoPtsY = meshGridPsudoPts.map( 
             function(cRow) {
                 // console.log(cRow);
-            return classifierFn( tf.tensor(cRow).transpose() ).arraySync().map( (oneHotClass)=> oneHotClass.indexOf(1) )
+                const cRowClass = classifierFn( tf.tensor(cRow).transpose() );
+
+                // console.log("printing cRowClass");
+                // cRowClass.print();
+                if (cRowClass.shape[1] === 1)
+                    return cRowClass.flatten().arraySync();
+
+            return cRowClass.arraySync().map( (oneHotClass)=> oneHotClass.indexOf(0) );
             }
         );
+
+    // console.log( meshGridPsudoP  tsY );
 
     // Visualizing 
 
@@ -108,52 +120,53 @@ function vizDecisionBoundary(dataX0,dataX1,classifierFn,divName='',bindTo=this,r
 
     ]
 
-    // console.log("plotting!",bindTo)
+    console.log("plotting!",this)
 
 
-    bindTo.Plotly.newPlot(divName,inputSpaceVizData,{title: 'input Space'})
-
-
-
+    window.Plotly.newPlot(document.getElementById(divName),inputSpaceVizData,{title: 'input Space'})
 
 
 
 
+
+
+
+
+
+
+
+
+
+// EXP
+// Visualizing Simoid prob.
+
+const gridMeshLogit = meshGridPsudoPts.map( 
+        function(cRow) {
+            // console.log(cRow);
+        return model.logisticFn(threshold=0.5,convert2Class=false)( tf.tensor(cRow).transpose(), model.getWeights() ).flatten().arraySync()
+        }
+    );
+
+const logitVizData = [{
+    x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
+    y : psudoPts.slice([0,1],[-1,1]).flatten().arraySync(),
+    z: gridMeshLogit,
+    type: 'surface',
+    line: {
+        width: 0
+        
+    },
+    zsmooth: 'best',
+    contours: {
+        smooting : 1,
+        coloring: 'heatmap'
+    }
+}]
+
+Plotly.newPlot('sigmoidCurveViz',logitVizData,{title: 'Logit Function Viz'})
 
 
 
 
 
 }
-
-// EXP
-// Visualizing Simoid prob.
-
-// const gridMeshLogit = meshGridPsudoPts.map( 
-//         function(cRow) {
-//             // console.log(cRow);
-//         return model.logisticFn(threshold=0.5,convert2Class=false)( tf.tensor(cRow).transpose(), model.getWeights() ).flatten().arraySync()
-//         }
-//     );
-
-// const logitVizData = [{
-//     x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
-//     y : psudoPts.slice([0,1],[-1,1]).flatten().arraySync(),
-//     z: gridMeshLogit,
-//     type: 'contour',
-//     line: {
-//         width: 0
-        
-//     },
-//     zsmooth: 'best',
-//     contours: {
-//         smooting : 1,
-//         coloring: 'heatmap'
-//     }
-// }]
-
-// Plotly.newPlot('sigmoidCurveViz',logitVizData,{title: 'Logit Function Viz'})
-
-
-
-

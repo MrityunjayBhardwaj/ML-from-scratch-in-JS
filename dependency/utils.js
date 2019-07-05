@@ -306,7 +306,14 @@ function tfSort(vector){
   return tf.tensor( sortedArray );
 }
 
-
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
 
 
 
@@ -407,12 +414,14 @@ let {
     if (!weights){
         // works only if x.shape = [m,n...] where, m == no. of training samples.
         weights =  tf.randomNormal([x.shape[1],1]);
-    }
+        weights =tf.tensor([[0.4907759 ],
+                            [-0.8839155]]);
+        }
 
-    let oldWeights = weights;
-    for(let i = 0;i<epoch;i++){
+        let oldWeights = weights;
+        for(let i = 0;i<epoch;i++){
 
-        // calculating new prediction and loss function.
+          // calculating new prediction and loss function.
         yPred = yPredFn(x,oldWeights);
         const Loss = costFn(y,yPred);
 
@@ -438,6 +447,7 @@ let {
           console.log("inside Callback")
           callback(x,y,yPred,oldWeights,Loss);
 
+          
         }
     }
 

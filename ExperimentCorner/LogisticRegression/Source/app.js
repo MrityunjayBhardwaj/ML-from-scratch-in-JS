@@ -94,7 +94,7 @@ const logitVizData = [{
     x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
     y : psudoPts.slice([0,1],[-1,1]).flatten().arraySync(),
     z: gridMeshLogit,
-    type: 'contour',
+    type: 'surface',
     line: {
         width: 0
         

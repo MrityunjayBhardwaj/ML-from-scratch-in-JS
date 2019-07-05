@@ -17,8 +17,6 @@ function LogisticRegression(){
 
             return function(x,weights=permWeights){
 
-            // weights.print();
-        
             // calculating logistic function
             const logOdds = tf.matMul( x, weights );
             const expLogOdds = tf.exp( tf.neg( logOdds ) );
@@ -28,9 +26,10 @@ function LogisticRegression(){
             // converting probability into prediction (Classes)
             if(convert2Class)
             {
-                const thCenter = tf.sub( logit,( threshold ) );
-                const predClass = tf.clipByValue(tf.mul(thCenter, 100 ),0 ,1  );
+                const thCenter  = tf.sub( logit,( threshold ) );
+                const predClass = tf.pow( tf.clipByValue(tf.mul(thCenter, 100 ), 0, 1 ), 1 );
 
+                
                 return predClass
             }
 

@@ -392,7 +392,9 @@ function optimize(x,y,
                             epoch    : 1000,
                             learningRate : 0.001,
                             threshold    : 1e-3,
-                            verbose  : false
+                            verbose   : false,
+                            batchSize : -1
+
                         }
                 ) {
 let {
@@ -408,45 +410,55 @@ let {
         learningRate = 0.0005,
         threshold    = 1e-3,
         verbose = false,
+        batchSize = -1,
+        
     } = params;
+
 
     // initializing weights vector tf.matMul( x, oldWeights).
     if (!weights){
-        // works only if x.shape = [m,n...] where, m == no. of training samples.
-        weights =  tf.randomNormal([x.shape[1],1]);
+          // works only if x.shape = [m,n...] where, m == no. of training samples.
+          weights =  tf.randomNormal([x.shape[1],1]);
         }
 
         let oldWeights = weights;
         for(let i = 0;i<epoch;i++){
 
-          // calculating new prediction and loss function.
-        yPred = yPredFn(x,oldWeights);
-        const Loss = costFn(y,yPred);
-
-        if(verbose)
-          Loss.print();
-
-        // checking convergence.
-        if (Loss.arraySync() < threshold){
-            yPred.print();
-            return oldWeights;
-        }
-
-        // Calculating and Updating new Weights
-        const weightDx = costFnDx(x,y,yPred);
-        const newWeights = tf.sub( oldWeights , tf.mul( tf.scalar( learningRate ) , weightDx ) );
-        
-        // reAssigning weights 
-        oldWeights = newWeights; 
-        
-        // console.log(callback)
-        // invoke the callback function 
-        if (callback !== null){
-          console.log("inside Callback")
-          callback(x,y,yPred,oldWeights,Loss);
-
+          const dataShuffleArray = x.concat(y, axis=1).arraySync();
+          ( tf.util.shuffle(Array) );
           
+          const cBatchX = tf.tensor(dataShuffleArray).slice([0,0],[-1, 2]).slice([0,0],[batchSize, -1]);
+          const cBatchY = tf.tensor(dataShuffleArray).slice([0,2],[-1,-1]).slice([0,0],[batchSize, -1]);
+
+            // calculating new prediction and loss function.
+          yPred = yPredFn(cBatchX,oldWeights);
+          const loss = costFn(cBatchY,yPred);
+
+          if(verbose){
+            loss.print();
+            oldWeights.print();
+          }
+
+          // checking convergence.
+          if (loss.arraySync() < threshold){
+              yPred.print();
+              return oldWeights;
+          }
+
+          // Calculating and Updating new Weights
+          const weightDx = costFnDx(cBatchX, cBatchY, yPred, loss);
+          const newWeights = tf.sub( oldWeights , tf.mul( tf.scalar( learningRate ) , weightDx ) );
+          
+          // reAssigning weights 
+          oldWeights = newWeights; 
+          
+          // console.log(callback)
+          // invoke the callback function 
+          if (callback !== null){
+            console.log("inside Callback")
+            callback(cBatchX,cBatchY,yPred,oldWeights,loss);
         }
+
     }
 
     return oldWeights;

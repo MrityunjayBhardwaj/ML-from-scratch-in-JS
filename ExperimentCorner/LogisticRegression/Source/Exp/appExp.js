@@ -19,15 +19,36 @@ function trainingCallback(x, y, yPred, Weights, Loss){
     const mIrisX_c1  = x.slice([50,0],[-1,-1]);
 
     weightHistory.push(Weights)
-    Weights.print();
+    // Weights.print();
 
     // vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.logisticFn(.5,1,Weights).bind(model), divName='logisticRegressionViz', window );
 
 }
 
-model.train( {x: mIrisX, y: mIrisY},   );
-
+model.train( {x: mIrisX, y: mIrisY}, trainingCallback  );
+weightHistory.push(model.getWeights())
 console.log("trained");
+
+
+const slider = document.getElementById('myRange');
+
+let currWeight = model.getWeights();
+slider.onchange = function(){
+    
+    const weightIndex = Math.floor( weightHistory.length*slider.value );
+    const cWeight = weightHistory[weightIndex];
+    currWeight = cWeight;
+    vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.logisticFn(.5, 1, cWeight).bind(model), divName='logisticRegressionViz', window );
+    
+}
+
+
+
+
+
+
+
+
 
 vizDecisionBoundary( dataX0=mIrisX_c0, dataX1=mIrisX_c1, classifierFn=model.classify.bind(model), divName='logisticRegressionViz' );
 
@@ -120,7 +141,7 @@ function vizDecisionBoundary(dataX0,dataX1,classifierFn,divName='',bindTo=this,r
 
     ]
 
-    console.log("plotting!",this)
+    console.log("plotting!")
 
 
     window.Plotly.newPlot(document.getElementById(divName),inputSpaceVizData,{title: 'input Space'})
@@ -143,9 +164,11 @@ function vizDecisionBoundary(dataX0,dataX1,classifierFn,divName='',bindTo=this,r
 const gridMeshLogit = meshGridPsudoPts.map( 
         function(cRow) {
             // console.log(cRow);
-        return model.logisticFn(threshold=0.5,convert2Class=false)( tf.tensor(cRow).transpose(), model.getWeights() ).flatten().arraySync()
+        return model.logisticFn(threshold=0.5,convert2Class=false)( tf.tensor(cRow).transpose(), currWeight ).flatten().arraySync()
         }
     );
+
+    console.log(gridMeshLogit,model.getWeights().print())
 
 const logitVizData = [{
     x : psudoPts.slice([0,0],[-1,1]).flatten().arraySync(),
@@ -161,7 +184,31 @@ const logitVizData = [{
         smooting : 1,
         coloring: 'heatmap'
     }
-}]
+},
+
+{
+    x : dataX0.slice([0,0],[-1,1]).flatten().arraySync(),
+    y : dataX0.slice([0,1],[-1,-1]).flatten().arraySync(),
+    z : tf.zeros([dataX0.shape[0],1]).flatten().arraySync(),
+    mode: 'markers',
+    type: 'scatter3d'
+},
+{
+    x : dataX1.slice([0,0],[-1,1]).flatten().arraySync(),
+    y : dataX1.slice([0,1],[-1,-1]).flatten().arraySync(),
+    z : tf.zeros([dataX0.shape[0],1]).flatten().arraySync(),
+    mode: 'markers',
+    type: 'scatter3d'
+}
+]
+
+// const logitViz2D = [{
+//     x : psudoPts1.flatten().arraySync(),
+//     y : tf.matMul(psudoPts, currWeight).flatten().arraySync(),
+
+//     type: 'scatter'
+// }]
+
 
 Plotly.newPlot('sigmoidCurveViz',logitVizData,{title: 'Logit Function Viz'})
 

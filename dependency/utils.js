@@ -414,8 +414,6 @@ let {
     if (!weights){
         // works only if x.shape = [m,n...] where, m == no. of training samples.
         weights =  tf.randomNormal([x.shape[1],1]);
-        weights =tf.tensor([[0.4907759 ],
-                            [-0.8839155]]);
         }
 
         let oldWeights = weights;

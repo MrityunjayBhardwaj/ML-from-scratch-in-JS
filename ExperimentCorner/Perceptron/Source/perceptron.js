@@ -1,5 +1,5 @@
 
-function perceptron(data){
+function perceptron(){
 
     const model = {
         weights : [],
@@ -9,6 +9,11 @@ function perceptron(data){
 
     this.getWeights = ()=>{return model.weights;}
 
+    /**
+     * @param x tf.tensor
+     * @param weights weights must be of dim [m,1] where, m = no. of dims of our x
+     * @return returns predicted y using { +1, -1 } encoding where, +1 => class A and -1 is class B
+     */
     this.classify = function(x, weights){
         // return predY {-1,+1}
 
@@ -19,6 +24,11 @@ function perceptron(data){
 
         return g;
     },
+    /**
+     *              
+     * @param {object} y true Y
+     * @param {object} yPred predicted Y
+     */
     this.cfn = (y, yPred) =>{
 
         // finding the nature of all the data points
@@ -34,8 +44,10 @@ function perceptron(data){
         return tf.sum(tf.mul(x,y), axis=0);
     }
 
+    /**
+     * @param {object} data  accepted structure:- { x: tf.tensor, y : tf.tensor } where, y must be a one hot encoded vector for each data points
+     */
     this.train = (data) => {
-        // algorithm:-
 
         // convert one hot encoded to +1 and -1 encoding scheme
         const modDataY =  data.y.matMul( tf.tensor([[-1],[1]])); // do +1 and -1 encoding
@@ -45,10 +57,14 @@ function perceptron(data){
 
         // assigning values to our model for further use.
         model.weights = calcWeights;
-        
+       
         return this;
     }
 
+    /**
+     * @param {object} testDataX input must be tf.tensor object
+     * @returns returns the predicted classes for each data point in input tf.tensor
+     */
     this. test = (testDataX) => {
 
         return this.classify(testDataX,model.getWeights());

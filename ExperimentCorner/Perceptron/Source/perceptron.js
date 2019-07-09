@@ -59,6 +59,7 @@ function perceptron(){
         model.weights = calcWeights;
        
         return this;
+
     }
 
     /**

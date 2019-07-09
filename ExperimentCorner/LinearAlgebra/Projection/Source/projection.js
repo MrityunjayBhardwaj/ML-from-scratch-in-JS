@@ -7,4 +7,5 @@
  * @returns returns the projected vector of 'b'.
  */
 function project(A,b){
+
 }

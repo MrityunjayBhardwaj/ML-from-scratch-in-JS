@@ -102,6 +102,11 @@ function nd2tf(x){
   return x;
 }
 
+
+function tfpinv(x){
+ return tf.tensor(pinv(x.arraySync()));
+}
+
 /**
  * 
  * @param {*} x must be a javascript array

@@ -13,7 +13,6 @@ function project(A,b){
     const invP1 =  tfpinv(part1);
     const fac = invP1.mul( tf.matMul(A.transpose(), b) );
 
-    fac.print();
     return A.matMul(fac);
 }
 

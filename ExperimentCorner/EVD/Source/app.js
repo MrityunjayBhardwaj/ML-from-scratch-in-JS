@@ -10,11 +10,12 @@ but why/How does it give my, the  basis vector for the column space of A?
 Answer: it doesn't always gives you the basis for the column space of A because the collection directions to which the vector * A is invariant doen't necesserly 
 span the eitire space. 
 and we are confused with the U of USV decomposition of SVD in U its a collection of orthogonal basis vector of the column space and null space of matrix A .
-
 */
+
 let layout = {
 	margin: {
-	t: 0}  ,
+		t: 0
+	},
 	uirevision:'true',
 	xaxis: {autorange: true},
 	yaxis: {autorange: true}
@@ -31,7 +32,6 @@ var interval = setInterval(function() {
 
 // div element for writing some informations.
 const cns = document.getElementById('console');
-
 
 /* Rotate the basis of column space using slider */
 
@@ -53,7 +53,6 @@ let rotVec1 = JSON.parse( nd.la.matmul( nd.array(rotMtx1) , nd.array([0,1]).T ).
 
 // combine the rotated vectors to form our final matrix
 matrix = nd.array( [ [ rotVec0[0][0],rotVec1[0][0] ],[rotVec0[1][0],rotVec1[1][0]] ] );
-// matrix = nd.array([[1,2],[3,1]]);
 
 // print the eigen vector in the HTML:
 cns.innerHTML = nd.la.eigen(matrix)[1];

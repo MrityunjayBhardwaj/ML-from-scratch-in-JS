@@ -8,5 +8,12 @@
  */
 function project(A,b){
     // (A^TA)^-1 * (A^T*b);
-    return tf.matMul(A.transpose(),A).matMul( tf.matMul(A.transpose, b) )
+    const part1 = tf.matMul(A.transpose(),A);
+
+    const invP1 =  tfpinv(part1);
+    const fac = invP1.mul( tf.matMul(A.transpose(), b) );
+
+    fac.print();
+    return A.matMul(fac);
 }
+

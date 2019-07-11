@@ -261,9 +261,23 @@ function prepro4Plotly(x){
 
 /**
  * 
+ * @param {object} range {x: {min: number, max: number}, y: {min: number, max: number}}
+ * @param {number} division division b/w the range.
+ */
+function meshGridRange(range={x:{min:0,max:1}, y:{min:0,max:1}}, division){
+
+  const a = tf.linspace(range.x.min, range.x.max, division);
+  const b = tf.linspace(range.y.min, range.y.max, division);
+
+  return meshGrid(a,b);
+}
+
+/**
+ * 
  * @param {Array} a 
  * @param {Array} b 
  * @description calculates the meshgrid just like in Matlab
+ * @returns returns multidim js-array.
  */
 function meshGrid(a,b){
  // input must be an array

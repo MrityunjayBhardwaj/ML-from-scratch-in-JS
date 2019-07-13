@@ -1,5 +1,3 @@
-  // import NormalDistribution from "../../../dependency/gaussDist";
-
   // initializing data
   const mIrisX = tf.tensor(iris).slice([0,0],[100,2])
   // one hot encoded
@@ -19,11 +17,10 @@
     const coordY = remap(y,originalRange.y[0],originalRange.y[1],newRange.y[0],newRange.y[1]);
 
     return [coordX,coordY];
-
   }
 
-  const data0 = {x: [0,5] , y : [0, 5]};
-  const data1 = {x: [0,5] , y : [0, 5]};
+  const data0 = {x: [0,5], y : [0, 5]};
+  const data1 = {x: [0,5], y : [0, 5]};
   let outputData = [
     {},{},{}
   ];
@@ -68,7 +65,7 @@
     yaxis: {
       range: [-1,5],
       autorange: false 
-    },
+    },    y : grid[0],
     margin: {
       autoexpand: false,
     },
@@ -185,12 +182,13 @@
             // traces[3] = (decBoundaryViz);
 
             const psudoPtsGridRes = 100;
-            const psudoPts0 = tf.linspace(-1,5,psudoPtsGridRes);
+            const psudoPts0 = tf.linspace( -1, 5, psudoPtsGridRes );
             const psudoPts  = tf.tile( psudoPts0.expandDims(1).transpose(),[2,1] ).transpose(); // mashGrid
-            const psudoPty = model.transform( psudoPts );
+            const psudoPty  = model.transform( psudoPts );
             const psudoPtsClassify = model.classify(psudoPts)
             window.model  = model;
 
+            console.log( pusdoPts );
             const meshGridPsudoPts = meshGrid(psudoPts0.arraySync(),psudoPts0.arraySync());
             const meshGridPsudoPtsY = meshGridPsudoPts.map( 
                   function(cRow) {

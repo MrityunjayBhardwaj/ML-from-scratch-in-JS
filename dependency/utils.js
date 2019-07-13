@@ -266,6 +266,7 @@ function prepro4Plotly(x){
  */
 function meshGridRange(range={x:{min:0,max:1}, y:{min:0,max:1}}, division){
 
+  console.log(range);
   const a = tf.linspace(range.x.min, range.x.max, division).flatten().arraySync();
   const b = tf.linspace(range.y.min, range.y.max, division).flatten().arraySync();
 

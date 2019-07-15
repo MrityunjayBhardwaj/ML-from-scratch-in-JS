@@ -25,11 +25,11 @@ const  g = pNorm(tf.tensor(tf.tensor(grid[0]).transpose().arraySync()[0]).expand
 const pNormGrid = grid.map( (a) =>{
     const f = tf.tensor(a).transpose().arraySync();
     const w = f.map( (b) =>{ 
-        return 1*(pNorm(tf.tensor(b),p=1).flatten().arraySync()[0] )
+        return 1*(inducedMatrixNorm(tf.tensor([[1, 2],[0, 2]]),tf.tensor(b).expandDims(1),p=2).flatten().arraySync()[0] )
     });
-    // console.log(w);
     return w;
 });
+
 console.log('grid ',grid);
 console.log('pNormGrid ',pNormGrid);
     

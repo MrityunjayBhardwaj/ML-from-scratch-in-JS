@@ -468,11 +468,10 @@ let {
           // Calculating and Updating new Weights
           const weightDx = costFnDx(cBatchX, cBatchY, yPred, loss);
           const newWeights = tf.sub( oldWeights , tf.mul( tf.scalar( learningRate ) , weightDx ) );
-          
+
           // reAssigning weights 
           oldWeights = newWeights; 
-          
-          // console.log(callback)
+
           // invoke the callback function 
           if (callback !== null){
             console.log("inside Callback")
@@ -485,3 +484,11 @@ let {
 }
 
 
+
+/**
+ * 
+ * @param {object} data input must be a tf tensor object
+ */
+function normalizeData(data){ 
+  return data.mean(axis=0).sub(data);
+}

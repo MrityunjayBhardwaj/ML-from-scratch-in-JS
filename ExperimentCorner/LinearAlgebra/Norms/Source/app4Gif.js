@@ -1,5 +1,16 @@
 /* this is highly experimental and created with glue and duct tape */
 
+let darkModeCols = {
+	red:   (alpha = 1)=> `rgba(255, 99, 132,${alpha})`,
+	orange:(alpha = 1)=> `rgba(255, 159, 64,${alpha})`,
+	yellow:(alpha = 1)=> `rgba(255, 205, 86,${alpha})`,
+	green: (alpha = 1)=> `rgba(75, 192, 192,${alpha})`,
+	blue:  (alpha = 1)=> `rgba(54, 162, 235,${alpha})`,
+	purple:(alpha = 1)=> `rgba(153, 102, 255,${alpha})`,
+    grey:  (alpha = 1)=> `rgba(231,233,237,${alpha})`,
+    magenta: (alpha = 1) =>`rgba(255,0,255, ${alpha})`,
+    violet: (alpha = 1) =>`rgba(255,0,255, ${alpha})`
+};
 
 var d3 = Plotly.d3;
 var img_jpg = d3.select('#jpg-export');
@@ -12,9 +23,12 @@ const grid = meshGridRange(range={x: {min: -1.1, max: +1.1},y: {min: -1.1, max: 
 
 const  g = pNorm(tf.tensor(tf.tensor(grid[0]).transpose().arraySync()[0]).expandDims(1) )
 
-const maxP = 100;
+const maxP = 10;
 
-let np =1;
+let np =0;
+
+const normArray = [25,50,100,250,500,1000,10000];
+
 
 function pGif(p){
 
@@ -33,15 +47,27 @@ function pGif(p){
         x : grid[0][0],
         y : grid[0][0],
         z : pNormGrid,
-        type: 'heatmap'
+        type: 'contour',
+
+        colorscale : [[0, darkModeCols.blue()], [0.25, darkModeCols.purple()],[0.5, darkModeCols.magenta()], [.75, darkModeCols.yellow()], [1, darkModeCols.red()]],
     }];
 
-    Plotly.newPlot('pNormViz',pNormVizData,{title: 'Norm-'+p})
+    const layoutSetting = {
+        title: 'Norm-'+p,
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
 
-    .then(
+
+    }
+
+    Plotly.newPlot('pNormViz',pNormVizData,layoutSetting).then(
         function(gd)
         {
-        Plotly.toImage(gd,{height:500,width:500})
+        Plotly.toImage(gd,{height:800,width:800})
             .then(
                 function(url)
             {
@@ -82,13 +108,16 @@ function pGif(p){
         var url = (window.webkitURL || window.URL).createObjectURL(blob);
         location.href = url; // <-- Download!
 
-            np++;
-            pGif(np);
+            if(np < normArray.length)
+                pGif(normArray[np]);
+                // if ( np < 12)
+                //     pGif(np);
+                np++;
 
             
-            sleep(5000);
+            sleep(1000);
 
-                return Plotly.toImage(gd,{format:'jpeg',height:500,width:500});
+                return Plotly.toImage(gd,{format:'jpeg',height:800,width:800});
             }
             )
         });

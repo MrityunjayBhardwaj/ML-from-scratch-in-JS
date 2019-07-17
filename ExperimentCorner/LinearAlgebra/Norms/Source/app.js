@@ -50,10 +50,22 @@ const pNormVizData = [{
      },
     line : {
         // width: 0
-    }
+    },
 }];
 
-Plotly.newPlot('pNormViz',pNormVizData,{title: 'P-Norm'});
+const layoutSetting = {
+    title : 'p-Norm',
+    font : {
+        size : 15,
+        color: 'white',
+        family : 'Helvetica'
+    },
+    paper_bgcolor : '#222633',
+
+
+}
+
+Plotly.newPlot('pNormViz',pNormVizData,layoutSetting);
 
 
 

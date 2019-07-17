@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>QR Factorization</title>
+
+    <style>
+      body{
+        font-family: Arial, Helvetica, sans-serif
+      }
+          </style>
+
+
+    <!-- dependencies -->
+    <script src="../../../dependency/tensorflowJS/tf.js"></script>
+    <script src="../../../dependency/ndjs/dist/nd.min.js"></script>
+    <script src="../../../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <script src="../../../dependency/gaussDist.js"></script>
+
+    <!-- utility -->
+    <script src="../../../dependency/utils.js"></script>
+</head>
+<body>
+  <div style="display: inline-flex">
+    <div id="pNormViz" style="width:800px;height:800px;display:inline-block;">
+  </div>
+  
+  <div style="display:inline-block;">
+    <h2>Gram-Schmidt Orthogonalization</h2>
+    <img id="jpg-export"></img>
+
+    <script src="Source/norms.js"></script>
+    <script src="Source/QRFac.js"></script>
+
+</body>

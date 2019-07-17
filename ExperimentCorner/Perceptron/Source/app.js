@@ -12,35 +12,44 @@ const mIrisX = normalizeData(IrisX);
 const model = new perceptron();
 model.train({x: mIrisX, y: IrisY});
 
+
+const decisionBoundary = [fac*model.getWeights().flatten().arraySync()[0], 
+                          fac*model.getWeights().flatten().arraySync()[1]];
+
+// const dBortho = 
+
+
+// function vectorNormal(x){ 
+// }
+
+
 function perceptronViz(){
 
 
     const fac = .02;
 
-    const perceptronVizData = [{
-        x : mIrisX.slice([0, -1],[50, -1]).slice([0, 0],[-1,  1]).flatten().arraySync(),
-        y : mIrisX.slice([0, -1],[50, -1]).slice([0, 1],[-1, -1]).flatten().arraySync(),
-        mode : 'markers',
-        type : 'scatter',
+    const perceptronVizData = [
+        {
+            x : mIrisX.slice([0, -1],[50, -1]).slice([0, 0],[-1,  1]).flatten().arraySync(),
+            y : mIrisX.slice([0, -1],[50, -1]).slice([0, 1],[-1, -1]).flatten().arraySync(),
+            mode : 'markers',
+            type : 'scatter',
 
-    },
-    {
-        x : mIrisX.slice([50, -1],[-1, -1]).slice([0, 0],[-1,  1]).flatten().arraySync(),
-        y : mIrisX.slice([50, -1],[-1, -1]).slice([0, 1],[-1, -1]).flatten().arraySync(),
-        mode : 'markers',
-        type : 'scatter',
+        },
+        {
+            x : mIrisX.slice([50, -1],[-1, -1]).slice([0, 0],[-1,  1]).flatten().arraySync(),
+            y : mIrisX.slice([50, -1],[-1, -1]).slice([0, 1],[-1, -1]).flatten().arraySync(),
+            mode : 'markers',
+            type : 'scatter',
 
-    },
-    {
-        x : [-fac*model.getWeights().flatten().arraySync()[0], fac*model.getWeights().flatten().arraySync()[0]],
-        y : [-fac*model.getWeights().flatten().arraySync()[1], fac*model.getWeights().flatten().arraySync()[1]],
-        mode : 'lines',
-        type : 'scatter'
+        },
+        {
+            x : [-decisionBoundary[0], decisionBoundary[1],],
+            y : [-decisionBoundary[0], decisionBoundary[1],],
+            mode : 'lines',
+            type : 'scatter'
 
-    }
-
-
-
+        }
     ];
 
     Plotly.newPlot('perceptronViz', perceptronVizData, {title: 'Rosenblatt\'s perceptron' });

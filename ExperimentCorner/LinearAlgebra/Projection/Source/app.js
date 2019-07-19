@@ -74,6 +74,7 @@ function projectionViz(){
     ];
 
     const vecVizLayout = {
+        title : '2D-Projection',
         xaxis: {
             range: [-2,+2],
             fixedrange: true
@@ -88,6 +89,8 @@ function projectionViz(){
 
     console.log("skdjf")
 }
+
+projectionViz();
 
 // setInterval(() => {
 //     projectionViz() 

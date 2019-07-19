@@ -13,6 +13,18 @@ function project(A,b){
     const invP1 =  tfpinv(part1);
     const fac = invP1.mul( tf.matMul(A.transpose(), b) );
 
+    fac.print();
     return A.matMul(fac);
 }
 
+
+function ndProject(A,b){
+
+    let projected = project(A.slice([0,0],[-1,1]), b);
+    for(let i=1;i<A.shape[1];i++){
+        const cColVec = A.slice([0,i],[-1,1]);
+        projected = projected.concat(project(cColVec,b), axis=1);
+    }
+
+    return projected;
+}

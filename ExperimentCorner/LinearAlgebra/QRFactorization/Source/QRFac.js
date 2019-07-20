@@ -69,22 +69,31 @@ function classicalGramSchmidt(A){
     return [Q, tf.tensor(r)];
 }
 
-// function qrFac(A){
 
-//     const arrayA = A.arraySync();
+function modifiedGramSchmidt(A){
+    
+    const Q = A.slice([0,0],[-1,1]);
+    const r = tf.zeros([A.shape[1],A.shape[1]]).arraySync();
 
-//     let Q; 
-//     for(let j=0;j<A.shape[1];j++){
+    const V = tf.tensor();
 
-//             const v_j = arrayA[j];
-//             for(let i=0;i<(j-1);i++){
-//                 r[i][j] = q[i]*a[j];
+    for (let i=0;i<A.shape[1];i++){
+        const v_i = A.slice([0,i], [-1,1]);
 
-//                 v[j] = v[j] - r[i][j]*q[i];
-//             }
+        r[i][i] = pNorm(v_i, p=2);
+        const q_i = v_i.div(r[i][i]);
 
-//             const r_jj = norm(v_j) ;
-//             Q[j] = v_J/r_jj; // noramlized v_J
-//     }
+        Q.concat(q_i, axis=1);
 
-// }
+        for(let j = i+1;j<A.shape[1];j++){
+            let v_j = A.slice([0,j], [-1,1]);
+            r[i][j] = q_i.matMul(v_j);
+
+            v_j = v_j.sub(q_i.mul(r[i][j]))
+
+            V.concat(v_j, axis=1);
+        }
+    }
+
+    return [Q,tf.tensor(r)]
+}

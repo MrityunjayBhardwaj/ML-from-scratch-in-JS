@@ -75,7 +75,7 @@ function modifiedGramSchmidt(A){
     const Q = A.slice([0,0],[-1,1]);
     const r = tf.zeros([A.shape[1],A.shape[1]]).arraySync();
 
-    const V = tf.tensor();
+    const V = tf.tensor(tf.zeors([A.shape[0],1]));
 
     for (let i=0;i<A.shape[1];i++){
         const v_i = A.slice([0,i], [-1,1]);
@@ -95,5 +95,5 @@ function modifiedGramSchmidt(A){
         }
     }
 
-    return [Q,tf.tensor(r)]
+    return [Q.slice([0,1],[-1,-1]),tf.tensor(r)]
 }

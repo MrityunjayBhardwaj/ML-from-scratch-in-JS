@@ -97,3 +97,29 @@ function modifiedGramSchmidt(A){
 
     return [Q.slice([0,1],[-1,-1]),tf.tensor(r)]
 }
+
+
+function mgs(A){
+    const V = A;
+    const r = tf.zeros([A.shape[1],A.shape[1]]).arraySync();
+
+    let Q = 0;
+
+    for(let i=0;i<A.shape[1];i++){
+        const v_i = V.slice([0,i],[-1,1])
+        r[i][i] = pNorm(v_i,p=2);
+
+        // q_i = Q.slice([0, 0],[-1, 1]);
+        const q_i = v_i.div(r[i][i]);
+
+        for(let j =(i+1);j< A.shape[1]){
+
+            const v_j = V.slice([0, j],[0, 1])
+
+            r[i][j] = q_i.matMul(v_i);
+            v_j = v_j.sub(q_i.mul(r[i][j]));
+        }
+
+    }
+
+}

@@ -492,3 +492,17 @@ let {
 function normalizeData(data){ 
   return data.mean(axis=0).sub(data);
 }
+
+
+function assign2Tensor(originalTensor,insertTensor,start=[],end=[]){
+
+
+  // const end = insertTensor.shape();
+  // originalTensor.slice(start,end);
+
+  const part1 = originalTensor.slice([0, 0], [-1, start[1]]);
+  const part2 = originalTensor.slice([0, start[1]+ insertTensor.shape[1]], [-1, -1]);
+
+  return part1.concat(insertTensor, axis=1).concat(part2, axis=1);
+
+}

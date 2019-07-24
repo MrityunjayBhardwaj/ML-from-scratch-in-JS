@@ -105,6 +105,7 @@ function mgs(A){
 
     let Q = 0;
 
+    const nV = 0;
     for(let i=0;i<A.shape[1];i++){
         const v_i = V.slice([0,i],[-1,1])
         r[i][i] = pNorm(v_i,p=2);
@@ -112,13 +113,23 @@ function mgs(A){
         // q_i = Q.slice([0, 0],[-1, 1]);
         const q_i = v_i.div(r[i][i]);
 
+        if (!Q)Q = q_i
+        else{
+            Q = Q.concat(q_i, axis=1);
+        }
+
         for(let j =(i+1);j< A.shape[1]){
 
             const v_j = V.slice([0, j],[0, 1])
 
             r[i][j] = q_i.matMul(v_i);
             v_j = v_j.sub(q_i.mul(r[i][j]));
+
+            // if (!nV){  }
+            V = V.concat(v_j, axis=1);
         }
+
+        return [Q, tf.tensor(r)];
 
     }
 

@@ -494,7 +494,7 @@ function normalizeData(data){
 }
 
 
-function assign2Tensor(originalTensor,insertTensor,start=[],end=[]){
+function insert2Tensor(originalTensor,insertTensor,start=[],end=[]){
 
 
   // const end = insertTensor.shape();

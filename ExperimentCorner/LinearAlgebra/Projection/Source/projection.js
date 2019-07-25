@@ -11,7 +11,7 @@ function project(A,b){
     const part1 = tf.matMul(A.transpose(),A);
 
     const invP1 =  tfpinv(part1);
-    const fac = invP1.mul( tf.matMul(A.transpose(), b) );
+    const fac = invP1.matMul( tf.matMul(A.transpose(), b) );
 
     fac.print();
     return A.matMul(fac);

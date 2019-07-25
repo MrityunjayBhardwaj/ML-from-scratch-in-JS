@@ -494,8 +494,8 @@ function normalizeData(data){
 }
 
 
+//NOTE: currently support only the [m,k] vector in [m,n] matrix where, k <= (start - n)
 function insert2Tensor(originalTensor,insertTensor,start=[],end=[]){
-
 
   // const end = insertTensor.shape();
   // originalTensor.slice(start,end);
@@ -506,3 +506,32 @@ function insert2Tensor(originalTensor,insertTensor,start=[],end=[]){
   return part1.concat(insertTensor, axis=1).concat(part2, axis=1);
 
 }
+
+
+// this function generates the span hyperplane given the Matrix/ basis vectors of column space
+/**
+ * 
+ * @param {object} A matrix of size [m,n]
+ * @param {number} fac the size of the hyperplane
+ * @summary this function construct a hyperplane using the basis vector of the column space of A. 
+ * the general useage of this method is to use it to visualize the span of the matrix 'A'.
+ * @returns it returns the object inwhich {x : // x-compoents of all the sides of the hyperplane // ,y: //y-compnent// , z: // z- compenent // }, respectively.
+ */
+function genSpan(A, fac){
+
+  // first... convert it into an orthogonal matrix
+  const Aortho = tf.linalg.gramSchmidt(A.transpose()).transpose();
+
+  const p1 = Aortho.mul(fac);
+  const p2 = Aortho.mul(-fac);
+
+  // now connect p1 and p2 to form a hyperplane
+  const combined = p1.concat(p2, axis=1);
+  return {
+          x: combined.slice([0, 0], [1, -1]),
+          y: (combined.shape[0] >=  2)? combined.slice([1, 0], [1, -1]): tf.zeros([1, combined.shape[0]]),
+          z: (combined.shape[0] === 3)? combined.slice([2, 0], [1, -1]): tf.zeros([1, combined.shape[0]]),
+         };
+}
+
+

@@ -104,7 +104,7 @@ function projectionViz3d(){
 const m = 3;
 const n = 2;
 
-const b = tf.randomUniform([m,1]);
+const b = tf.randomUniform([m,1]).mul(2);
 const A = tf.randomUniform([m,n]);
 
 const projVec = project(A, b);
@@ -118,7 +118,8 @@ const spanPlane = genSpan(A,fac);
 
 /* visualize */
 
-const project3dVizData = [{
+const project3dVizData = [
+{
     // visualizing span of 'A'
     x: spanPlane.x.arraySync()[0],
     y: spanPlane.y.arraySync()[0],
@@ -139,6 +140,18 @@ const project3dVizData = [{
         width: 5 
     }
 },
+{
+    // visualizing vector 'b' projected onto subspace 'A'
+    x: [0, projVec.flatten().arraySync()[0]],
+    y: [0, projVec.flatten().arraySync()[1]],
+    z: [0, projVec.flatten().arraySync()[2]],
+    type: 'scatter3d',
+
+    line : {
+       width: 5
+    }
+    
+}
 ];
 
 const layoutSettings = {

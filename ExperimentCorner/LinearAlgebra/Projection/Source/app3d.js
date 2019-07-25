@@ -1,7 +1,7 @@
 const mtx0Div = document.getElementById('mtx0');
 const mtx1Div = document.getElementById('mtx1');
 
-function projectionViz(){
+function projectionViz3d(){
 
     /* Rotate the basis of column space using slider */
 
@@ -87,8 +87,63 @@ function projectionViz(){
     console.log("skdjf")
 }
 
-projectionViz();
 
 // setInterval(() => {
 //     projectionViz() 
 // }, 100);
+
+
+
+
+
+
+
+
+// test if we are able to project a vector onto a 2d subspace in 3d ambient space
+
+const m = 3;
+const n = 2;
+
+const b = tf.randomUniform([m,1]);
+const A = tf.randomUniform([m,n]);
+
+const projVec = project(A, b);
+
+
+A.print();
+b.print();
+
+const fac = 5;
+const spanPlane = genSpan(A,fac);
+
+/* visualize */
+
+const project3dVizData = [{
+    // visualizing span of 'A'
+    x: spanPlane.x.arraySync()[0],
+    y: spanPlane.y.arraySync()[0],
+    z: spanPlane.z.arraySync()[0],
+    type: 'mesh3d',
+    // type: 'scatter'
+
+},
+{
+    // visualizing vector 'b' 
+    x : [0, b.flatten().arraySync()[0]],
+    y : [0, b.flatten().arraySync()[1]],
+    z : [0, b.flatten().arraySync()[2]],
+    type: 'scatter3d',
+    mode: 'lines',
+
+    line : {
+        width: 5 
+    }
+},
+];
+
+const layoutSettings = {
+    title: 'Projection onto 2d subspace'
+}
+
+// commit to the div
+Plotly.newPlot('vecViz', project3dVizData, layoutSettings);

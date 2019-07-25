@@ -24,7 +24,8 @@ const  g = pNorm(tf.tensor(tf.tensor(grid[0]).transpose().arraySync()[0]).expand
 const pNormGrid = grid.map( (a) =>{
     const f = tf.tensor(a).transpose().arraySync();
     const w = f.map( (b) =>{ 
-        return 1*(inducedMatrixNorm(tf.tensor([[1, 2],[0, 2]]),tf.tensor(b).expandDims(1),p=2).flatten().arraySync()[0] )
+        return 1*(pNorm(tf.tensor(b).expandDims(1), p=2).flatten().arraySync()[0] )
+        // return 1*(inducedMatrixNorm(tf.tensor([[1, 2],[0, 2]]),tf.tensor(b).expandDims(1),p=2).flatten().arraySync()[0] )
     });
     return w;
 });
@@ -37,7 +38,7 @@ const pNormVizData = [{
     x : grid[0][0],
     y : grid[0][0],
     z : pNormGrid,
-    type: 'contour',
+    type: 'surface',
 
     colorscale : [[0, darkModeCols.blue()], [0.25, darkModeCols.purple()],[0.5, darkModeCols.magenta()], [.75, darkModeCols.yellow()], [1, darkModeCols.red()]],
 

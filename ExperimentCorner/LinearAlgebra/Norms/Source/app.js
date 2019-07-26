@@ -1,16 +1,4 @@
 
-let darkModeCols = {
-	red:   (alpha = 1)=> `rgba(255, 99, 132, ${alpha})`,
-	orange:(alpha = 1)=> `rgba(255, 159, 64, ${alpha})`,
-	yellow:(alpha = 1)=> `rgba(255, 205, 86, ${alpha})`,
-	green: (alpha = 1)=> `rgba(75, 192, 192, ${alpha})`,
-	blue:  (alpha = 1)=> `rgba(54, 162, 235, ${alpha})`,
-	purple:(alpha = 1)=> `rgba(153, 102, 255,${alpha})`,
-    grey:  (alpha = 1)=> `rgba(231,233,237,  ${alpha})`,
-    magenta: (alpha = 1) =>`rgba(255,0,255,  ${alpha})`,
-    violet: (alpha = 1) =>`rgba(255,0,255,   ${alpha})`
-};
-
 
 const x = tf.tensor([[1],[2]]);
 

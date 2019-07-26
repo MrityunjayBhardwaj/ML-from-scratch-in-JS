@@ -125,7 +125,11 @@ const project3dVizData = [
     y: spanPlane.y.arraySync()[0],
     z: spanPlane.z.arraySync()[0],
     type: 'mesh3d',
-    // type: 'scatter'
+
+    colorscale : [[0, darkModeCols.blue()], [0.25, darkModeCols.purple()],[0.5, darkModeCols.magenta()], [.75, darkModeCols.yellow()], [1, darkModeCols.red()]],
+
+    opacity : 0.7,
+    color: 'pink'
 
 },
 {
@@ -146,6 +150,7 @@ const project3dVizData = [
     y: [0, projVec.flatten().arraySync()[1]],
     z: [0, projVec.flatten().arraySync()[2]],
     type: 'scatter3d',
+    mode: 'lines',
 
     line : {
        width: 5
@@ -155,7 +160,8 @@ const project3dVizData = [
 ];
 
 const layoutSettings = {
-    title: 'Projection onto 2d subspace'
+    title: 'Projection onto 2d subspace',
+
 }
 
 // commit to the div

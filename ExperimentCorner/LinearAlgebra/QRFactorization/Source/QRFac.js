@@ -139,13 +139,15 @@ function mgs(A){
 
 function householderQR(A){
     const {m,n} = A.shape();
-
+    const R = A;
     const Q = tf.eye(m);
-
+    let V = [];
     for(let k =0;k<n;k++){
         // find the reflector for curr col
-        const z = A.slice([k,k],[-1,1]);
 
-        let v = sign(z.slice([0,0],[1,1])).mul(pNorm(z, p=2)).sub( (z.slice([0,0],[1,1])) )
+        let v = R.slice([k,k],[-1,1]);
+        v = v.reshape([(n-k),1]);
+
+        let v = sign(z.slice([0,0],[1,1])).mul(pNorm(z, p=2)).sub( (z.slice([0,0],[1,1])) );
     }
 }

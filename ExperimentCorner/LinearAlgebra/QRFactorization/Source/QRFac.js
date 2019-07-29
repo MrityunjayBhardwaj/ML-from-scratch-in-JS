@@ -145,9 +145,38 @@ function householderQR(A){
     for(let k =0;k<n;k++){
         // find the reflector for curr col
 
-        let v = R.slice([k,k],[-1,1]);
-        v = v.reshape([(n-k),1]);
+        const Rkk = R.slice([k,k],[-1,1]);
+        let v = R.slice([k,k],[-1,1]).expandDims(1).transpose();
 
-        let v = sign(z.slice([0,0],[1,1])).mul(pNorm(z, p=2)).sub( (z.slice([0,0],[1,1])) );
+        const v0 = v.slice([0,0],[1,-1])
+        const newV0 = v0.add(tf.sign(v0).mul(pNorm(v, p=2))); 
+
+        // alter the 'V'
+        v = newV0.concat(v.slice([1,0],[-1,-1]), axis=1);
+
+        v = v.div(pNorm(v));
+
+        const newRkk = R.slice([k,k],[-1,1]).sub( v.matMul(v.transpose()).matMul(Rkk).mul(-2) );
+
+
+        // FIXIT:-
+        R = tf.concat(newRkk, R.slice());
+
+        V.concat(v, axis=1);
+
     }
 }
+
+def householder(A):
+    m, n = A.shape
+    R = np.copy(A)
+    Q = np.eye(m)
+    V = []
+    for k in range(n):
+        v = np.copy(R[k:,k])
+        v = np.reshape(v, (n-k, 1))
+        v[0] += np.sign(v[0]) * np.linalg.norm(v)
+        v /= np.linalg.norm(v)
+        R[k:,k:] = R[k:,k:] - 2 * v @ v.T @ R[k:,k:]
+        V.append(v)
+    return R, V

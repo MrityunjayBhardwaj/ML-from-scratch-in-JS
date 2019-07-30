@@ -158,25 +158,23 @@ function householderQR(A){
 
         const newRkk = R.slice([k,k],[-1,1]).sub( v.matMul(v.transpose()).matMul(Rkk).mul(-2) );
 
-
-        // FIXIT:-
-        R = tf.concat(newRkk, R.slice());
+        R  = replace2Tensor(R, newRkk, [k,k]);
 
         V.concat(v, axis=1);
 
     }
 }
 
-def householder(A):
-    m, n = A.shape
-    R = np.copy(A)
-    Q = np.eye(m)
-    V = []
-    for k in range(n):
-        v = np.copy(R[k:,k])
-        v = np.reshape(v, (n-k, 1))
-        v[0] += np.sign(v[0]) * np.linalg.norm(v)
-        v /= np.linalg.norm(v)
-        R[k:,k:] = R[k:,k:] - 2 * v @ v.T @ R[k:,k:]
-        V.append(v)
-    return R, V
+// def householder(A):
+//     m, n = A.shape
+//     R = np.copy(A)
+//     Q = np.eye(m)
+//     V = []
+//     for k in range(n):
+//         v = np.copy(R[k:,k])
+//         v = np.reshape(v, (n-k, 1))
+//         v[0] += np.sign(v[0]) * np.linalg.norm(v)
+//         v /= np.linalg.norm(v)
+//         R[k:,k:] = R[k:,k:] - 2 * v @ v.T @ R[k:,k:]
+//         V.append(v)
+//     return R, V

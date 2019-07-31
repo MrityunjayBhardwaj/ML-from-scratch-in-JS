@@ -118,7 +118,7 @@ function mgs(A){
             Q = Q.concat(q_i, axis=1);
         }
 
-        for(let j =(i+1);j< A.shape[1]){
+        for(let j =(i+1);j< A.shape[1]; j++){
 
             const v_j = V.slice([0, j],[0, 1])
 
@@ -138,31 +138,50 @@ function mgs(A){
 
 
 function householderQR(A){
-    const {m,n} = A.shape();
-    const R = A;
-    const Q = tf.eye(m);
-    let V = [];
+    const {0: m,1: n} = A.shape;
+    let R = A;
+    // const Q = tf.eye(m);
+    let V = tf.tensor([]);
     for(let k =0;k<n;k++){
         // find the reflector for curr col
 
-        const Rkk = R.slice([k,k],[-1,1]);
-        let v = R.slice([k,k],[-1,1]).expandDims(1).transpose();
+        console.log('------------------------------loop: '+k);
 
-        const v0 = v.slice([0,0],[1,-1])
-        const newV0 = v0.add(tf.sign(v0).mul(pNorm(v, p=2))); 
+        const Rkk = R.slice([k,k],[-1,-1]);
+        let v = R.slice([k,k],[-1,1]);
 
-        // alter the 'V'
-        v = newV0.concat(v.slice([1,0],[-1,-1]), axis=1);
+        console.log('\n1) v:');
+        v.print();
 
-        v = v.div(pNorm(v));
+        const v0 = v.slice([0,0],[1,1]);
+        const newv0 = v0.add(tf.sign(v0).mul(mtxNorm(v))); 
 
-        const newRkk = R.slice([k,k],[-1,1]).sub( v.matMul(v.transpose()).matMul(Rkk).mul(-2) );
+        v = replace2Tensor(v, newv0, [0,0]);
+
+        v = v.div(mtxNorm(v));
+
+        console.log('\n3) v:');
+        v.print();
+
+        console.log('Rkk: ');
+        Rkk.print();
+
+
+        // R[k:,k:] = R[k:,k:] - 2 * v @ v.T @ R[k:,k:]
+        const newRkk = Rkk.sub( v.matMul(v.transpose()).matMul(Rkk).mul(2) );
 
         R  = replace2Tensor(R, newRkk, [k,k]);
 
-        V.concat(v, axis=1);
+        V = V.concat(v);
 
+        console.log('\n4) R ');
+        R.print();
+
+        console.log('\n5) V ');
+        V.print();
     }
+
+    return [R,V]
 }
 
 // def householder(A):

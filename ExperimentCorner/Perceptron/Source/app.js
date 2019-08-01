@@ -12,6 +12,7 @@ const mIrisX = normalizeData(IrisX);
 const model = new perceptron();
 model.train({x: mIrisX, y: IrisY});
 
+const fac = .02;
 
 const decisionBoundary = [fac*model.getWeights().flatten().arraySync()[0], 
                           fac*model.getWeights().flatten().arraySync()[1]];

@@ -566,8 +566,6 @@ function replace2Tensor(originalTensor, replacedTensor, start = [0, 0]) {
     [start[0], (start[1] + replacedTensor.shape[1] <= originalTensor.shape[1] )?replacedTensor.shape[1] : -1 ]
   );
 
-  part2_top.print();
-
   const part4_right = ( 
     
     function(){

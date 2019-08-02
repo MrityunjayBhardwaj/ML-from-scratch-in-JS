@@ -608,3 +608,15 @@ function replace2Tensor(originalTensor, replacedTensor, start = [0, 0]) {
 
   return newTensor;
 }
+
+
+/**
+ * 
+ * @param {object} V  tf.tensor object of shape m by 1 which is essentially just a Vector
+ * @summary given a vector this function convert it into diagonal matrix inwhich the diagonal entries corresponding to 
+ * each values in the input vector 'V'.
+ */
+function tfDiag(V){
+    if (!V.shape[1]){V = V.expandDims(1);}else{ if (V.shape[1] >1)throw new Error('input must be a Tf tensor of shape m by 1 but given m by n')}
+    return V.mul(tf.eye(V.shape[0]));
+}

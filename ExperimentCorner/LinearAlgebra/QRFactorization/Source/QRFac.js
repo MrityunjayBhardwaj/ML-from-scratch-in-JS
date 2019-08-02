@@ -135,9 +135,67 @@ function mgs(A){
 
 }
 
+function householder_lots(A){
+    const {0: m,1: n} = A.shape;
+    let R = A;
+    // const Q = tf.eye(m);
+    let V  = tf.tensor([]);
+    let Fs = [];
+
+    for(let k =0;k<n;k++){
+        // find the reflector for curr col
+
+        console.log('------------------------------loop: '+k);
+
+        const Rkk = R.slice([k,k],[-1,-1]);
+        let v = R.slice([k,k],[-1,1]);
+
+        console.log('\n1) v:');
+        v.print();
+
+        const v0 = v.slice([0,0],[1,1]);
+        const newv0 = v0.add(tf.sign(v0).mul(mtxNorm(v))); 
+
+        v = replace2Tensor(v, newv0, [0,0]);
+
+        v = v.div(mtxNorm(v));
+
+        console.log('\n3) v:');
+        v.print();
+
+        console.log('Rkk: ');
+        Rkk.print();
 
 
-function householderQR(A){
+        // R[k:,k:] = R[k:,k:] - 2 * v @ v.T @ R[k:,k:]
+        const newRkk = Rkk.sub( v.matMul(v.transpose()).matMul(Rkk).mul(2) );
+
+        R  = replace2Tensor(R, newRkk, [k,k]);
+        V = V.concat(v);
+
+        //  F = np.eye(n-k) - 2 * np.matmul(v, v.T)/np.matmul(v.T, v)
+        // Fs.append(F)
+
+        const f  = tf.eye(n-k).sub( tf.matMul(v,v.transpose()).div(tf.matMul(v.transpose(),v)).mul(2) )
+        console.log('\n5) f ');
+        f.print();
+
+        Fs.push(f);
+
+        // F = F.concat(f);
+
+        console.log('\n4) R ');
+        R.print();
+
+        console.log('\n5) V ');
+        V.print();
+
+    }
+
+    return [R,V,Fs]
+}
+
+function householder(A){
     const {0: m,1: n} = A.shape;
     let R = A;
     // const Q = tf.eye(m);
@@ -183,6 +241,14 @@ function householderQR(A){
 
     return [R,V]
 }
+
+// QT = np.matmul(block_diag(np.eye(3), F[3]), 
+//                np.matmul(block_diag(np.eye(2), F[2]), 
+//                          np.matmul(block_diag(np.eye(1), F[1]), F[0])))
+
+// const QT = tf.matMul(block)
+
+
 
 // def householder(A):
 //     m, n = A.shape

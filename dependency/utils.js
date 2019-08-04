@@ -626,6 +626,12 @@ function tfShuffle(V){
 
 }
 
+/**
+ * 
+ * @param {object} X input must be a tf.tensor
+ * @param {object} Y input must be a tf.tensor and it must be a one hot encoded vector
+ * @param {array} percent specify the percentage of train / test data spliting or if 2 values are specified then the second value corresponds to the additional cross-validation set split.
+ */
 function trainTestSplit(X, Y, percent){
   /**
    * TODO:-

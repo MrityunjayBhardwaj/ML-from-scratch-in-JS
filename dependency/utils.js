@@ -620,3 +620,60 @@ function tfDiag(V){
     if (!V.shape[1]){V = V.expandDims(1);}else{ if (V.shape[1] >1)throw new Error('input must be a Tf tensor of shape m by 1 but given m by n')}
     return V.mul(tf.eye(V.shape[0]));
 }
+
+
+function tfShuffle(V){
+
+}
+
+function trainTestSplit(X, Y, percent){
+  /**
+   * TODO:-
+   * 1. split the data according to there corresponding classes
+   * 2. shuffle the data points
+   * 3. take _percent_ data as a training data and rest of them as test data.
+   * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
+   */
+
+   
+  percent = (percent.length())? percent:[percent];// if the percent is just a number then convert it into array of length 1
+
+  //  * 1. split the data according to there corresponding classes
+
+  const classwiseX = classwiseDataSplit(X,Y);
+
+  //  * 2. shuffle the data points
+
+  for(let i=0; i<classwiseX.length(); i++){
+    classwiseX[i] = tf.util.shuffle(classwiseX[i]);
+  }
+
+  //  * 3. take _percent_ data as a training data and rest of them as test data.
+
+  const classwiseXTest = [];
+  const classwiseXCV   = [];
+  const classwiseXTest = [];
+
+  for(let i=0; i<classwiseX.length(); i++){
+
+    const percentLength   = Math.floor( classwiseX[i].shape[0]*percent[0] );
+    const percentCVLength = Math.floor( (classwiseX[i].shape[0])*(percent[1]) );
+
+    classwiseXTrain.push( classwiseX[i].slice([0,0],[percentLength,-1]) );
+
+    const otherData = ( classwiseX[i].slice([percentLength,0],[-1,-1]) );
+
+  //  * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
+
+    if (percent.length() === 2){
+      classwiseXCV.push( otherData.slice([0,0],[percentCVLength,-1]) );
+      classwiseXTest.push( classwiseX[i].slice([percentCVLength,0],[-1,-1]) );
+
+      continue;
+    }
+
+
+    classwiseXTest.push( classwiseX[i].slice([percentLength,0],[-1,-1]) );
+  }
+  
+}

@@ -639,6 +639,8 @@ function trainTestSplit(X, Y, percent){
    * 2. shuffle the data points
    * 3. take _percent_ data as a training data and rest of them as test data.
    * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
+   * 5. concat all the classwise X data for all the 3 sets (train,cross-validation and test)
+   * 6. return all the 3 sets.
    */
 
    
@@ -656,30 +658,38 @@ function trainTestSplit(X, Y, percent){
 
   //  * 3. take _percent_ data as a training data and rest of them as test data.
 
-  const classwiseXTest = [];
-  const classwiseXCV   = [];
-  const classwiseXTest = [];
+  const classwiseXTest = tf.tensor([]);
+  const classwiseXCV   = tf.tensor([]);
+  const classwiseXTest = tf.tensor([]);
 
   for(let i=0; i<classwiseX.length(); i++){
 
     const percentLength   = Math.floor( classwiseX[i].shape[0]*percent[0] );
     const percentCVLength = Math.floor( (classwiseX[i].shape[0])*(percent[1]) );
 
-    classwiseXTrain.push( classwiseX[i].slice([0,0],[percentLength,-1]) );
+    classwiseXTrain = classwiseXTrain.concat( classwiseX[i].slice([0,0],[percentLength,-1]));
 
     const otherData = ( classwiseX[i].slice([percentLength,0],[-1,-1]) );
 
   //  * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
 
     if (percent.length() === 2){
-      classwiseXCV.push( otherData.slice([0,0],[percentCVLength,-1]) );
-      classwiseXTest.push( classwiseX[i].slice([percentCVLength,0],[-1,-1]) );
+      classwiseXCV = classwiseXCV.concat( otherData.slice([0,0],[percentCVLength,-1]) );
+      classwiseXTest = classwiseXTest.concat( classwiseX[i].slice([percentCVLength,0],[-1,-1]) );
 
       continue;
     }
 
-
-    classwiseXTest.push( classwiseX[i].slice([percentLength,0],[-1,-1]) );
+    classwiseXTest = classwiseXTest.concat( classwiseX[i].slice([percentLength,0],[-1,-1]) );
   }
-  
+
+  //  * 6. return all the sets.
+
+  const retVal = [classwiseXTest];
+
+  if(percent.length() === 2)
+    retVal.push(classwiseXCV);
+  retVal.push(classwiseXTest);
+
+  return retVal;
 }

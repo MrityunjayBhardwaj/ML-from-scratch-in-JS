@@ -246,9 +246,23 @@ function householder(A){
 //                np.matmul(block_diag(np.eye(2), F[2]), 
 //                          np.matmul(block_diag(np.eye(1), F[1]), F[0])))
 
-// const QT = tf.matMul(block)
+// const QT = tf.matMul( tf.eye(3).mul(F[3]), tf.matMul( tf.eye(2).mul())
+
+// def implicit_Qx(V,x):
+//     n = len(x)
+//     for k in range(n-1,-1,-1):
+//         x[k:n] -= 2*np.matmul(v[-k], np.matmul(v[-k], x[k:n]))
 
 
+function implicit_Qx(V,x){
+    n = x.shape[0];
+    for(let k = n;k>0;k++){
+        const newXK2n =x.slice([k,0],[n-k,-1]).sub( tf.matMul(V.slice([n-k,0],[1,-1]), tf.matMul(V.slice([n-k,0],[1,-1]), x.slice([k,0],[n-k,-1])) ));
+        x = replace2Tensor(x, newXK2n, [k,0]);
+    }
+
+    return x;
+}
 
 // def householder(A):
 //     m, n = A.shape

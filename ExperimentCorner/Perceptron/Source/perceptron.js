@@ -32,12 +32,13 @@ function perceptron(){
     this.cfn = (y, yPred) =>{
 
         // finding the nature of all the data points
-        const classifiedPts    = tf.pow( tf.add(y, yPred), 2 ).clipByValue(0,1);
+        const classifiedPts     = tf.pow( tf.add(y, yPred), 2 ).clipByValue(0,1);
         const missClassifiedPts = tf.sub(tf.scalar(1), classifiedPts);
 
         // add panenty only to the miss classified points:-
         const error = tf.neg( tf.sum( tf.mul( yPred, tf.mul(y, missClassifiedPts) ) ) );
 
+        error.print();
         return error;
     },
     this.updateRule = (x, y, yPred, loss ) =>{
@@ -53,7 +54,7 @@ function perceptron(){
         const modDataY =  data.y.matMul( tf.tensor([[-1],[1]])); // do +1 and -1 encoding
 
         // calculate weights using gradient descent 
-        const calcWeights = optimize( x=data.x, y=modDataY, params={ yPredFn:this.classify, costFn:this.cfn, costFnDx:this.updateRule, learningRate:1, verbose: true, batchSize:1, epoch:100, threshold: -1} );
+        const calcWeights = optimize( x=data.x, y=modDataY, params={ yPredFn:this.classify, costFn:this.cfn, costFnDx:this.updateRule, learningRate:1, verbose: true, batchSize:1, epoch:100, threshold: -.001} );
 
         // assigning values to our model for further use.
         model.weights = calcWeights;
@@ -67,7 +68,7 @@ function perceptron(){
      */
     this. test = (testDataX) => {
 
-        return this.classify(testDataX,model.getWeights());
+        return this.classify(testDataX, this.getWeights());
 
     }
 }

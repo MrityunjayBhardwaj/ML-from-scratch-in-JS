@@ -8,21 +8,25 @@ const IrisY = tf.tensor(Array(100).fill([1,0],0,50).fill([0,1],50));
 // normalizing data
 const mIrisX = normalizeData(IrisX);
 
+
 // training our model on this dataset.
 const model = new perceptron();
 model.train({x: mIrisX, y: IrisY});
+
+console.log('training complete.');
 
 const fac = .02;
 
 const decisionBoundary = [fac*model.getWeights().flatten().arraySync()[0], 
                           fac*model.getWeights().flatten().arraySync()[1]];
 
-// const dBortho = 
 
+// testing our model.
+// console.log('test')
+// model.test(IrisX.slice([0,0], [1,-1])).print();
 
-// function vectorNormal(x){ 
-// }
-
+// console.log('accuracy:-')
+// checkAccuracy(IrisX, IrisY, model.test).print();
 
 function perceptronViz(){
 

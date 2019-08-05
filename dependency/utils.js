@@ -450,7 +450,7 @@ function optimize(
   let oldWeights = weights;
   for (let i = 0; i < epoch; i++) {
     const dataShuffleArray = x.concat(y, (axis = 1)).arraySync();
-    tf.util.shuffle(Array);
+    tf.util.shuffle(dataShuffleArray);
 
     const cBatchX = tf
       .tensor(dataShuffleArray)
@@ -466,7 +466,10 @@ function optimize(
     const loss = costFn(cBatchY, yPred);
 
     if (verbose) {
+      console.log("loss:- ");
       loss.print();
+
+      console.log("oldWeights:- ");
       oldWeights.print();
     }
 
@@ -621,11 +624,6 @@ function tfDiag(V){
     return V.mul(tf.eye(V.shape[0]));
 }
 
-
-function tfShuffle(V){
-
-}
-
 /**
  * 
  * @param {object} X input must be a tf.tensor
@@ -638,13 +636,13 @@ function trainTestSplit(X, Y, percent){
    * 1. split the data according to there corresponding classes
    * 2. shuffle the data points
    * 3. take _percent_ data as a training data and rest of them as test data.
-   * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
+   * 4. if _percent.length_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
    * 5. concat all the classwise X data for all the 3 sets (train,cross-validation and test)
    * 6. return all the 3 sets.
    */
 
    
-  percent = (percent.length())? percent:[percent];// if the percent is just a number then convert it into array of length 1
+  percent = (percent.length)? percent:[percent];// if the percent is just a number then convert it into array of length 1
 
   //  * 1. split the data according to there corresponding classes
 
@@ -652,17 +650,20 @@ function trainTestSplit(X, Y, percent){
 
   //  * 2. shuffle the data points
 
-  for(let i=0; i<classwiseX.length(); i++){
-    classwiseX[i] = tf.util.shuffle(classwiseX[i]);
+  for(let i=0; i<classwiseX.length; i++){
+    const currClassXArray = classwiseX[i].arraySync();
+    tf.util.shuffle(currClassXArray);
+
+    classwiseX[i] = tf.tensor(currClassXArray);
   }
 
   //  * 3. take _percent_ data as a training data and rest of them as test data.
 
-  const classwiseXTest = tf.tensor([]);
-  const classwiseXCV   = tf.tensor([]);
-  const classwiseXTest = tf.tensor([]);
+  const classwiseXTrain = tf.tensor([]);
+  const classwiseXCV    = tf.tensor([]);
+  const classwiseXTest  = tf.tensor([]);
 
-  for(let i=0; i<classwiseX.length(); i++){
+  for(let i=0; i<classwiseX.length; i++){
 
     const percentLength   = Math.floor( classwiseX[i].shape[0]*percent[0] );
     const percentCVLength = Math.floor( (classwiseX[i].shape[0])*(percent[1]) );
@@ -671,9 +672,9 @@ function trainTestSplit(X, Y, percent){
 
     const otherData = ( classwiseX[i].slice([percentLength,0],[-1,-1]) );
 
-  //  * 4. if _percent.length()_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
+  //  * 4. if _percent.length_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
 
-    if (percent.length() === 2){
+    if (percent.length === 2){
       classwiseXCV = classwiseXCV.concat( otherData.slice([0,0],[percentCVLength,-1]) );
       classwiseXTest = classwiseXTest.concat( classwiseX[i].slice([percentCVLength,0],[-1,-1]) );
 
@@ -687,9 +688,29 @@ function trainTestSplit(X, Y, percent){
 
   const retVal = [classwiseXTest];
 
-  if(percent.length() === 2)
+  if(percent.length === 2)
     retVal.push(classwiseXCV);
   retVal.push(classwiseXTest);
 
   return retVal;
+}
+
+function checkAccuracy(x, trueY, fn){
+
+  // predict the y using fn
+
+  const xArray = x.arraySync();
+
+  let predY = tf.tensor([]);
+  for(let i=0; i<xArray.length; i++){
+
+    const currX = x.slice([i,0],[1,-1]);
+    predY = predY.concat( fn(currX) );
+  }
+
+
+  // accuracy truePositive/ total
+   return tf.sum(tf.sub(trueY, predY)).div( tf.sum(trueY) );
+
+
 }

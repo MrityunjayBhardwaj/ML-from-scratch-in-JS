@@ -54,7 +54,7 @@ function perceptron(){
         const modDataY =  data.y.matMul( tf.tensor([[-1],[1]])); // do +1 and -1 encoding
 
         // calculate weights using gradient descent 
-        const calcWeights = optimize( x=data.x, y=modDataY, params={ yPredFn:this.classify, costFn:this.cfn, costFnDx:this.updateRule, learningRate:1, verbose: true, batchSize:1, epoch:100, threshold: -.001} );
+        const calcWeights = optimize( x=data.x, y=modDataY, params={ yPredFn:this.classify, costFn:this.cfn, costFnDx:this.updateRule, learningRate:1, verbose: true, batchSize:1, epoch:60, threshold: -.001} );
 
         // assigning values to our model for further use.
         model.weights = calcWeights;

@@ -10,4 +10,7 @@ const A = tf.tensor(myA)
 // w[1].print();
 // nd.array(myA).qr()
 
-const b = householderQR(A);
+const b = householder(A);
+const c = householder_lots(A);
+
+// const d = implicit_Qx()

@@ -37,3 +37,32 @@ function LU(A){
     return { L:L, U:U };
 }
 
+
+// gaussian elimination with partial pivoting
+
+// % Gaussian elimination with partial pivoting.
+// for j=1:n-1  % Loop over columns.
+//   [pivot,k] = max(abs(A(j:n,j))); % Find the pivot element
+//                                   % in column j.
+//                                   % pivot is the largest
+//                                   % absolute value of an
+//                                   % entry; k+j-1 is its index.
+//   if pivot==0,                    % If all entries in the
+//                                   % column are 0, return with
+//     disp(' Matrix is singular.')   % an error message.
+//     break;
+//   end;
+//   temp = A(j,:);            % Otherwise,
+//   A(j,:) = A(k+j-1,:);      % Interchange rows j and k+j-1.
+//   A(k+j-1,:) = temp;
+//   tempb = b(j);
+//   b(j) = b(k+j-1);
+// b(k+j-1) = tempb;
+//   for i=j+1:n             % Loop over rows below j.
+//     mult = A(i,j)/A(j,j); % Subtract this multiple
+//                           % of row j from row
+//                           % i to make A(i,j)=0.
+//     A(i,j:n) = A(i,j:n) - multimageA(j,j:n);
+//     b(i) = b(i) - multimageb(j);
+//   end;
+// end;

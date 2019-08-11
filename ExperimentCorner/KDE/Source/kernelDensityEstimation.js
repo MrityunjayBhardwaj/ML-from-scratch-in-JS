@@ -4,11 +4,11 @@ function KDE() {
   this.kernelFn = function(type) {
     switch (type) {
       case "parzen":
-        return function(x_prime, x, params) {
+        return function(x_prime, x, params={h:0.2}) {
           // hyperparameters
           const h = params.h;
-          const N = params.N;
-          const D = x_prime.shape[0];
+          const N = x.shape[0];
+          const D = x_prime.shape[1];
 
           // calculating K : no. of neighbours
           const u = x_prime.sub(x).div(h);
@@ -30,8 +30,9 @@ function KDE() {
         };
 
       case "radial":
-        return function(x, x_prime, params) {
+        return function(x, x_prime, params = {h: 0.5,}) {
           const h = params.h;
+          const N = x_prime.shape[0];
           const gaussianKernel = tf.sum(
             tf.mul(
               1 / (2 * Math.PI * h ** 2) ** (1 / 2),

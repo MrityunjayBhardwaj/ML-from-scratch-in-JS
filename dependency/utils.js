@@ -66,7 +66,7 @@ function Img2Arr(img) {
  * @param {*} x
  * @param {*} y make sure they are one hot encoded.
  */
-function classwiseDataSplit(x, y) {
+function classwiseDataSplit(x, y, concatClass = 0) {
   // make sure y is a one hot encoded vector.
 
   const nClasses = y.shape[1];
@@ -79,8 +79,23 @@ function classwiseDataSplit(x, y) {
     let currClassSplit = xArray.filter(function(_, index) {
       return this[index][i];
     }, yArray);
-    xSplit.push(tf.tensor(currClassSplit));
+
+    // convert to tensor
+    currClassSplit = tf.tensor(currClassSplit);
+
+    
+    const currClassY = tf.tile(
+          insert2Tensor(tf.zeros([1, nClasses]), tf.tensor([1]).expandDims(1), [
+            0,
+            i
+          ]),
+          [currClassSplit.shape[0], 1]
+        );
+
+    xSplit.push({x: currClassSplit, y: currClassY});
+
   }
+
 
   return xSplit;
 }
@@ -552,85 +567,95 @@ function genSpan(A, fac) {
   };
 }
 
-
 function replace2Tensor(originalTensor, replacedTensor, start = [0, 0]) {
-
   // check if the starting point is inside the originalTensor shape.
-  if (start[0] < 0 && start[1] < 0 && start[0] > originalTensor.shape[0] && start[1] > originalTensor.shape[1] )new Error("invalid starting point specified");
+  if (
+    start[0] < 0 &&
+    start[1] < 0 &&
+    start[0] > originalTensor.shape[0] &&
+    start[1] > originalTensor.shape[1]
+  )
+    new Error("invalid starting point specified");
 
+  const part1_left = originalTensor.slice([0, 0], [-1, start[1]]);
 
-  const part1_left  = originalTensor.slice(
-    [0, 0],
-    [-1, start[1]]
-  );
-
-  const part2_top   = originalTensor.slice(
+  const part2_top = originalTensor.slice(
     [0, start[1]],
-    [start[0], (start[1] + replacedTensor.shape[1] <= originalTensor.shape[1] )?replacedTensor.shape[1] : -1 ]
+    [
+      start[0],
+      start[1] + replacedTensor.shape[1] <= originalTensor.shape[1]
+        ? replacedTensor.shape[1]
+        : -1
+    ]
   );
 
-  const part4_right = ( 
-    
-    function(){
-
-      if (start[1] + replacedTensor.shape[1] > originalTensor.shape[1])
-        return tf.tensor([]);
-
-      return originalTensor.slice(
-        [0, start[1] + replacedTensor.shape[1]],
-        [-1, -1]
-      )
-  
-    }()
-  );
-
-  const part3_down = (
-    function(){
-
-      if (start[0] + replacedTensor.shape[0] > originalTensor.shape[0])
+  const part4_right = (function() {
+    if (start[1] + replacedTensor.shape[1] > originalTensor.shape[1])
       return tf.tensor([]);
-    
-      return originalTensor.slice(
-        [start[0] + replacedTensor.shape[0], start[1]],
-        [-1, (start[1] + replacedTensor.shape[1] <= originalTensor.shape[1] )?replacedTensor.shape[1] : -1 ]
-      );
 
-    
-    }()
-  );
+    return originalTensor.slice(
+      [0, start[1] + replacedTensor.shape[1]],
+      [-1, -1]
+    );
+  })();
+
+  const part3_down = (function() {
+    if (start[0] + replacedTensor.shape[0] > originalTensor.shape[0])
+      return tf.tensor([]);
+
+    return originalTensor.slice(
+      [start[0] + replacedTensor.shape[0], start[1]],
+      [
+        -1,
+        start[1] + replacedTensor.shape[1] <= originalTensor.shape[1]
+          ? replacedTensor.shape[1]
+          : -1
+      ]
+    );
+  })();
 
   // now putting all the parts together
 
   // tiling up part1_top, replacedTesor and part3_down
-  let midSection = part2_top.concat(replacedTensor.slice([0,0],[-1,part2_top.shape[1]]), axis=0).concat(part3_down, axis=0);
+  let midSection = part2_top
+    .concat(replacedTensor.slice([0, 0], [-1, part2_top.shape[1]]), (axis = 0))
+    .concat(part3_down, (axis = 0));
 
   // console.log
-  midSection = midSection.slice([0,0],[originalTensor.shape[0], -1]);
+  midSection = midSection.slice([0, 0], [originalTensor.shape[0], -1]);
 
-  const newTensor = part1_left.concat(midSection, axis=1).concat(part4_right, axis=1);
+  const newTensor = part1_left
+    .concat(midSection, (axis = 1))
+    .concat(part4_right, (axis = 1));
 
   return newTensor;
 }
 
-
 /**
- * 
+ *
  * @param {object} V  tf.tensor object of shape m by 1 which is essentially just a Vector
- * @summary given a vector this function convert it into diagonal matrix inwhich the diagonal entries corresponding to 
+ * @summary given a vector this function convert it into diagonal matrix inwhich the diagonal entries corresponding to
  * each values in the input vector 'V'.
  */
-function tfDiag(V){
-    if (!V.shape[1]){V = V.expandDims(1);}else{ if (V.shape[1] >1)throw new Error('input must be a Tf tensor of shape m by 1 but given m by n')}
-    return V.mul(tf.eye(V.shape[0]));
+function tfDiag(V) {
+  if (!V.shape[1]) {
+    V = V.expandDims(1);
+  } else {
+    if (V.shape[1] > 1)
+      throw new Error(
+        "input must be a Tf tensor of shape m by 1 but given m by n"
+      );
+  }
+  return V.mul(tf.eye(V.shape[0]));
 }
 
 /**
- * 
+ *
  * @param {object} X input must be a tf.tensor
  * @param {object} Y input must be a tf.tensor and it must be a one hot encoded vector
  * @param {array} percent specify the percentage of train / test data spliting or if 2 values are specified then the second value corresponds to the additional cross-validation set split.
  */
-function trainTestSplit(X, Y, percent){
+function trainTestSplit(X, Y, percent) {
   /**
    * TODO:-
    * 1. split the data according to there corresponding classes
@@ -641,76 +666,88 @@ function trainTestSplit(X, Y, percent){
    * 6. return all the 3 sets.
    */
 
-   
-  percent = (percent.length)? percent:[percent];// if the percent is just a number then convert it into array of length 1
+  percent = percent.length ? percent : [percent]; // if the percent is just a number then convert it into array of length 1
 
   //  * 1. split the data according to there corresponding classes
 
-  const classwiseX = classwiseDataSplit(X,Y);
+  // const classwiseX = classwiseDataSplit(X, Y);
 
-  //  * 2. shuffle the data points
+  // for(let i=0;i<classwiseX.length;i++){
+  //   classwiseX = classwiseX.x.concat(classwiseX.y, axis=1);
+  // }
 
-  for(let i=0; i<classwiseX.length; i++){
-    const currClassXArray = classwiseX[i].arraySync();
+  let classwiseX = X.concat(Y, axis=1);
+
+
+  //  * 2. shuffle the data points of each class
+
+    const currClassXArray = classwiseX.arraySync();
     tf.util.shuffle(currClassXArray);
-
-    classwiseX[i] = tf.tensor(currClassXArray);
-  }
+    classwiseX = tf.tensor(currClassXArray);
 
   //  * 3. take _percent_ data as a training data and rest of them as test data.
 
-  const classwiseXTrain = tf.tensor([]);
-  const classwiseXCV    = tf.tensor([]);
-  const classwiseXTest  = tf.tensor([]);
+  let classwiseXTrain = tf.tensor([]);
+  let classwiseXCV = tf.tensor([]);
+  let classwiseXTest = tf.tensor([]);
 
-  for(let i=0; i<classwiseX.length; i++){
+    const percentLength   = Math.floor(classwiseX.shape[0] * percent[0]);
+    const percentCVLength = Math.floor(classwiseX.shape[0] * percent[1]);
 
-    const percentLength   = Math.floor( classwiseX[i].shape[0]*percent[0] );
-    const percentCVLength = Math.floor( (classwiseX[i].shape[0])*(percent[1]) );
+    classwiseXTrain = classwiseXTrain.concat(
+      classwiseX.slice([0, 0], [percentLength, -1])
+    );
 
-    classwiseXTrain = classwiseXTrain.concat( classwiseX[i].slice([0,0],[percentLength,-1]));
+    const otherData = classwiseX.slice([percentLength, 0], [-1, -1]);
 
-    const otherData = ( classwiseX[i].slice([percentLength,0],[-1,-1]) );
+    //  * 4. if _percent.length_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
 
-  //  * 4. if _percent.length_ === 2 then split the test data into _percepnt[1]_ as cross-validation set.
-
-    if (percent.length === 2){
-      classwiseXCV = classwiseXCV.concat( otherData.slice([0,0],[percentCVLength,-1]) );
-      classwiseXTest = classwiseXTest.concat( classwiseX[i].slice([percentCVLength,0],[-1,-1]) );
-
-      continue;
+    if (percent.length === 2) {
+      classwiseXCV = classwiseXCV.concat(
+        otherData.slice([0, 0], [percentCVLength, -1])
+      );
     }
 
-    classwiseXTest = classwiseXTest.concat( classwiseX[i].slice([percentLength,0],[-1,-1]) );
-  }
+    classwiseXTest = classwiseXTest.concat(
+      classwiseX.slice([((percent.length===2)?percentCVLength : percentLength), 0], [-1, -1])
+    );
 
   //  * 6. return all the sets.
 
-  const retVal = [classwiseXTest];
+  // add train set
+  const retVal = [{
+                    x: classwiseXTrain.slice([0, 0], [-1, X.shape[1]]),
+                    y: classwiseXTrain.slice([0,X.shape[1]], [-1, -1])
+                  }];
 
-  if(percent.length === 2)
-    retVal.push(classwiseXCV);
-  retVal.push(classwiseXTest);
+  if (percent.length === 2) {
+    // include corss-validation set
+    retVal.push({
+                  x: classwiseXCV.slice([0, 0], [-1, X.shape[1]]), 
+                  y: classwiseXCV.slice([0,X.shape[1]], [-1, -1])
+                });
+  }
+
+  // add test set
+  retVal.push({
+                x: classwiseXTest.slice([0, 0], [-1, X.shape[1]]),
+                y: classwiseXTest.slice([0,X.shape[1]], [-1, -1])
+              });
 
   return retVal;
 }
 
-function checkAccuracy(x, trueY, fn){
-
+function checkAccuracy(x, trueY, fn) {
   // predict the y using fn
 
   const xArray = x.arraySync();
 
   let predY = tf.tensor([]);
-  for(let i=0; i<xArray.length; i++){
-
-    const currX = x.slice([i,0],[1,-1]);
-    predY = predY.concat( fn(currX) );
+  for (let i = 0; i < xArray.length; i++) {
+    const currX = x.slice([i, 0], [1, -1]);
+    predY = predY.concat(fn(currX));
   }
 
-
   // accuracy truePositive/ total
-   return tf.sum(tf.sub(trueY, predY)).div( tf.sum(trueY) );
-
-
+  return tf.sum(tf.sub(trueY, predY)).div(tf.sum(trueY));
 }

@@ -469,11 +469,11 @@ function optimize(
 
     const cBatchX = tf
       .tensor(dataShuffleArray)
-      .slice([0, 0], [-1, 2])
+      .slice([0, 0], [-1, x.shape[1]])
       .slice([0, 0], [batchSize, -1]);
     const cBatchY = tf
       .tensor(dataShuffleArray)
-      .slice([0, 2], [-1, -1])
+      .slice([0, x.shape[1]], [-1, -1])
       .slice([0, 0], [batchSize, -1]);
 
     // calculating new prediction and loss function.

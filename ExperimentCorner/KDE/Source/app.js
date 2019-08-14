@@ -45,7 +45,7 @@ const pNormGrid = grid.map(a => {
             .expandDims(1)
             .transpose(),
           trainX,
-          (params = { h: 0.15 })
+          (params = { h: 0.05 })
         )
         .flatten()
         .arraySync()[0]

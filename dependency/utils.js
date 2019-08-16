@@ -492,7 +492,7 @@ function optimize(
 
     // checking convergence.
     if (loss.arraySync() < threshold) {
-      console.log('weights converged! @' +i+ 'epoch \n'+'loss: '+loss.arraySync() )
+      console.log('loss converged! @' +i+ 'epoch \n'+'loss: '+loss.arraySync() )
       yPred.print();
       return oldWeights;
     }

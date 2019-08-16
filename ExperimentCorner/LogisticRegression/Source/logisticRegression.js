@@ -33,41 +33,56 @@ function LogisticRegression(){
 
             return logit;
         }
-    }
+    },
+    this.lfn = (x,weights=model.weights) => {
 
-    this.train = function(data,callbackFn){
-        
+            // calculating logistic function
+            const logOdds = tf.matMul( x, weights ); // here we are using w^Tx in-place of log odds
+            const expLogOdds = tf.exp( tf.neg( logOdds ) );
+            let logit = tf.div( 1, tf.add( 1, expLogOdds ) );
+
+            return logit;
+        }
+
+    this.train = function(data,params ={} ){
+
+        // augmenting params object to insert important parameters that are important for our model training.
+        params.threshold = params.threshold || model.params.threshold;
+        params.yPredFn = this.lfn;
+
         // convert data.y one hot into binary and calaculate weights
-        const dataBinaryY = tf.tensor( data.y.arraySync().map( (cVec) => { return cVec.indexOf(1) } ) ).expandDims(1);
-        const calcWeights = optimize( data.x, dataBinaryY, { 
-            yPredFn: this.logisticFn(model.params.threshold, convert2Class=0), 
-            // costFn: this.logisticFn(model.params.threshold, convert2Class=1),
-            threshold: model.params.threshold,
-            callback: callbackFn,
-            epoch: 2000,
-            learningRate: 0.01,
-            verbose: 1
-             } );
+        const dataBinaryY    = oneHot2Class( data.y );
+        const trainedWeights = optimize( data.x, dataBinaryY, params );
 
         // calcWeights.print()
-        model.weights = calcWeights;
+        model.weights = trainedWeights;
         return this;
     }
 
-    this.classify = function(testDataX, weights=null, threshold=null, convert2Class = 1){
-        // returns a one hot encoded vector
-        const predClass = (this.logisticFn( threshold || model.params.threshold, convert2Class )( testDataX, weights || model.weights ));
+    // { weights:null, threshold:null, probOrClass:1}
+    this.classify = function(testDataX, params={}){
+        const { 
+                weights     = model.weights, 
+                threshold   = model.params.threshold,
+                probOrClass = 1 
+                } = params;
 
-        // model.weights.print();
-        // predClass.print();
-        // console.log(model.params.threshold,predProb)
-        // converting prob to pred class
+        const prob = this.lfn( testDataX, weights );
+        // converting probability into prediction (Classes)
+        if(probOrClass)
+        {
+            const thCenter  = tf.sub( prob,( threshold ) );
+            const predClass = tf.pow( tf.clipByValue(tf.mul(thCenter, 10000000 ), 0, 1 ), 1 );
 
-        // convert predClass to one-hot encoded vector.
-        // predClass.matMul( predClass )
-        const oneHot0 = tf.ones(predClass.shape).sub( predClass);
-        const oneHotPredClass = oneHot0.concat( predClass, axis=1 );
+            const oneHot0 = tf.ones(predClass.shape).sub( predClass);
+            const oneHotPredClass = oneHot0.concat( predClass, axis=1 );
 
-        return oneHotPredClass;
+            return oneHotPredClass; 
+        }
+
+        return prob;
     }
 }
+
+
+

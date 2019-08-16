@@ -481,6 +481,8 @@ function optimize(
     const loss = costFn(cBatchY, yPred);
 
     if (verbose) {
+      console.log('epoch: '+i+'\n');
+
       console.log("loss:- ");
       loss.print();
 
@@ -490,6 +492,7 @@ function optimize(
 
     // checking convergence.
     if (loss.arraySync() < threshold) {
+      console.log('weights converged! @' +i+ 'epoch \n'+'loss: '+loss.arraySync() )
       yPred.print();
       return oldWeights;
     }
@@ -510,6 +513,7 @@ function optimize(
       callback(cBatchX, cBatchY, yPred, oldWeights, loss);
     }
   }
+  console.log(epoch+'epoach finished!');
 
   return oldWeights;
 }
@@ -750,4 +754,12 @@ function checkAccuracy(x, trueY, fn) {
 
   // accuracy truePositive/ total
   return tf.sum(tf.sub(trueY, predY)).div(tf.sum(trueY));
+}
+
+/**
+ * 
+ * @param {object} oneHotTensor Tensor must be of Size NxM where, M = no. of classes N = no. of data points
+ */
+function oneHot2Class(oneHotTensor){
+  return oneHotTensor.matMul( tf.linspace(0, oneHotTensor.shape[1]-1, oneHotTensor.shape[1]).expandDims(1) )
 }

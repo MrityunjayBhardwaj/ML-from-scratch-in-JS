@@ -446,7 +446,7 @@ function optimize(
     },
     costFn = costFunction("mse"),
     costFnDx = costFnDerivatives("mse"),
-    callback = null,
+    callbackFn = null,
     yPred = null,
     weights = null,
     epoch = 100,
@@ -508,9 +508,9 @@ function optimize(
     oldWeights = newWeights;
 
     // invoke the callback function
-    if (callback !== null) {
+    if (callbackFn !== null) {
       console.log("inside Callback");
-      callback(cBatchX, cBatchY, yPred, oldWeights, loss);
+      callbackFn(cBatchX, cBatchY, yPred, oldWeights, loss);
     }
   }
   console.log(epoch+'epoach finished!');

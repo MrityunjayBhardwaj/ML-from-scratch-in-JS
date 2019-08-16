@@ -9,7 +9,11 @@ const mIrisXWithBias =  mIrisX.concat( tf.ones(mIrisX.shape), axis=1 );
 
 
 const model = new LogisticRegression();
-model.train({x: mIrisXWithBias, y: mIrisY},null, 0.2 );
+model.train({x: mIrisXWithBias, y: mIrisY}, params={
+            epoch: 2000,
+            learningRate: 0.01,
+            verbose: 1
+});
 
 const mIrisPredY = model.classify(mIrisXWithBias);
 
@@ -25,7 +29,7 @@ const psudoPtsLogit = model.logisticFn(0.5, 0 )(psudoPtsWithBias, model.getWeigh
 
 const decisionRegionData = [{
     x : mIrisX.slice([0,0],[50,-1]).flatten().arraySync(),
-    y : mIrisPredY.slice([0,0],[50,-1]).flatten().arraySync(),
+    y : mIrisPredY.slice([0,0],[50,-1]).matMul(tf.tensor([[1],[0]])).flatten().arraySync(),
     // y : tf.zeros([mIrisX.shape[0]]).flatten().arraySync(),
     type: 'scatter',
     mode: 'markers',
@@ -38,7 +42,7 @@ const decisionRegionData = [{
 },
 {
     x : mIrisX.slice([50,0],[-1,-1]).flatten().arraySync(),
-    y : mIrisPredY.slice([50,0],[-1,-1]).flatten().arraySync(),
+    y : mIrisPredY.slice([50,0],[-1,-1]).matMul(tf.tensor([[1],[0]])).flatten().arraySync(),
     // y : tf.zeros([mIrisX.shape[0]]).flatten().arraySync(),
     type: 'scatter',
     mode: 'markers',

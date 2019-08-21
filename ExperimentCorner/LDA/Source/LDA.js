@@ -61,7 +61,7 @@ function LDA(){
         model.params.prior = classPrior;
 
     },
-    this.classify = (data, probOrClass=0, threshold)=>{
+    this.classify = (dataX, probOrClass=0, threshold)=>{
         threshold = threshold || model.params.threshold;
         // calculate the class conditional probabilities for all the classes.
 
@@ -87,21 +87,13 @@ function LDA(){
                         );
 
 
-        // const weights2 = tfpinv(model.params.sharedCovariance).mul(c1Mean.sub(c2Mean));
-        // const bias2 =  c1Mean.transpose().matMul(invCovariance).matMul(c1Mean).mul( -1/2 )
-        //                 .add(
-        //                 c2Mean.transpose().matMul(invCovariance).matMul(c2Mean).mul( -1/2 ) )    
-        //                 .add(
-        //                 bayesFactor
-        //                 );
-
         const linearFn = weights.transpose().matMul(dataX.transpose()).add(bias);
-
         const c2LinearFn = c2Weights.transpose().matMul(dataX.transpose()).add(c2Bias);
 
-        // feeding our linear function to logistic sigmoid function
-        const classConditionalProb = this.logisticFn(linearFn);
 
+
+        // feeding our linear function to logistic sigmoid function
+        const classConditionalProb   = this.logisticFn(linearFn);
         const c2ClassConditionalProb = this.logisticFn(c2LinearFn);
 
 

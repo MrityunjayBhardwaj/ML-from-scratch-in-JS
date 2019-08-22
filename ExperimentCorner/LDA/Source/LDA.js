@@ -71,9 +71,8 @@ function LDA(){
         const c1Prior = model.params.prior[0];
         const c2Prior = model.params.prior[1];
 
-        const bayesFactor = model.params.prior[0] / model.params.prior[1];
-
         const invCovariance = tfpinv(model.params.sharedCovariance);
+
         const weights = invCovariance.matMul(c1Mean.transpose());
         const bias =  c1Mean.matMul(invCovariance).matMul( c1Mean.transpose() ).mul( -1/2 )
                         .add(
@@ -89,7 +88,6 @@ function LDA(){
 
         const linearFn = weights.transpose().matMul(dataX.transpose()).add(bias);
         const c2LinearFn = c2Weights.transpose().matMul(dataX.transpose()).add(c2Bias);
-
 
 
         // feeding our linear function to logistic sigmoid function

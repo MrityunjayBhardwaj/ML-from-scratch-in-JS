@@ -522,8 +522,19 @@ function optimize(
  *
  * @param {object} data input must be a tf tensor object
  */
-function normalizeData(data) {
-  return data.mean((axis = 0)).sub(data);
+function normalizeData(data, unitVariance=0) {
+
+  const meanCenteredData = data.sub( data.mean((axis = 0)) );
+  const variance = meanCenteredData.pow(2);
+  const stdev = tf.sum(variance.pow(1/2), 0).div(meanCenteredData.shape[0]);
+
+  // z-score
+  const standardForm = meanCenteredData.div(stdev);
+  if (unitVariance)
+    return standardForm;
+
+  return meanCenteredData;
+
 }
 
 //NOTE: currently support only the [m,k] vector in [m,n] matrix where, k <= (start - n)

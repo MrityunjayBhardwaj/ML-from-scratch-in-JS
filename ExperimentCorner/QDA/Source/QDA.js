@@ -38,7 +38,7 @@ function QDA(){
             const currClassData = classwiseData[i].x;
             const currClassDataLength = currClassData.shape[0];
             
-            const currClassPrior = currClassDataLength / dataLength;
+            const currClassPrior = tf.tensor( currClassDataLength / dataLength );
             const currClassMean  = tf.sum(currClassData, axis=0).div(currClassDataLength).expandDims(1).transpose();
 
             const meanCenteredCurrClassData = currClassData.sub(currClassMean);
@@ -63,7 +63,7 @@ function QDA(){
         model.params.covariance = classCovariance;
 
     },
-    this.classify = (dataX, probOrClass=0, threshold)=>{
+    this.classify = (dataX, probOrClass=1, threshold)=>{
         // TODO: derived for individual covariance instead of common covariance.
 
         threshold = threshold || model.params.threshold;
@@ -75,7 +75,7 @@ function QDA(){
         const c1Prior = model.params.prior[0];
         const c2Prior = model.params.prior[1];
 
-        const invCovariance = tfpinv(model.params.sharedCovariance);
+        // const invCovariance = tfpinv(model.params.sharedCovariance);
 
         const c1InvCovariance = tfpinv(model.params.covariance[0]);
         const c2InvCovariance = tfpinv(model.params.covariance[1]);
@@ -85,21 +85,30 @@ function QDA(){
 
         
         const quadraticFn =  /* weights */
-                          dataX.sub(c1Mean).matMul(c1InvCovariance).matMul(dataX.sub(c1Mean))
-                          .sub( dataX.sub(c2Mean).matMul(c2InvCovariance).matMul(dataX.sub(c2Mean)) ).mul(1/2)
+                          dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() )
+                          .sub( dataX.sub(c2Mean).matMul(c2InvCovariance).matMul( dataX.sub(c2Mean).transpose() ) ).mul(1/2)
 
                           /* bias */
                           .add( tf.log( c1DetCovariance.div(c2DetCovariance) ).mul(1/2))
                           .add( tf.log( c1Prior.div(c2Prior) ));
 
+
+        const quadraticFn2 = dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() ).mul(-1/2)
+                             .sub( tf.log(c1DetCovariance).mul(1/2))
+                             .add(tf.log(c1Prior));
+
         // feeding our linear function to logistic sigmoid function
-        const classConditionalProb   = this.logisticFn(quadraticFn);
+        const classConditionalProb   = this.logisticFn(quadraticFn2);
+        // const ccp   = this.logisticFn(quadraticFn2);
+
+        
 
         // TODO: converting class conditional probabilities into classes 
         
         if (probOrClass === 0)
-            return classConditionalProb
-    
+            return (classConditionalProb)
+        
+        return tf.clipByValue(classConditionalProb.sub(model.params.threshold).mul(1000000), 0,1);
 
     }
 }

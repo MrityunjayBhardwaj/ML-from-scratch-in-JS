@@ -293,15 +293,16 @@ function prepro4Plotly(x) {
  */
 function meshGridRange(
   range = { x: { min: 0, max: 1 }, y: { min: 0, max: 1 } },
-  division
+  division,
+  margin=1.0
 ) {
   console.log(range);
   const a = tf
-    .linspace(range.x.min, range.x.max, division)
+    .linspace(range.x.min - margin, range.x.max + margin, division)
     .flatten()
     .arraySync();
   const b = tf
-    .linspace(range.y.min, range.y.max, division)
+    .linspace(range.y.min - margin, range.y.max + margin, division)
     .flatten()
     .arraySync();
 
@@ -773,4 +774,33 @@ function checkAccuracy(x, trueY, fn) {
  */
 function oneHot2Class(oneHotTensor){
   return oneHotTensor.matMul( tf.linspace(0, oneHotTensor.shape[1]-1, oneHotTensor.shape[1]).expandDims(1) )
+}
+
+
+/**
+ * 
+ * @param { object } tensor array.
+ */
+function tfdet(x) {
+  // NOTE: currently it only works for 2x2 input 
+
+  // if (  x.shape[0] > 2 )
+  //     throw new Error('invalid input! \n input must be of size 2x2 but given '+ x.shape[0]+' x '+x.shape[1]);
+
+  if (  x.shape[0] > 2 ){
+    const {0:Q,1:R} = linalg.qr(x);
+
+    const det = tf.tensor(0);
+    // multiply the diagonal of R matrix
+    for(let i=0;i<x.shape[0];i++){
+        det = tf.abs( det.add( x.slice([i, i],[1, 1]) ) );
+    }
+
+    return det;
+  }
+
+
+  const tensorArray = x.arraySync();
+
+  return tf.tensor(tensorArray[0][0]*tensorArray[1][1] - tensorArray[0][1]*tensorArray[1][0]);
 }

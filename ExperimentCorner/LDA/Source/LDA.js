@@ -65,40 +65,37 @@ function LDA(){
         threshold = threshold || model.params.threshold;
         // calculate the class conditional probabilities for all the classes.
 
-        const c1Mean = model.params.mean[0];
-        const c2Mean = model.params.mean[1];
-
-        const c1Prior = model.params.prior[0];
-        const c2Prior = model.params.prior[1];
-
+        const nClasses = model.params.mean.length;
         const invCovariance = tfpinv(model.params.sharedCovariance);
 
-        const weights = invCovariance.matMul(c1Mean.transpose());
-        const bias =  c1Mean.matMul(invCovariance).matMul( c1Mean.transpose() ).mul( -1/2 )
-                        .add(
-                           tf.log( c1Prior) 
-                        );
+        let posteriorProb = tf.tensor([]);
 
-        const c2Weights = invCovariance.matMul(c2Mean.transpose());
-        const c2Bias    = c2Mean.matMul(invCovariance).matMul( c2Mean.transpose() ).mul( -1/2 )
-                        .add(
-                           tf.log( c2Prior) 
-                        );
+        for(let i=0;i< nClasses;i++){
 
+            const currMean = model.params.mean[i];
+            const currPrior = model.params.prior[i];
 
-        const linearFn = weights.transpose().matMul(dataX.transpose()).add(bias);
-        const c2LinearFn = c2Weights.transpose().matMul(dataX.transpose()).add(c2Bias);
+            const weights = invCovariance.matMul(currMean.transpose());
+            const bias =  currMean.matMul(invCovariance).matMul( currMean.transpose() ).mul( -1/2 )
+                            .add(
+                            tf.log( currPrior) 
+                            );
 
 
-        // feeding our linear function to logistic sigmoid function
-        const classConditionalProb   = this.logisticFn(linearFn);
-        const c2ClassConditionalProb = this.logisticFn(c2LinearFn);
+            const linearFn = weights.transpose().matMul(dataX.transpose()).add(bias);
+            const currClassLogisticFn = this.logisticFn(linearFn);
 
+            posteriorProb = posteriorProb.concat( (currClassLogisticFn) )
 
-        // TODO: converting class conditional probabilities into classes 
+        }
+
+        // converting posterior probabilites to classes 
+        const predY = tf.tensor(1).sub(tf.abs( (posteriorProb.sub(tf.max( posteriorProb, axis=0 ))) ).mul(100000000).clipByValue(0,1)).transpose().matMul(tf.linspace(0,nClasses-1,nClasses).expandDims(1));
         
         if (probOrClass === 0)
-            return classConditionalProb
+            return posteriorProb; 
+        
+        return predY 
     
 
     }

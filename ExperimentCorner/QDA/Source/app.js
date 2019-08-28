@@ -87,7 +87,7 @@ const pNormVizData = [
   //   //     size: 4
   //   //  },
   //   line: {}
-  // },
+  },
 
   {
       x: standardDataX.slice([0,0],[50,-1]).transpose().arraySync()[0],

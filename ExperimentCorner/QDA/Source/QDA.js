@@ -68,6 +68,7 @@ function QDA(){
 
         threshold = threshold || model.params.threshold;
         // calculate the class conditional probabilities for all the classes.
+        const nClasses = model.params.mean.length;
 
         const c1Mean = model.params.mean[0];
         const c2Mean = model.params.mean[1];
@@ -83,7 +84,9 @@ function QDA(){
         const c1DetCovariance = tfdet(model.params.covariance[0]);
         const c2DetCovariance = tfdet(model.params.covariance[1]);
 
-        
+
+        let posteriorProb = tf.tensor([]);
+
         const quadraticFn =  /* weights */
                           dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() )
                           .sub( dataX.sub(c2Mean).matMul(c2InvCovariance).matMul( dataX.sub(c2Mean).transpose() ) ).mul(1/2)
@@ -93,12 +96,36 @@ function QDA(){
                           .add( tf.log( c1Prior.div(c2Prior) ));
 
 
-        const quadraticFn2 = dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() ).mul(-1/2)
-                             .sub( tf.log(c1DetCovariance).mul(1/2))
-                             .add(tf.log(c1Prior));
+    
+        for(let i=0;i< nClasses;i++){
+
+            const currMean = model.params.mean[i];
+            const currInvCovariance = tfpinv(model.params.covariance[i]);
+
+            // TODO: tfdet need calculate nxn determinant 
+
+            const currDetCovariance = tfdet(model.params.covariance[i]);
+            const currPrior = model.params.prior[i];
+
+            const currClassQuadraticFn = dataX.sub(currMean).matMul(currInvCovariance).matMul( dataX.sub(currMean).transpose() ).mul(-1/2)
+                                .sub( tf.log(currDetCovariance).mul(1/2))
+                                .add(tf.log(currPrior));
+
+            const currClassLogisticFn = this.logisticFn(currClassQuadraticFn);
+
+            posteriorProb = posteriorProb.concat( currClassLogisticFn )
+
+        }
+
+        const predY = tf.tensor(1).sub( tf.abs( (posteriorProb.sub(tf.max( posteriorProb, axis=0 ))) ).mul(100000000).clipByValue(0,1) ).transpose().matMul(tf.linspace(0,nClasses-1,nClasses).expandDims(1));
+
+
+        // const quadraticFn2 = dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() ).mul(-1/2)
+        //                      .sub( tf.log(c1DetCovariance).mul(1/2))
+        //                      .add(tf.log(c1Prior));
 
         // feeding our linear function to logistic sigmoid function
-        const classConditionalProb   = this.logisticFn(quadraticFn2);
+        // const classConditionalProb   = this.logisticFn(quadraticFn2);
         // const ccp   = this.logisticFn(quadraticFn2);
 
         
@@ -106,9 +133,9 @@ function QDA(){
         // TODO: converting class conditional probabilities into classes 
         
         if (probOrClass === 0)
-            return (classConditionalProb)
+            return posteriorProb
         
-        return tf.clipByValue(classConditionalProb.sub(model.params.threshold).mul(1000000), 0,1);
+        return predY;
 
     }
 }

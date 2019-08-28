@@ -1,7 +1,8 @@
-let mIrisX = tf.tensor(iris).slice([0,1],[100,2])
+let mIrisX = tf.tensor(iris).slice([0,1],[-1,2]);
 // one hot encoded
-let mIrisY = tf.tensor( Array(100).fill([1,0],0,50).fill([0,1],50) );
+// let mIrisY = tf.tensor( Array(100).fill([1,0],0,50).fill([0,1],50) );
 
+let mIrisY = tf.tensor( Array(150).fill([1,0,0], 0, 50).fill([0,1,0], 50, 100).fill([0,0,1], 100) );
 const standardDataX = normalizeData(mIrisX, 1)
 
 const {0: trainData,1: testData} = trainTestSplit(standardDataX,mIrisY,2/3);
@@ -13,6 +14,13 @@ model.train(trainData);
 const predicted = model.classify(testData.x);
 
 
+let predY = tf.tensor([]);
+for(let i=0;i< testData.x.shape[0]; i++){
+
+  const currPtX = testData.x.slice([i, 0],[1, -1]);
+  predY = predY.concat( model.classify( currPtX ) );
+
+}
 
 
 
@@ -24,13 +32,13 @@ const grid = meshGridRange(
   (range = { 
     
         x: { min: tf.min(trainData.x, axis=0).arraySync()[1],
-                max: tf.max(trainData.x, axis=0).arraySync()[1] },
+             max: tf.max(trainData.x, axis=0).arraySync()[1] },
     
         y: { min: tf.min(trainData.x, axis=0).arraySync()[0],
-                  max: tf.max(trainData.x, axis=0).arraySync()[0] }
+             max: tf.max(trainData.x, axis=0).arraySync()[0] }
 
     }),
-  (division = 20)
+  (division = 40)
 );
 
 const pNormGrid = grid.map(a => {
@@ -73,17 +81,33 @@ const pNormVizData = [
       [1, darkModeCols.red()]
     ],
 
-    contours: {
-        start: 0,
-        end: 1,
-        size: 3
-     },
-    line: {}
-  },
+  //   // contours: {
+  //   //     start: 0,
+  //   //     end: 2,
+  //   //     size: 4
+  //   //  },
+  //   line: {}
+  // },
 
   {
-      x: trainData.x.transpose().arraySync()[0],
-      y: trainData.x.transpose().arraySync()[1],
+      x: standardDataX.slice([0,0],[50,-1]).transpose().arraySync()[0],
+      y: standardDataX.slice([0,0],[50,-1]).transpose().arraySync()[1],
+      type: 'scatter',
+      mode: 'markers'
+
+
+  },
+  {
+      x: standardDataX.slice([50,0],[100,-1]).transpose().arraySync()[0],
+      y: standardDataX.slice([50,0],[100,-1]).transpose().arraySync()[1],
+      type: 'scatter',
+      mode: 'markers'
+
+
+  },
+  {
+      x: standardDataX.slice([100,0],[-1,-1]).transpose().arraySync()[0],
+      y: standardDataX.slice([100,0],[-1,-1]).transpose().arraySync()[1],
       type: 'scatter',
       mode: 'markers'
 

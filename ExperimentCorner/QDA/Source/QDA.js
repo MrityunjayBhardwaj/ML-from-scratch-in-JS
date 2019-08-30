@@ -113,11 +113,11 @@ function QDA(){
 
             const currClassLogisticFn = this.logisticFn(currClassQuadraticFn);
 
-            posteriorProb = posteriorProb.concat( currClassLogisticFn )
+            posteriorProb = posteriorProb.concat( currClassLogisticFn.mul(currPrior ));
 
         }
 
-        const predY = tf.tensor(1).sub( tf.abs( (posteriorProb.sub(tf.max( posteriorProb, axis=0 ))) ).mul(100000000).clipByValue(0,1) ).transpose().matMul(tf.linspace(0,nClasses-1,nClasses).expandDims(1));
+        const predY = tf.floor( tf.tensor(1).sub( tf.abs( (posteriorProb.sub(tf.max( posteriorProb, axis=0 ))) ).mul(1000000000).clipByValue(0,1) ).transpose().matMul(tf.linspace(0,nClasses-1,nClasses).expandDims(1)) );
 
 
         // const quadraticFn2 = dataX.sub(c1Mean).matMul(c1InvCovariance).matMul( dataX.sub(c1Mean).transpose() ).mul(-1/2)

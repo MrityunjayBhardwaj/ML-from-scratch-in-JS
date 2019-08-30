@@ -788,9 +788,9 @@ function tfdet(x) {
   //     throw new Error('invalid input! \n input must be of size 2x2 but given '+ x.shape[0]+' x '+x.shape[1]);
 
   if (  x.shape[0] > 2 ){
-    const {0:Q,1:R} = linalg.qr(x);
+    const {0:Q,1:R} = tf.linalg.qr(x);
 
-    const det = tf.tensor(0);
+    let det = tf.tensor(0);
     // multiply the diagonal of R matrix
     for(let i=0;i<x.shape[0];i++){
         det = tf.abs( det.add( x.slice([i, i],[1, 1]) ) );

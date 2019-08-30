@@ -7,12 +7,13 @@ const standardDataX = normalizeData(mIrisX, 1)
 
 const {0: trainData,1: testData} = trainTestSplit(standardDataX,mIrisY,2/3);
 
+// const classwiseDataSplit
+
 const model = new QDA;
 
 model.train(trainData);
 
-const predicted = model.classify(testData.x);
-
+// const predicted = model.classify(testData.x);
 
 let predY = tf.tensor([]);
 for(let i=0;i< testData.x.shape[0]; i++){
@@ -21,9 +22,6 @@ for(let i=0;i< testData.x.shape[0]; i++){
   predY = predY.concat( model.classify( currPtX ) );
 
 }
-
-
-
 
 /* Visualizing Decision Boundary in the input space */
 
@@ -38,7 +36,7 @@ const grid = meshGridRange(
              max: tf.max(trainData.x, axis=0).arraySync()[0] }
 
     }),
-  (division = 40)
+  (division = 10)
 );
 
 const pNormGrid = grid.map(a => {
@@ -81,11 +79,11 @@ const pNormVizData = [
       [1, darkModeCols.red()]
     ],
 
-  //   // contours: {
-  //   //     start: 0,
-  //   //     end: 2,
-  //   //     size: 4
-  //   //  },
+    contours: {
+        start: 0,
+        end: 2,
+        size: 1 
+     },
   //   line: {}
   },
 

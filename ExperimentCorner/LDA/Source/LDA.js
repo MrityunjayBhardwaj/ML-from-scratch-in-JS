@@ -66,6 +66,7 @@ function LDA(){
         // calculate the class conditional probabilities for all the classes.
 
         const nClasses = model.params.mean.length;
+
         const invCovariance = tfpinv(model.params.sharedCovariance);
 
         let posteriorProb = tf.tensor([]);

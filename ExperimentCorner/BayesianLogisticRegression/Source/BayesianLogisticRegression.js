@@ -15,27 +15,40 @@ function BayesianLogisticRegression(){
     this.parameterPDF = function(data){
 
         // hyperparameters for prior distribution.
-        const hypParams = {m_0: 0, S_0: 0};
+        const hypParams = { m_0: tf.zeros(data.x.shape[1]), 
+                            S_0: tf.ones([nClasses,nClasses]) };
 
 
-        // TODO: Calculate the W_MAP>>>>
+        // TODO: Calculate the W_MAP For each Classes>>>>
 
-        const currY = 0 // specify the current class of the data.
-        const weightMAP = hypParams.m_0.sub( S_0.mul(tf.sum(data.x - currY.mul(data.x))));
+        const nClasses = data.y.shape[1];
+        const dataSplit = classwiseDataSplit(data.x, data.y,concatClass=1);
 
-        const predY = this.logisticFn( weightMean.matMul(data.x) );
-        const weightCovariance = hypParams.S_0.add(
-          tf.sum(
-            predY.mul(
-              tf.tensor(1)
-                .sub(predY)
-                .matMul(data.x.matMul(data.x.transpose()))
+        for(let i=0; i<nClasses; i++){
+
+            // let 1 for class_i and 0 for the rest
+
+            const currClassDataX = dataSplit[i].x;
+
+            const currY = tf.tensor(1);// specify the current class of the data.
+            const currWeightMAP = hypParams.m_0.sub( S_0.mul(tf.sum(currClassDataX - currY.mul(currClassDataX))));
+
+            const predY = this.logisticFn( currWeightMAP.matMul(currClassDataX) );
+            const currWeightCovariance = hypParams.S_0.add(
+            tf.sum(
+                predY.mul(
+                tf.tensor(1)
+                    .sub(predY)
+                    .matMul(data.x.matMul(data.x.transpose()))
+                )
             )
-          )
-        );
+            );
 
-        model.parameterPDF.mean = weightMean;
-        model.parameterPDF.covariance = weightCovariance; 
+            model.parameterPDF.mean.push( currWeightMAP );
+            model.parameterPDF.covariance.push( currWeightCovariance ); 
+
+        }
+
 
 
         // TODO: Create a function to generate weights from the parameterPDF.
@@ -47,19 +60,32 @@ function BayesianLogisticRegression(){
 
         const dataX = data.x;
 
-        const meanWeight = model.parameterPDF.mean; // more presicely its MAP weight.
-        const weightCovariance = model.parameterPDF.covariance; 
+        const maxProb = 0;
+        const optimalClass;
 
-        const mean = meanWeight.matMul( dataX );
-        const variance = dataX.matMul(weightCovariance).matMul( dataX );
+        for(let i=0; i<nClasses; i++){
 
+            const currMeanWeight = model.parameterPDF.mean[i]; // more presicely its MAP weight.
+            const currWeightCovariance = model.parameterPDF.covariance[i]; 
 
-        const kai = variance.mul(lambda).add(1).pow(-1/2);
+            const currMean = currMeanWeight.matMul( dataX );
+            const currVariance = dataX.matMul(currWeightCovariance).matMul( dataX );
 
-        const predictiveProb = this.logisticFn( kai.mul(mean) );
+            const kai = currVariance.mul(lambda).add(1).pow(-1/2);
 
-        model.predictiveProb = predictiveProb;
-        // return predictiveProb;
+            const currClassPredictiveProb = this.logisticFn( kai.mul(currMean) );
+
+            if (maxProb < currClassPredictiveProb){ 
+                maxProb = currClassPredictiveProb
+                optimalClass = i;
+            }
+            model.predictiveProb.push( currClassPredictiveProb );
+        }
+
+        // return the class which has max posterior predictive probability
+
+        // TODO: return the one hot encoded vector.
+        return optimalClass
     }
 
 }

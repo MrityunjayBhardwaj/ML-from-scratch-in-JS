@@ -82,7 +82,7 @@ const pNormVizData = [
 ];
 
 const layoutSetting = {
-  title: "p-Norm",
+  title: "Kernel Density Estimation",
   font: {
     size: 15,
     color: "white",

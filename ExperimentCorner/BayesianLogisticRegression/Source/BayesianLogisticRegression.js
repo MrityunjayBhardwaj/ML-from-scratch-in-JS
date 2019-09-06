@@ -1,11 +1,12 @@
 function bayesianLogisticRegression(){
 
     const model = {
-        predictiveProb : 0,
+        predictiveProb : [],
         parameterPDF: {
             mean : [],
             covariance: []
-        }
+        },
+        nClasses: 1
     }
 
     this.logisticFn = function(a){
@@ -50,11 +51,13 @@ function bayesianLogisticRegression(){
             )
             );
 
+
             model.parameterPDF.mean.push( currWeightMAP );
             model.parameterPDF.covariance.push( currWeightCovariance ); 
 
         }
 
+        model.nClasses = nClasses;
 
 
         // TODO: Create a function to generate weights from the parameterPDF.
@@ -62,17 +65,23 @@ function bayesianLogisticRegression(){
 
     }
     this.train = function(data){
+
+        this.parameterPDF(data);
+    }
+    this.test = function(data){
         const lambda = Math.PI/8; // parameter for inverse probit function.
 
         const dataX = data.x;
 
-        const maxProb = 0;
-        const optimalClass = -1;
+        let maxProb = tf.tensor(0);
+        let optimalClass = -1;
 
-        const nClasses = data.y.shape[1];
+        // const nClasses = data.y.shape[1];
+
+        const nClasses = model.nClasses;
 
         // calculating the parameters of posterior probability
-        this.parameterPDF(data);
+        // this.parameterPDF(data);
 
         // calculating the posterior predictive probability.
         for(let i=0; i<nClasses; i++){
@@ -81,13 +90,13 @@ function bayesianLogisticRegression(){
             const currWeightCovariance = model.parameterPDF.covariance[i]; 
 
             const currMean = dataX.matMul( currMeanWeight );
-            const currVariance = currWeightCovariance.matMul(dataX.transpose() ).matMul( dataX );
+            const currVariance = dataX.matMul(currWeightCovariance.transpose() ).matMul( dataX.transpose() );
 
             const kai = currVariance.mul(lambda).add(1).pow(-1/2);
 
             const currClassPredictiveProb = this.logisticFn( kai.mul(currMean) );
 
-            if (maxProb < currClassPredictiveProb){ 
+            if (tf.lessEqual( maxProb, currClassPredictiveProb )){ 
                 maxProb = currClassPredictiveProb
                 optimalClass = i;
             }
@@ -100,22 +109,4 @@ function bayesianLogisticRegression(){
         return optimalClass
     }
 
-    this.test = function(){
-
-        const optimalClass = -1;
-
-        const nClasses = data.y.shape[1];
-        
-        // calculating the posterior predictive probability.
-        for(let i=0; i<nClasses; i++){
-
-            const currClassPredictiveProb = this.logisticFn( kai.mul(currMean) );
-
-            if (maxProb < currClassPredictiveProb){ 
-                maxProb = currClassPredictiveProb
-                optimalClass = i;
-            }
-            model.predictiveProb.push( currClassPredictiveProb );
-        }
-    }
 }

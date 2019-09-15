@@ -57,9 +57,8 @@ function NeuralNetworks(){
         }
 
         // calculate the error:-
-
         this.lossFn(output, dataY)
 
-
+        
     }
 }

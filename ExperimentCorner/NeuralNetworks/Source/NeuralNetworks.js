@@ -7,23 +7,69 @@ function NeuralNetworks(){
         },
         weights: tf.tensor(),
 
-    }
+        nerualNetwork : {},
 
-    this.getWeights = function(){return model.weights}
+        derivativeNetwork : {}
+
+    },
+
+    
+
+    this.getWeights = function(){ return model.weights; }
 
     this.derivatives = function() {
 
     },
 
-    this.costFn = function() {
+    this.costFn = function(predY, trueY, params /* any userdefined params for our error function */) {
 
     },
 
+    this.costFnDx = function(predY, trueY, params){
+
+    },
+
+    this.activationFn = function(prepro, params /* any userdefined params for this activation function */){
+
+    },
+
+    this.activationFnDx = function(prepro, params){
+
+    },
+
+    this.backprop = function(predY){
+
+        /**
+         * TODO: 
+         * 1. Calculate the error function dx.
+         * 2. recursively calculate the derivative for all the weights for each layer
+         * 
+         */
+
+        const nLayers = 10;
+
+        // calculating the error function dx;
+
+        let lastDx = this.costFnDx(predY).mul( this.activationFnDx( this.model.nerualNetwork[nLayers - 1].prepro ) );
+
+        for(let l=nLayers-1;l>=0;l--){
+
+            const currLayerDx = this.model.nerualNetwork[l+1].weights.matMul(lastDx).mul( this.activationFnDx( this.model.nerualNetwork[l].prepro ) )
+
+            lastDx = currLayerDx;
+
+        }
+
+    }
+
+
     this.train = function(data){
+        // TODO: do backpropagation.
+
         
 
 
-    }
+    },
 
     this.forwardPass = function(data, weights = null){
 
@@ -46,7 +92,6 @@ function NeuralNetworks(){
         for(let i=1; i<nLayers; i++){
 
             const cWeights = weights.slice([0,0], [-1, i]);
-
 
             const prepro = preLayer.matMul( cWeights );
             // TODO: Add functionality to have different activation function. for each neuron

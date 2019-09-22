@@ -20,8 +20,6 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
          * where, each [.] => {prepro, output, weights} and for the first column the weights are set to 'None'
          * because there are 2 weight matrix connecting layer 0 to 1 and 1 to 2.
          * 
-         * 
-         * 
          */
 
         networkDx : [] // derivative of all the prepro stage w.r.t loss function for all the layers.
@@ -104,7 +102,8 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     this.train = function(data){
         // TODO: do backpropagation.
 
-        
+    
+        this.backprop(  );
 
 
     },

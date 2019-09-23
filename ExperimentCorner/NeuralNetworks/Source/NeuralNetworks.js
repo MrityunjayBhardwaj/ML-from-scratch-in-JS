@@ -64,6 +64,8 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     },
 
     this.activationFnDx = function(prepro, params){
+        // NOTE: prepro is going to be of size N x 1 where N = no. of points M = num of features
+        // so please make sure to have an output in dim Nx1 
 
     },
 
@@ -102,10 +104,23 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     this.train = function(data){
         // TODO: do backpropagation.
 
-    
-        this.backprop(  );
+        let epoach = 10;
+
+        let weights = 0;
+        for(let i=0;i< epoach;i++){
+
+            // predict y using the current weights
+            const cPredY = this.forwardPass(data, weights);
+
+            // calculate the error:-
+            const cLoss = this.lossFn(cPredY, dataY);
+
+            // calculate the derivatives of loss w.r.t all the neurons.
+            // and store them to our this.model.networkDx array.
+            this.backprop(cPredY);
 
 
+        }
     },
 
     this.forwardPass = function(data, weights = null){
@@ -124,22 +139,28 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         let preLayer = dataX; // here, we are assuming input as a layer but it isn't appear in our model.neuralnetwork
 
-        let output = 0;
+        let predY = 0; 
+
         for(let i=1; i<nLayers; i++){
 
-            const cWeights = weights.slice([0,0], [-1, i]);
+            const layerWeights = weights[i];
 
-            const prepro = preLayer.matMul(cWeights);
+            const layerPrepro = preLayer.matMul(layerWeights);
             // TODO: Add functionality to have different activation function. for each neuron
-            const activation = this.activationFn(prepro);
+
+            let layerOutput = tf.tensor();
+
+            // calculate the activation function for each neuron on layer 'i' sepratly.
+            for(let j=0;j< nLayers[i];j++){
+                const cPrepro = layerPrepro.slice([0,j], [-1,1]);
+                layerOutput = layerOutput.concat(this.activationFn(cPrepro));
+            }
 
             if(i++ === nLayers)
-                output = activation;
+                predY = layerOutput;
         }
 
-        // calculate the error:-
-        this.lossFn(output, dataY)
-
+        return predY;
         
     }
 }

@@ -1,7 +1,7 @@
 
 
 function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weights of pre-trained model */){
-    this.model = {
+    model = {
         params : {
 
         },
@@ -26,53 +26,56 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
     },
 
-    function init() {
+    function init(structure) {
         // initialize the weights.
 
-        // initializing model.neuralNewtwork. each 
-        for(let i=0;i< structure.length;i++){
+        for(let i=1;i< structure.length;i++){
 
-            const currNeuronValue = tf.zeros([structure[i], 1]);
+            const currNeuronValue = tf.ones([structure[i], 1]);
 
-            this.model.neuralNetwork[i].prepro = currNeuronValue;
-            this.model.neuralNetwork[i].output = currNeuronValue;
+            model.neuralNetwork[i].prepro = currNeuronValue;
+            model.neuralNetwork[i].output = currNeuronValue;
 
-            if (i >= 1 ){
-                // initialize weights
-                // TODO: use a better initialization criterion like Xavier / He initialization.
+            // initialize weights
+            // TODO: use a better initialization criterion like Xavier / He initialization.
 
-                this.model.neuralNetwork[i].weights = tf.zeros([structure[i-1], structure[i]]);
-            }
+            model.weights[i] = tf.ones([structure[i-1], structure[i]]);
 
         }
 
 
     }
 
+
     this.getWeights = function(){ return model.weights; }
 
 
     this.costFn = function(predY, trueY, params /* any userdefined params for our error function */) {
 
+        return trueY.sub(predY).mul(2).pow(2);
     },
     this.costFnDx = function(predY, trueY, params){
 
+        return trueY.sub(predY);
     },
 
     this.activationFn = function(prepro, params /* any userdefined params for this activation function */){
 
+        // using sigmoid
+        return tf.exp(tf.neg(prepro)).add(1).pow(-1);
     },
 
     this.activationFnDx = function(prepro, params){
         // NOTE: prepro is going to be of size N x 1 where N = no. of points M = num of features
         // so please make sure to have an output in dim Nx1 
 
+        return tf.exp(tf.neg(prepro)).mul( tf.tensor(1).sub(tf.exp(tf.neg(prepro))));
     },
 
 
 
 
-    this.backprop = function(predY){
+    this.backprop = function(predY, cost){
 
         /**
          * TODO: 
@@ -81,54 +84,62 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
          * 
          */
 
-        const nLayers = 10;
+        const nLayers = model.neuralNetwork.length; // no of layers:- hidden + 1+outputlayer
 
         // calculating the error function dx;
 
         // currently using same activation Function. 
-        let lastDx = this.costFnDx(predY).mul( this.activationFnDx( this.model.nerualNetwork[nLayers - 1].prepro ) );
+        let lastDx = this.costFnDx(predY, cost).mul( this.activationFnDx( model.nerualNetwork[nLayers - 1].prepro ) );
 
-        this.model.networkDx[nLayers -1] = lastDx;
+        model.networkDx[nLayers -1] = lastDx;
 
         for(let l=nLayers-2; l>=0; l--){
 
-            const currLayerDx = this.model.nerualNetwork[l+1].weights.matMul( this.model.networkDx[l+1] ).mul( this.activationFnDx( this.model.nerualNetwork[l].prepro ) )
+            const currLayerDx = model.nerualNetwork[l+1].weights
+            .matMul( model.networkDx[l+1] )
+            .mul( this.activationFnDx( model.nerualNetwork[l].prepro ) );
 
             // inserting this derivative to our networkDerivative array for future use.
-            this.model.networkDx[l] = currLayerDx;
+            model.networkDx[l] = currLayerDx;
         }
 
     }
 
 
     this.train = function(data){
-        // TODO: do backpropagation.
 
-        let epoach = 10;
+        // initialization
+        const struct = [data.x.shape[1]].concat(structure).concat([data.y.shape[1]]);
+        init(struct); 
 
+        // training
+        let epoch = 10;
         let weights = 0;
-        for(let i=0;i< epoach;i++){
+
+        for(let i=0;i< epoch;i++){
 
             // predict y using the current weights
-            const cPredY = this.forwardPass(data, weights);
+            const cPredY = this.forwardPass(data);
 
             // calculate the error:-
             const cLoss = this.lossFn(cPredY, dataY);
 
-            // calculate the derivatives of loss w.r.t all the neurons.
-            // and store them to our this.model.networkDx array.
-            this.backprop(cPredY);
+            console.log("Loss: "+cLoss+" epoch: "+i)
 
+            // calculate the derivatives of loss w.r.t all the neurons.
+            // and store them to our model.networkDx array.
+            this.backprop(cPredY, cLoss);
+
+            // TODO: use the networkDx to update the weights.
 
         }
     },
 
-    this.forwardPass = function(data, weights = null){
+    this.forwardPass = function(data){
 
         const dataX = data.x;
-        const dataY = data.y;
 
-        const weights = weights || this.getWeights();
+        const weights = this.getWeights();
 
         // if (weights.shape[0] === 0){
         //     throw new Error('No weights specified, either specify the weights or train the model');
@@ -146,6 +157,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             const layerWeights = weights[i];
 
             const layerPrepro = preLayer.matMul(layerWeights);
+
             // TODO: Add functionality to have different activation function. for each neuron
 
             let layerOutput = tf.tensor();
@@ -156,8 +168,12 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
                 layerOutput = layerOutput.concat(this.activationFn(cPrepro));
             }
 
+            model.neuralNetwork[i].prepro = layerPrepro;
+            model.neuralNetwork[i].output = layerOutput; 
+
             if(i++ === nLayers)
                 predY = layerOutput;
+
         }
 
         return predY;

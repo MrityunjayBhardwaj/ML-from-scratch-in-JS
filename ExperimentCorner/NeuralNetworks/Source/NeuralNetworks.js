@@ -1,13 +1,13 @@
 
 
 function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weights of pre-trained model */){
-    model = {
+    const model = {
         params : {
 
         },
-        weights: tf.tensor(),
+        weights: tf.tensor([]),
 
-        nerualNetwork : {},
+        neuralNetwork : [],
 
         /**
          * Structure:-
@@ -24,7 +24,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         networkDx : [] // derivative of all the prepro stage w.r.t loss function for all the layers.
 
-    },
+    };
 
     function init(structure) {
         // initialize the weights.
@@ -33,13 +33,13 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
             const currNeuronValue = tf.ones([structure[i], 1]);
 
-            model.neuralNetwork[i].prepro = currNeuronValue;
-            model.neuralNetwork[i].output = currNeuronValue;
+            model.neuralNetwork[i-1] = {prepro : currNeuronValue,
+                                      output : currNeuronValue};
 
             // initialize weights
             // TODO: use a better initialization criterion like Xavier / He initialization.
 
-            model.weights[i] = tf.ones([structure[i-1], structure[i]]);
+            model.weights[i-1] = tf.ones([structure[i-1], structure[i]]);
 
         }
 
@@ -47,7 +47,8 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     }
 
 
-    this.getWeights = function(){ return model.weights; }
+    this.getWeights = function(){ return model.weights; },
+    
 
 
     this.costFn = function(predY, trueY, params /* any userdefined params for our error function */) {
@@ -152,7 +153,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         let predY = 0; 
 
-        for(let i=1; i<nLayers; i++){
+        for(let i=0; i<nLayers; i++){
 
             const layerWeights = weights[i];
 
@@ -160,12 +161,14 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
             // TODO: Add functionality to have different activation function. for each neuron
 
-            let layerOutput = tf.tensor();
+            let layerOutput = this.activationFn( layerPrepro.slice([0, 0], [-1, 1]));
+
+            const cNeurons = model.neuralNetwork[i].prepro.shape[0];
 
             // calculate the activation function for each neuron on layer 'i' sepratly.
-            for(let j=0;j< nLayers[i];j++){
+            for(let j=1;j< cNeurons;j++){
                 const cPrepro = layerPrepro.slice([0,j], [-1,1]);
-                layerOutput = layerOutput.concat(this.activationFn(cPrepro));
+                layerOutput = layerOutput.concat(this.activationFn(cPrepro), axis=1);
             }
 
             model.neuralNetwork[i].prepro = layerPrepro;

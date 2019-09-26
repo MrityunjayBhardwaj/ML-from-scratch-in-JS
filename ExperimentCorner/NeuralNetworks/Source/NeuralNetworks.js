@@ -73,9 +73,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
         return tf.exp(tf.neg(prepro)).mul( tf.tensor(1).sub(tf.exp(tf.neg(prepro))));
     },
 
-
-
-
+    
     this.backprop = function(predY, cost){
 
         /**
@@ -122,8 +120,11 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             // predict y using the current weights
             const cPredY = this.forwardPass(data);
 
+            const predYOneHot = pred2Class(cPredY.slice([0, 0], [-1, 1]), threshold=0.5, oneHot=false)
+                                .concat( pred2Class(cPredY.slice([0, 1], [-1,1]), threshold=0.5, oneHOt=false));
+
             // calculate the error:-
-            const cLoss = this.lossFn(cPredY, dataY);
+            const cLoss = this.costFn(predYOneHot, data.y);
 
             console.log("Loss: "+cLoss+" epoch: "+i)
 
@@ -174,9 +175,10 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             model.neuralNetwork[i].prepro = layerPrepro;
             model.neuralNetwork[i].output = layerOutput; 
 
-            if(i++ === nLayers)
+            if(i+1 === nLayers)
                 predY = layerOutput;
 
+                preLayer = layerOutput;
         }
 
         return predY;

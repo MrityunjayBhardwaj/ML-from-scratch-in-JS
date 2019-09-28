@@ -31,7 +31,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         for(let i=1;i< structure.length;i++){
 
-            const currNeuronValue = tf.ones([1, structure[i]]);
+            const currNeuronValue = tf.randomNormal([1, structure[i]]);
 
             model.neuralNetwork[i-1] = {prepro : currNeuronValue,
                                       output : currNeuronValue};
@@ -39,7 +39,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             // initialize weights
             // TODO: use a better initialization criterion like Xavier / He initialization.
 
-            model.weights[i-1] = tf.ones([structure[i-1], structure[i]]);
+            model.weights[i-1] = tf.randomNormal([structure[i-1], structure[i]]);
 
         }
 
@@ -49,12 +49,11 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
     this.getWeights = function(){ return model.weights; },
     
-
-
     this.costFn = function(predY, trueY, params /* any userdefined params for our error function */) {
 
         return trueY.sub(predY).mul(2).pow(2);
     },
+
     this.costFnDx = function(predY, trueY, params){
 
         return trueY.sub(predY);
@@ -91,11 +90,10 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
         // currently using same activation Function. 
         let lastDx = this.costFnDx(predY, data.y).mul( this.activationFnDx( model.neuralNetwork[nLayers - 1].prepro ) );
 
-
         model.networkDx[nLayers -1] = lastDx;
 
         // updating weights
-        model.weights[nLayers-1] = tf.sub( model.weights[nLayers-1], model.neuralNetwork[nLayers-2].transpose().matMul(lastDx));
+        model.weights[nLayers-1] = tf.sub( model.weights[nLayers-1], model.neuralNetwork[nLayers-2].output.transpose().matMul(lastDx));
 
         for(let l=nLayers-2; l>=0; l--){
 
@@ -107,7 +105,12 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             model.networkDx[l] = currLayerDx;
 
             // updating weights
-            model.weights[l-1] = tf.sub( model.weights[l-1], model.neuralNetwork[l].output.transpose().matMul( currLayerDx).mul(learningRate));
+            if (l > 0)
+                model.weights[l] = tf.sub( model.weights[l], model.neuralNetwork[l-1].output.transpose().matMul( currLayerDx).mul(learningRate));
+            else{
+                model.weights[l] = tf.sub( model.weights[l], data.x.transpose().matMul( currLayerDx).mul(learningRate));
+
+            }
 
         }
 
@@ -132,7 +135,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             // NOTE: ITS CUSTOM
             //  TODO: generalize this bit:
             const predYOneHot = pred2Class(cPredY.slice([0, 0], [-1, 1]), threshold=0.5, oneHot=false)
-                                .concat( pred2Class(cPredY.slice([0, 1], [-1,1]), threshold=0.5, oneHOt=false), axis=1);
+                                .concat( pred2Class(cPredY.slice([0, 1], [-1,1]), threshold=0.5, oneHot=false), axis=1);
 
             // calculate the error:-
             const cLoss = this.costFn(predYOneHot, data.y);

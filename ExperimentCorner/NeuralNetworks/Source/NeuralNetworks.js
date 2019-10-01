@@ -48,6 +48,8 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
 
     this.getWeights = function(){ return model.weights; },
+    this.getNeuralNet = function(){return model.neuralNetwork;}
+    this.getNetworkDx = function(){return model.networkDx;}
     
     this.costFn = function(predY, trueY, params /* any userdefined params for our error function */) {
 
@@ -62,7 +64,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     this.activationFn = function(prepro, params /* any userdefined params for this activation function */){
 
         // using sigmoid
-        return tf.exp(tf.neg(prepro)).add(1).pow(-1);
+        return tf.tensor(1).sub(tf.exp(tf.neg(prepro))).pow(-1);
     },
 
     this.activationFnDx = function(prepro, params){
@@ -84,16 +86,21 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         const nLayers = model.neuralNetwork.length; // no of layers:- hidden + 1+outputlayer
 
-        const learningRate = 0.0001;
+        const learningRate = 0.001;
         // calculating the error function dx;
+
+        
+        let preLayerOut = (nLayers-2 > 0)? model.neuralNetwork[nLayers-2].output : data.x;
 
         // currently using same activation Function. 
         let lastDx = this.costFnDx(predY, data.y).mul( this.activationFnDx( model.neuralNetwork[nLayers - 1].prepro ) );
 
+        lastDx = tf.tensor(lastDx.flatten().arraySync().map( function(a,i){return (isNaN(a))? 0 : a})).expandDims(1);
+
         model.networkDx[nLayers -1] = lastDx;
 
         // updating weights
-        model.weights[nLayers-1] = tf.sub( model.weights[nLayers-1], model.neuralNetwork[nLayers-2].output.transpose().matMul(lastDx));
+        model.weights[nLayers-1] = tf.sub( model.weights[nLayers-1], preLayerOut.transpose().matMul(lastDx).mul(learningRate/data.x.shape[0]));
 
         for(let l=nLayers-2; l>=0; l--){
 
@@ -102,15 +109,21 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             .mul( this.activationFnDx( model.neuralNetwork[l].prepro ) );
 
             // inserting this derivative to our networkDerivative array for future use.
+
+
             model.networkDx[l] = currLayerDx;
 
             // updating weights
-            if (l > 0)
-                model.weights[l] = tf.sub( model.weights[l], model.neuralNetwork[l-1].output.transpose().matMul( currLayerDx ).mul(learningRate));
-            else{
-                model.weights[l] = tf.sub( model.weights[l], data.x.transpose().matMul( currLayerDx ).mul(learningRate));
 
-            }
+            preLayerOut = (l > 0)? model.neuralNetwork[l-1].output : data.x;
+
+            model.weights[l] = tf.sub( model.weights[l], preLayerOut.transpose().matMul( currLayerDx ).mul(learningRate/data.x.shape[0]));
+            // if (l > 0)
+            //     model.weights[l] = tf.sub( model.weights[l], model.neuralNetwork[l-1].output.transpose().matMul( currLayerDx ).mul(learningRate/ data.x.shape[0]));
+            // else{
+            //     model.weights[l] = tf.sub( model.weights[l], data.x.transpose().matMul( currLayerDx ).mul(learningRate/ data.x.shape[0]));
+
+            // }
 
         }
 
@@ -127,7 +140,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
         let epoch = 100;
 
         for(let i=0;i< epoch;i++){
-            // const cBatchData = trainTestSplit(data.x, data.y, .99)[0];
+            // const cBatchData = trainTestSplit(data.x, data.y, .6)[0];
             const cBatchData = data;
 
             // predict y using the current weights
@@ -138,17 +151,24 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             // const predYOneHot = pred2Class(cPredY.slice([0, 0], [-1, 1]), threshold=0.5, oneHot=false)
             //                     .concat(pred2Class(cPredY.slice([0, 1], [-1,1]), threshold=0.5, oneHot=false), axis=1);
 
-            const predYOneHot = tf.round(cPredY);
+            const predYOneHot = tf.clipByValue(tf.round(cPredY), 0,1);
             // calculate the error:-
             const cLoss = this.costFn(predYOneHot, cBatchData.y);
 
-            console.log("Loss: "+tf.sum(cLoss)+" epoch: "+i)
+            // printing entire report
+            console.log("Loss: "+tf.sum(cLoss).div(cBatchData.x.shape[0])+" epoch: "+i)
+            // console.log('cBatchData.x: '+cBatchData.x.flatten().arraySync());
+            // console.log('model.weights[0]: '+this.getWeights()[0].flatten().arraySync());
+            // console.log('model.neuralNetwork[0].prepro: '+this.getNeuralNet()[0].prepro.flatten().arraySync());
+            // console.log('model.neuralNetwork[0].output: '+this.getNeuralNet()[0].output.flatten().arraySync());
+            // console.log('predYOneHot: ', predYOneHot.flatten().arraySync());
+            // console.log('cBatchData.y: '+cBatchData.y.flatten().arraySync());
+            
 
             // calculate the derivatives of loss w.r.t all the neurons.
             // and store them to our model.networkDx array.
             this.backprop(cBatchData, predYOneHot);
-
-            // TODO: use the networkDx to update the weights.
+            // console.log('model.networkDx[0]: ', this.getNetworkDx()[0].flatten().arraySync())
 
 
 

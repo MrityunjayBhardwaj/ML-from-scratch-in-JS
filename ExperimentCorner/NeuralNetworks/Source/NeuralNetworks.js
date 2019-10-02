@@ -28,7 +28,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
     function init(structure) {
         // initialize the weights.
-
+        // tensor([[1],])
         for(let i=1;i< structure.length;i++){
 
             const currNeuronValue = tf.randomNormal([1, structure[i]]);
@@ -47,7 +47,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
     }
 
 
-    this.getWeights = function(){ return model.weights; },
+    this.getWeights   = function(){return model.weights; },
     this.getNeuralNet = function(){return model.neuralNetwork;}
     this.getNetworkDx = function(){return model.networkDx;}
     
@@ -71,7 +71,7 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
         // NOTE: prepro is going to be of size N x 1 where N = no. of points M = num of features
         // so please make sure to have an output in dim Nx1 
 
-        return tf.exp(tf.neg(prepro)).mul( tf.tensor(1).sub(tf.exp(tf.neg(prepro))));
+        return this.activationFn(prepro).mul( tf.tensor(1).sub(this.activationFn(prepro)));
     },
 
     
@@ -95,8 +95,9 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
         // currently using same activation Function. 
         let lastDx = this.costFnDx(predY, data.y).mul( this.activationFnDx( model.neuralNetwork[nLayers - 1].prepro ) );
 
-        lastDx = tf.tensor(lastDx.flatten().arraySync().map( function(a,i){return (isNaN(a))? 0 : a})).expandDims(1);
+        // lastDx = tf.tensor(lastDx.flatten().arraySync().map( function(a,i){return (isNaN(a))? 0 : a})).expandDims(1);
 
+        lastDx = tf.tensor(lastDx.arraySync().map( (cRow, rowIndex)=> { return cRow.map( (cVal, cellIndex) => { return (isNaN(cVal))? 0 : cVal} ) } ) );
         model.networkDx[nLayers -1] = lastDx;
 
         // updating weights
@@ -104,12 +105,13 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
 
         for(let l=nLayers-2; l>=0; l--){
 
-            const currLayerDx = model.networkDx[l+1]
+            let currLayerDx = model.networkDx[l+1]
             .matMul( model.weights[l+1].transpose() )
             .mul( this.activationFnDx( model.neuralNetwork[l].prepro ) );
 
             // inserting this derivative to our networkDerivative array for future use.
 
+            currLayerDx = tf.tensor(currLayerDx.arraySync().map( (cRow, rowIndex)=> { return cRow.map( (cVal, cellIndex) => { return (isNaN(cVal))? 0 : cVal} ) } ));
 
             model.networkDx[l] = currLayerDx;
 
@@ -144,19 +146,31 @@ function NeuralNetworks(structure = [3, 3, 3], weights /* user can insert weight
             const cBatchData = data;
 
             // predict y using the current weights
-            const cPredY = this.forwardPass(cBatchData);
+            let cPredY = this.forwardPass(cBatchData);
+
+
+            // TODO: filter the NaN
+            for(let i=0;i< model.neuralNetwork.length;i++) {
+
+                // filtering neuralNetworks
+                model.neuralNetwork[i].prepro = tf.tensor(model.neuralNetwork[i].prepro.arraySync().map( (cRow, rowIndex)=> { return cRow.map( (cVal, cellIndex) => { return (isNaN(cVal))? 0 : cVal} ) } ));
+                model.neuralNetwork[i].output = tf.tensor(model.neuralNetwork[i].output.arraySync().map( (cRow, rowIndex)=> { return cRow.map( (cVal, cellIndex) => { return (isNaN(cVal))? 0 : cVal} ) } ));
+
+            }
+
+            predYOneHot = tf.tensor(cPredY.arraySync().map( (cRow, rowIndex)=> { return cRow.map( (cVal, cellIndex) => { return (cVal > 0.5)? 1 : 0} ) } ));
 
             // NOTE: ITS CUSTOM
             //  TODO: generalize this bit:
-            // const predYOneHot = pred2Class(cPredY.slice([0, 0], [-1, 1]), threshold=0.5, oneHot=false)
+            // const predYOneHot = pred2Class(cPredY.slice([0, 0], [-1, 1]), threshold=0.5, oneHot=false);
             //                     .concat(pred2Class(cPredY.slice([0, 1], [-1,1]), threshold=0.5, oneHot=false), axis=1);
 
-            const predYOneHot = tf.clipByValue(tf.round(cPredY), 0,1);
+            // const predYOneHot = tf.clipByValue(tf.round(cPredY), 0,1);
             // calculate the error:-
             const cLoss = this.costFn(predYOneHot, cBatchData.y);
 
             // printing entire report
-            console.log("Loss: "+tf.sum(cLoss).div(cBatchData.x.shape[0])+" epoch: "+i)
+            console.log("Loss: "+tf.sum(cLoss)+" epoch: "+i)
             // console.log('cBatchData.x: '+cBatchData.x.flatten().arraySync());
             // console.log('model.weights[0]: '+this.getWeights()[0].flatten().arraySync());
             // console.log('model.neuralNetwork[0].prepro: '+this.getNeuralNet()[0].prepro.flatten().arraySync());

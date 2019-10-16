@@ -1,0 +1,54 @@
+{
+  "name": "multivariate-gaussian",
+  "version": "3.3.1",
+  "description": "Multivariate normal distribution density function",
+  "main": "multivariate_gaussian.js",
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lovasoa/multivariate-gaussian.git"
+  },
+  "keywords": [
+    "multivariate",
+    "Gaussian",
+    "normal",
+    "distribution",
+    "density",
+    "probability",
+    "n-dimensional",
+    "nd",
+    "multidimensional",
+    "multi",
+    "multiple",
+    "dimension",
+    "variable"
+  ],
+  "author": "Ophir LOJKINE",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lovasoa/multivariate-gaussian/issues"
+  },
+  "homepage": "https://github.com/lovasoa/multivariate-gaussian#readme",
+  "dependencies": {
+    "numeric": "^1.2.6"
+  },
+  "runkitExample": "var gaussian = require('multivariate-gaussian');\n",
+  "devDependencies": {
+    "tape": "^4.6.3"
+  },
+  "testling": {
+    "files": "test/*js",
+    "browsers": [
+      "chrome/latest",
+      "firefox/latest",
+      "ie/6..latest",
+      "safari/5..latest",
+      "android-browser/4..latest",
+      "iphone/6..latest",
+      "opera/11",
+      "opera/next"
+    ]
+  }
+}

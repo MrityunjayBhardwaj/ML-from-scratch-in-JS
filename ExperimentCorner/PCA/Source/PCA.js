@@ -35,7 +35,7 @@ function PCA(matrix){
     // decomposing covriance matrix using eigenDecomposition (which is preferred.)
     const eigenDecomp = nd.la.eigen(covMatrix);
 
-    console.log(eigenDecomp[1]);
+    console.log(eigenDecomp[0], convert2dArray(eigenDecomp[1]));
     
     // Extracting U S V matrixes
     const lBasis = covSVD[0];
@@ -49,6 +49,8 @@ function PCA(matrix){
     // const pCompVec = convert2dArray(nd.la.matmul(lBasis.sliceElems('...',0).reshape(1,2),ndMatrix.T ));
     const pCompVec = convert2dArray(eigenDecomp[1]);
 
+    const eVecFac = 1; // multiply the eigenVectors for clear visualization.
+
     let eigenVec = eigenDecomp[1];
     let eigenVals  = convert2dArray(eigenDecomp[0]);
 
@@ -57,7 +59,7 @@ function PCA(matrix){
     eigenVals[0] = eigenVals[0]/eValMag;
     eigenVals[1] = eigenVals[1]/eValMag;
 
-    console.log(pCompVec[0][0].re,covMatrix,eigenVals);
+    console.log(pCompVec[0],covMatrix,eigenVals);
 
 
 var layout = {
@@ -99,18 +101,18 @@ var layout = {
             marker: {size: 2}
         },
         {
-            x : [0, pCompVec[0][0].re*eigenVals[1]],
-            y : [0, pCompVec[0][1].re*eigenVals[1]],
+            x : [0, pCompVec[0][0]*eigenVals[0]**1*eVecFac],
+            y : [0, pCompVec[1][0]*eigenVals[0]**1*eVecFac],
             mode: 'Lines',
             type: 'Lines',
             line: {width: 5,color:'violet'},
         },
         {
-            x : [0, pCompVec[1][0].re*eigenVals[0]],
-            y : [0, pCompVec[1][1].re*eigenVals[0]],
+            x : [0, pCompVec[0][1]*eigenVals[1]**1*eVecFac],
+            y : [0, pCompVec[1][1]*eigenVals[1]**1*eVecFac],
             mode: 'Lines',
             type: 'Lines',
-            line: {width: 5,color:'violet'},
+            line: {width: 5,color:'yellow'},
         },
 
 

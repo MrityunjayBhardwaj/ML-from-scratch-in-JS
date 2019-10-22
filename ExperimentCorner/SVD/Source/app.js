@@ -1,69 +1,63 @@
 
 
-// Remove dependency of p5js
-
-
 function SVD(matrix ){
 
-// Singular Value Decomposition:-
-matrix = matrix || nd.array([[1,2],[3,1]]);
+// infering some image properties.
+const imageDim = {width: matrix[0].length, height: matrix.length};
+const imageDimRatio = {width: imageDim.width/(imageDim.width+imageDim.height), height: imageDim.height/(imageDim.width+imageDim.height)};
 
-let dSize = [40,40];
+  const data = [
+    {
+      z: prepro4Plotly(matrix),
+      colorscale: 'Greys',
+      type:'heatmap',
+    }
+  ];
+// initializing plot
+Plotly.newPlot('tester', data,{title:'Original Image',
 
-const m = 40;
-const k = Math.round(m/2);
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
 
-
-const x = tf.linspace(-3,3,k).expandDims(1);
-
-const xMatrix = x.transpose().tile([k,1]);
-
-const g2d = tf.exp( tf.div( tf.mul( tf.scalar(-1) , tf.add(tf.pow( xMatrix,2) , tf.pow( xMatrix.transpose(),2) ) ) , tf.scalar(k/8) ));
-
-// g2d.print();
-const A = tf.truncatedNormal([m,m])
-// const W = tf.conv2d(A,g2d.reshape([k,k,1,1]));
-
-console.log("resume ")
-
-// const IM = new ImageParser();
-// const Im =p5.LoadImage('../Assets/Images/brain_sticker.png', ()=>{ console.log("it Works!")},()=>{ console.log("it Works!")});
-
-// Create Conv2d;
-for(let i=0;i<5;i++){
-  for(let j=0;i<5;i++){
-    break;
-  }
-} 
+},
+);
 
 
-var data = [
-  {
-    // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
-    z: prepro4Plotly(matrix),
-    colorscale: 'Greys',
-    type: 'heatmap'
-  },
-  
-];
-
-Plotly.newPlot('tester', data,{title:'original Matrix \'A\''},{staticPlot: true});
-// Plotly.react()
-
-
-// SVD :-
+// calculating the svd of this image.
 const matrixSvd = nd.la.svd_decomp(matrix);
 
 const matrixLEVec =  convert2dArray(matrixSvd[0]);
 const matrixSEVal =  convert2dArray(nd.la.diag_mat(matrixSvd[1]));
 const matrixREVec =  convert2dArray(matrixSvd[2]);
 
-const eigenVals = convert2dArray(matrixSvd[1])
+// matrixSEVal[0][0] = -matrixSEVal[0][0]*2;
+
+// console.log("matrixSEVal" ,matrixSEVal);
+
+// converting the U S V to tf.tensor for further calcuation
+let tfU = tf.tensor(matrixLEVec);
+let tfS = tf.tensor(matrixSEVal);
+let tfV = tf.tensor(matrixREVec);
+
+// tfU = tfU.pow(1/2)
+// tfS = tfS.pow(-1)
+// tfV = tfV.pow(1/2)
+
+
+ // slice the left eigen vector matrix, just for experimentation
+const tfUMod = tf.mul(tfU.slice([0,0],[-1,5]),0).concat(tfU.slice([0,5],[-1,-1]), 1);
+
+// preparing the data for heatmap
+const eigenVals = convert2dArray(matrixSvd[1]); // eigen value matrix
 var lVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
     z: prepro4Plotly( matrixLEVec ),
-    type: 'heatmap'
+    type: 'heatmap',
   },
   
 ];
@@ -71,7 +65,7 @@ var sVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
     z: prepro4Plotly( matrixSEVal ),
-    type: 'heatmap'
+    type: 'heatmap',
   },
   
 ];
@@ -80,90 +74,231 @@ var rVecData = [
   {
     // z: [[1, 20, 30, 30], [20, 1, 60, 50], [30, 60, 1, 70], [0, 30, 60,8]],
     z: prepro4Plotly( matrixREVec ),
-    type: 'heatmap'
+    type: 'heatmap',
   },
   
 ];
 
-const eigenValsPlot = [
-  {
-    y : eigenVals,
-    mode: 'lines+markers',
-    type:'scatter',
-    line: {color: "violet",width:3} ,
-    markers: {width:10}
 
-  }
-];
+// plotting the data :
+Plotly.newPlot('leftEigenVector',lVecData,{title: "Left-SingularVectors",
 
-Plotly.newPlot('leftEigenVector',lVecData,{title: "U"});
-Plotly.newPlot('singularValues',sVecData,{title: "E"});
-Plotly.newPlot('rightEigenVector',rVecData,{title: "V"});
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
+});
+Plotly.newPlot('singularValues',sVecData,{title: "SingularValues",
 
-Plotly.newPlot('screePlot',eigenValsPlot,{title: "EigenValues"});
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
+
+});
+Plotly.newPlot('rightEigenVector',rVecData,{title: "Right-SingularVectors",
+
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
+});
 
 
 
-/* Reconstructing the image using some SVD components */
+/* Reconstructing the image using cummulative SVD components */
+let compArray =     [tf.zeros([imageDim.width, imageDim.height]), tf.matMul( tf.mul(tfU.slice([0,0],[-1,1]), tfS.slice([0,0],[1,1]) ) , tfV.slice([0,0],[1,-1]) )];
+let cummCompArray = [tf.zeros([imageDim.width, imageDim.height]), tf.matMul( tf.mul(tfU.slice([0,0],[-1,1]), tfS.slice([0,0],[1,1]) ) , tfV.slice([0,0],[1,-1]) )];
 
-// converting the U S V to tf.tensor for better calcuation
 
-const tfU = tf.tensor(matrixLEVec);
-const tfS = tf.tensor(matrixSEVal);
-const tfV = tf.tensor(matrixREVec);
 
-const compArray = [tf.zeros(tfS.shape)];
-// pre-calculate all the components
-for(let i=0;i<tfS.shape[0];i++){
-  const cComp = tf.matMul( tf.mul(tfU.slice([0,i],[-1,1]), tfS.slice([i,i],[1,1]) ) , tfV.slice([i,0],[1,-1]) );
-  // cummulativeComp = tf.add(cummulativeComp) 
+// pre-calculate all the components and cummulative component images.
+for(let i=2;i<tfS.shape[0]+1;i++){
+  const cComp = tf.matMul( 
+                            tf.mul(tfU.slice([0,i-1],[-1,1]), tfS.slice([i-1,i-1],[1,1]) ) , 
+                            tfV.slice([i-1,0],[1,-1]) 
+                          );
+  const cummulativeComp = tf.add(cummCompArray[i-1], cComp);
+
+  cummCompArray.push(cummulativeComp);
   compArray.push(cComp);
 }
 
 const originalImg = tf.tensor(matrix);
 
-setInterval(() => {
+const slider = document.getElementById('compNum');
+slider.oninput = ()=>{
+
 
   //get  current component number from user.
-  let compNum = Math.floor( document.getElementById('compNum').value * tfS.shape[0] );
-  document.getElementById('currCompNum').innerHTML = compNum;
+  let compNum = Math.floor( slider.value * tfS.shape[0] );
+  document.getElementById('currCompNum').innerHTML = (compNum)? compNum: "None";
 
-  // calculate the cummulative image.
-  let cummulativeComp = compArray[0];
-  for(let i=0;i<compNum;i++){
-    cummulativeComp = tf.add(cummulativeComp,compArray[i+1]);
-  }
+  // fetching the current component image and cummulative image upto 'compNum'
+  const currComp = compArray[compNum];
+  const currCummComp = cummCompArray[compNum];
 
   // Calcuating percent Difference:
-  const pDiff = 100* ( tf.norm(cummulativeComp).arraySync() / tf.norm(originalImg).arraySync() );
-  document.getElementById('pctDiff').innerHTML = `  ${pDiff.toFixed(1)}%`;
-
-  // console.log(pDiff, tf.norm(cummulativeComp).arraySync());
+  const pDiff = 100* (( tf.norm(currCummComp).arraySync() / tf.norm(originalImg).arraySync() ));
+  document.getElementById('pctDiff').innerHTML = `  ${pDiff.toFixed(2)}%`;
 
   // Visualizing currently added Component
-  const currComp = compArray[compNum];
   const compData = [
     {
       z: prepro4Plotly( currComp.arraySync() ),
       // colorscale: 'Greys',
-      type: 'heatmap'
+      type: 'heatmap',
+      colorscale : [
+                    [ 0, darkModeCols.darkBlue()],
+                    [ .25, darkModeCols.magenta()], 
+                    [ 0.5, darkModeCols.blue()], 
+                    [ 0.75, darkModeCols.yellow()],
+                    [ 1, darkModeCols.red()], 
+                  
+                  ],
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
     }
   ];
 
   // Visualizing the Constructed Commulative Component Image:-
   const cummCompData = [
     {
-      z: prepro4Plotly( cummulativeComp.arraySync()),
+      z: prepro4Plotly( currCummComp.arraySync()),
       colorscale: 'Greys',
-      type:'heatmap'
+      type:'heatmap',
     }
   ];
 
+
+
+let cNum = compNum-1;
+
+const eigenValsPlot = [
+
+  // visualizing unused singular values.
+  {
+    y : eigenVals,
+    x : tf.linspace(1, eigenVals.length+1, eigenVals.length).flatten().arraySync(),
+    mode: 'lines+markers',
+    type:'scatter',
+    line: {color: darkModeCols.purple(),width:1} ,
+    marker: {size:1},
+
+    name: 'unused singular values(SVs)'
+  },
+];
+
+if (compNum){
+  eigenValsPlot.push(
+  // showing the cummulative singular values used in reconstructed image.
+    {
+    // current component
+    y : eigenVals.slice(0, cNum+1),
+    x : tf.linspace(1, eigenVals.length+1, eigenVals.length).flatten().arraySync().slice(0, cNum+1),
+    mode: 'lines+markers',
+    type:'scatter',
+    line: {color: darkModeCols.blue(),width:2} ,
+    markers: {width:25},
+    name: 'cummulative-SVs'
+  },
+  );
+
+  // showing the currently added singular value.
+  eigenValsPlot.push(
+
+  {
+
+    // current component
+    y : [eigenVals[cNum]],
+    x :[cNum+1],
+    mode: 'markers',
+    type:'scatter',
+    marker: {color: "magenta",size:20},
+    name: 'current-SV'
+  },
+  )
+
+
+}
+
+
+
+
   // updating  plotly
-Plotly.react('compViz0',compData,{title: "Component " +compNum},{staticPlot: true})
-Plotly.react('cummCompViz',cummCompData,{title: "Cummulative Component Image"},{staticPlot: true})
+Plotly.react('compViz0',
+              compData,
+              {
+                title: {
+                      text: "currently added Component: " +((compNum)? compNum: "None"),
+                      font:{
+                        color: "magenta",
+
+                      }
+                },
+            
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
+            
+            },
+              {staticPlot: true}
+            );
+Plotly.react('cummCompViz',
+              cummCompData,
+              {
+                // title: "Cummulative Component Image", 
+                title: {
+                      text:(compNum)? "Reconstructed Image \n (using components 1 to "+compNum+ ")": "Reconstructed Image using Nothing "  , 
+                      font:{
+                        color: darkModeCols.blue()
+
+                      }
+                },
+
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica'
+        },
+        paper_bgcolor : '#222633',
+              },
+              {staticPlot: true}
+            );
   
-}, 250);
+
+
+Plotly.react('screePlot',eigenValsPlot,{title: "<br>Singular-Values", width: 600, height: 400,
+
+        font : {
+            size : 15,
+            color: 'white',
+            family : 'Helvetica',
+            
+        },
+        plot_bgcolor: "#222633",
+        paper_bgcolor : '#222633',
+
+}, 
+
+              {staticPlot: true}
+
+);
+
+};
 
 
 }

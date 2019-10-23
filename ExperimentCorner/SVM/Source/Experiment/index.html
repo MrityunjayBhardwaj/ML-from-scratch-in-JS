@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Experiment</title>
+
+    <script src="../../../../dependency/tensorflowJS/tf.min.js"></script>
+    <script src="../../../../dependency/utils.js"></script>
+    <script src="../../../../dependency/plotlyJS/plotly.js"></script>
+
+    <!--  viz Library -->
+    <script src="../../../../dependency/d3.js"></script>
+
+</head>
+<body>
+    <style>
+
+        body{
+            background-color: rgb(13, 13, 27);
+            color: white;
+        }
+
+        .mathRow {
+            display: flex;
+            position: relative;
+
+        }
+        .mathRow div{
+            margin: .5em;
+        }
+
+        .sliderContainer {
+
+        }
+
+        #sliderContainerElem {
+            padding: 4px
+        }
+        
+    </style>
+
+
+    <div class="vizContainer">
+
+        <div id="visualization">
+            <div id="expViz"></div>
+        </div>
+
+        <div id="controls">
+
+            <h3>HyperPlane Settings:</h3>
+            <div class="sliderContainer">
+
+                <div id="sliderContainerElem">
+                    angle: 
+                    <input type="range" min="0" max="1" value=".15"  class="slider" step=".01" id="angleSlider">
+                </div>
+
+                <div id="sliderContainerElem">
+                    bias: 
+                    <input type="range" min="-1" max="1" value="    0" class="slider" step=".01" id="biasSlider">
+                </div>
+
+            </div>
+
+
+            <div id="controlViz">
+
+                <div class="mathRow">
+                    <div style="color: blue;">
+                        <h1>w</h1>
+
+                    </div>
+                    <div>
+                       <h3>T</h3>
+                    </div>
+                    <div style="color:magenta;">
+                        <h1>x</h1>
+                    </div>
+                    <div>
+                    <h2 style="margin-top: 1.2em; " >+</h2> 
+                    </div>
+                    <div style="color: red;">
+                        <h1 style="margin-top: 0.8em;">b</h1>
+                    </div>
+                    <div>
+                        <h2 style="margin-top: 1.1em;">=</h2>
+                    </div>
+
+                    <div>
+                        <h1>y(x)</h1>
+                    </div>
+                </div>
+
+                <div class="mathRow">
+                    <div style="color: blue;">
+                            <h2 id="weightXOut" style="font-family:Helvetica;">2</h2>
+                            <h2 id="weightYOut" style="font-family:Helvetica;">2</h2>
+                    </div>
+                    <div>
+                        T
+                    </div>
+                    <div style="color:magenta;">
+                        <h2 id="rndPtXOut">3</h2>
+                        <h2 id="rndPtYOut">4</h2>
+                    </div>
+                    <div>
+                    <h2 style="margin-top: 1.7em; " >+</h2> 
+                    </div>
+                    <div style="color: red;">
+                        <h2 id="biasOut"style="margin-top: 1.7em; ">3</h2>
+                    </div>
+                    <div>
+                    <h2 style="margin-top: 1.7em; " > =</h2> 
+                    </div>
+
+                    <div>
+                        <h2 id="predOut"style="margin-top: 1.7em; ">3</h2>
+                    </div>
+                </div>
+            </div>
+
+
+
+    <svg id='svgContainer'></svg>
+
+    </div>
+   
+    
+    <!-- <script src="Source/main.js"></script> -->
+
+    <script src="Source/HyperPlaneVizMain.js"></script>
+</body>
+</html>

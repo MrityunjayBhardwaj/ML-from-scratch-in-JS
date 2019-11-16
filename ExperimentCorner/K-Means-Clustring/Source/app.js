@@ -46,6 +46,30 @@ for(let i=0; i<k; i++){
         }
     )
 
+    plotData.push(
+        {
+
+            x: [mean[i][0]],
+            y: [mean[i][1]],
+
+
+            mode: 'markers',
+            type: 'scatter',
+            legendgroup: 'group'+i+'',
+            name: 'cluster'+i+' mean',
+
+            marker : {
+                size: 50,
+                color: currColor,
+                opacity: .7,
+                line: {
+                    color: 'rgb(231, 99, 250)',
+                    width: 6
+                  },
+            }
+        }
+    )
+    
 }
 
 

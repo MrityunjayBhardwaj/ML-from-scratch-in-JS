@@ -21,8 +21,8 @@ function FDA(data){
         // do classwise division 
         const dataSplit = classwiseDataSplit(tfDataX,tfDataY);
 
-        const data0 = dataSplit[0]; // data of class 0
-        const data1 = dataSplit[1]; // data of class 1
+        const data0 = dataSplit[0].x; // data of class 0
+        const data1 = dataSplit[1].x; // data of class 1
 
         // calculate the mean of the matrix
         const data0Mean = tf.mean( data0 , axis=0 );
@@ -81,10 +81,10 @@ function FDAmc(){
         const dataClassArray = classwiseDataSplit(tfDataX,tfDataY);
 
         // calculating the mean of all the classes.
-        const dataMean = dataClassArray.map( (cClassData) => tf.mean( cClassData, axis=0 ).expandDims(1) );       
+        const dataMean = dataClassArray.map( (cClassData) => tf.mean( cClassData.x, axis=0 ).expandDims(1) );       
 
         // calculate the covariance matrix for all the classes data
-        const dataCov = dataClassArray.map( (cClassData) => tf.matMul( cClassData.transpose(),cClassData ) );
+        const dataCov = dataClassArray.map( (cClassData) => tf.matMul( cClassData.x.transpose(),cClassData.x ) );
 
         // Cummulative mean of all the data points from all the classes
         const cumMean = tf.mean( tfDataX, axis=0).expandDims(1);
@@ -130,6 +130,8 @@ function FDAmc(){
         // console.log(nd)
 
         model.weights = tf.tensor(eigenVecsSorted).slice([0,1],[-1,-1]);
+
+        
         return eigenVecsSorted;
         // console.log(eigenVals,eigenVecs);
     }

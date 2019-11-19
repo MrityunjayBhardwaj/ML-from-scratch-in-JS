@@ -1,7 +1,7 @@
   // initializing data
   const mIrisX = tf.tensor(iris).slice([0,0],[100,2])
   // one hot encoded
-  const mIrisY = Array(100).fill([1,0],0,50).fill([0,1],50);
+  const mIrisY =  Array(100).fill([1,0],0,50).fill([0,1],50) ;
   /**
    * 
    * @param {number} x cursor location X
@@ -65,7 +65,7 @@
     yaxis: {
       range: [-1,5],
       autorange: false 
-    },    y : grid[0],
+    },    
     margin: {
       autoexpand: false,
     },
@@ -150,24 +150,35 @@
             let dataY = Array(dataC0.shape[0] + dataC1.shape[0]).fill([1,0],0,dataC0.shape[0]).fill([0,1],dataC0.shape[0],);
 
             const model = new FDAmc();
-            projVec = model.train({ x:dataX.arraySync(), y:dataY })[1];
+            projVec = model.train({ x:dataX.arraySync(), y:dataY });
 
             
             // const projDataX = tf.matMul(dataX,projVec);
-              console.log(projVec,
-                );
+              console.log(projVec);
+               
             // const orth2EigVec = nd
             // const bias = - projDataX;
 
-            const projVecViz = {
+            const projVecViz = [{
               name: "FDA's Projection Vector",
-              x : [ -projVec[0]*fac ,projVec[0]*fac ],
-              y : [ -projVec[1]*fac ,projVec[1]*fac ],
-              mode: 'lines',
-              type: 'scatter',
-              line : { width : 4}
+              x : [ -projVec[0][0]*fac ,projVec[0][0]*fac ],
+              y : [ -projVec[0][1]*fac ,projVec[0][1]*fac ],
+              mode : 'lines',
+              type : 'scatter',
+              line : { width : 4, color: 'green'}
+            },
+            {
+              name: "FDA's Projection Vector",
+              x : [ -projVec[1][0]*fac ,projVec[1][0]*fac ],
+              y : [ -projVec[1][1]*fac ,projVec[1][1]*fac ],
+              mode : 'lines',
+              type : 'scatter',
+              line : { width : 4, color: 'green'}
             }
-            traces[2] = projVecViz;
+          
+          ]
+            traces[2] = projVecViz[0];
+            traces[3] = projVecViz[1];
 
             // TODO: figure out the decision boundary
             // let decisionBoundary = tf.linalg.gramSchmidt(tf.tensor(projVec).expandDims(1).transpose()).flatten().arraySync();
@@ -188,11 +199,11 @@
             const psudoPtsClassify = model.classify(psudoPts)
             window.model  = model;
 
-            console.log( pusdoPts );
+            console.log( psudoPts );
             const meshGridPsudoPts = meshGrid(psudoPts0.arraySync(),psudoPts0.arraySync());
             const meshGridPsudoPtsY = meshGridPsudoPts.map( 
                   function(cRow) {
-                    return model.classify( tf.tensor(cRow).transpose() ).flatten().arraySync()
+                    return model.classify( tf.tensor(cRow) ).flatten().arraySync()
                   }
              );
 
@@ -276,8 +287,8 @@ function plotDist(dataX,dataY,containerId,index = 0){
   const dataSplit = classwiseDataSplit(clfProjX,tfDataY);
 
   // split the data
-  const clfProjX0 =  dataSplit[0];
-  const clfProjX1 =  dataSplit[1];
+  const clfProjX0 =  dataSplit[0].x;
+  const clfProjX1 =  dataSplit[1].x;
 
   // calculating parameters of gaussian
 
@@ -360,6 +371,20 @@ function plotDist(dataX,dataY,containerId,index = 0){
       
   ];
 
-  Plotly.newPlot(containerId,clfProjXData,{title: 'FDA for Classification'})
+  const classifierLayout = {
+    title: 'FDA for Classification',
+
+    xaxis:{
+        range : [-4, 4],
+        autorange: false,
+    },
+
+    yaxis:{
+        autorange: false
+    }
+    
+  }
+
+  Plotly.newPlot(containerId, clfProjXData, classifierLayout)
 
 }

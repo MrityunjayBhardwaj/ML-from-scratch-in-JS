@@ -87,6 +87,34 @@ function gaussianProcess() {
     return tf.log( tfdet(K).mul(0.5).add( Y_train.transpose.dot(tfpinv(K).dot(Y_train)).mul(0.5).add( len(X_train)* Math.log(lMath.PI*2)*0.5) ) )
     },
 
+    this.test = (X,data) => {
+
+        console.log(X.shape);
+        const cov = this.kernel[0](X,X).arraySync();
+        const mu = tf.zeros(X.shape);
+
+        // saving our params into our model
+        model.priorParams.mean = mu;
+        model.priorParams.covariance = cov;
+
+        const {0: mu_s, 1: cov_s} = this.posteriorPredictive(X, data.x,data.y, params={l:1.0, sigma_f: 1.0, sigma_y: 1.5});
+
+        // saving our params into our model
+        model.posteriorPredictiveParms.mean = mu_s;
+        model.posteriorPredictiveParms.covariance = cov_s;
+
+        // return mu_s; // which is our prediction.
+
+        return [mu_s.flatten().arraySync(), 
+                (mu_s.add(  nd2tf(nd.la.diag(tf.sqrt(cov_s).arraySync()) ).mul( 1.96).expandDims(1) ) ).flatten().arraySync(),
+                (mu_s.sub(  nd2tf(nd.la.diag(tf.sqrt(cov_s).arraySync()) ).mul( 1.96).expandDims(1) ) ).flatten().arraySync() ]
+        // TODO: plot different kernels.
+
+
+    },
+
+
+
 }
 
 

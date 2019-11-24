@@ -114,6 +114,33 @@ function gaussianProcess() {
     },
 
 
+    this.getSamples = (sampleSize= 1, from='posterior') =>{
+        if(from === 'posterior'){
+            samples = [];
+
+            distribution = MultivariateNormal(model.posteriorPredictiveParms.mean.flatten().arraySync(),
+                                               model.posteriorPredictiveParms.covariance.arraySync());
+
+            for(let i=0;i< sampleSize; i++){
+                samples.push(distribution.sample());
+            }
+        }
+        else if (from === 'prior'){
+            samples = [];
+
+            distribution = MultivariateNormal(model.posteriorPredictiveParms.mean.flatten().arraySync(),
+                                               model.posteriorPredictiveParms.covariance.arraySync());
+
+            for(let i=0;i< sampleSize; i++){
+                samples.push(distribution.sample());
+            }
+
+        }
+        else {
+            throw new Error('invalid parameter value, must be either \' posterior \' or \' prior \' ');
+        }
+
+    }
 
 }
 

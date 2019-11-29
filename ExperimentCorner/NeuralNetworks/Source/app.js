@@ -1,20 +1,60 @@
-let mIrisX = tf.tensor(iris).slice([0,1],[100,2]);
+let mIrisX = tf.tensor(iris).slice([0,0],[100,1]);
+
+
+// simulated data
+
+const sampleSize = 500;
+
+const simData = {   x : tf.randomNormal([sampleSize/2, 1]).mul(0.5).sub(2.5).concat(tf.randomNormal([sampleSize/2, 1]).mul(0.5).add(2.5)), 
+                    y: tf.ones([sampleSize/2, 1]).concat(tf.zeros([sampleSize/2, 1])) }
+
 // one hot encoded
 let mIrisY = tf.tensor( Array(100).fill([1,0],0,50).fill([0,1],50) );
 
 // let mIrisY = tf.tensor( Array(150).fill([1,0,0], 0, 50).fill([0,1,0], 50, 100).fill([0,0,1], 100) );
 const standardDataX = normalizeData(mIrisX, 1)
 
-const {0: trainData,1: testData} = trainTestSplit(standardDataX,mIrisY,2/3);
+const trainData = { x : standardDataX.slice([0,0],[Math.floor(standardDataX.shape[0]*2/3), -1]),
+                    y: mIrisY.slice([0,0],[Math.floor(standardDataX.shape[0]*2/3), 1]) };
+
+const testData  = { x: standardDataX.slice([Math.floor(standardDataX.shape[0]*2/3), 0],[-1, -1]),
+                    y: mIrisY.slice([Math.floor(standardDataX.shape[0]*2/3), 0],[-1, 1]) };
+
+// const {0: trainData,1: testData} = trainTestSplit(standardDataX, mIrisY.slice([0,0],[-1,1]), 2/3);
 
 // const classwiseDataSplit
 
-const model = new NeuralNetworks([3,3]);
+const streetlights = tf.tensor( [[ 1, 0, 1 ],
+                          [ 0, 1, 1 ],
+                          [ 0, 0, 1 ],
+                          [ 1, 1, 1 ] ] )
+
+const walk_vs_stop = tf.tensor([[ 1, 1, 0, 0]]).transpose()
+
+const gdltrain = {x:streetlights, y: walk_vs_stop}
+
+const model = new NeuralNetworks([3,3,3],
+     {epoch: 100, learningRate: 0.001, batchSize: 1.0 /* percent of data */ },
+     );
 
 model.train(trainData);
+model.test(testData);
+
+// TODO: MAKE THE CODE MORE PROFESSIONAL AND APPLICABLE.
 
 
+// testing:
+// model.test(testData)
 
+
+// const originalWeights = 5;
+// let trainX = tf.randomUniform();
+// let trainY = trainX.mul(originalWeights);
+
+
+// const regModel = new NeuralNetworks([3,3]);
+
+// model.train(trainX);
 
 
 

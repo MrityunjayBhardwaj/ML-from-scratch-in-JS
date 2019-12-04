@@ -14,3 +14,15 @@
 function dSeperation(Graph){
 
 }
+
+// given a factor graph this function lets you run inference.
+function sumProd(FG){
+
+    this.init= function(FG){
+
+    },
+    this.inference = function(query){
+
+    }
+
+}

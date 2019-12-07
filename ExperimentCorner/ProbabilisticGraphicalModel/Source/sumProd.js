@@ -144,7 +144,6 @@ Factor.prototype.maxProductMessage = function(recipient){
     expanded in the correct axes.
 */
 Factor.prototype.reformatMessage = function(message){
-
     const dims =  this.potential.shape;
     const states = message.val.flatten().arraySync(); // TODO: solve this for multi-variate distribution case
     const whichAxis  = this.connections.indexOf(message.fromNode); // select the axis of the node who sends this message.

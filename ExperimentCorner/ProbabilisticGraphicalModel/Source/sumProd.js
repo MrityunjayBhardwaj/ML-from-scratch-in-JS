@@ -144,6 +144,7 @@ Factor.prototype.maxProductMessage = function(recipient){
     expanded in the correct axes.
 */
 Factor.prototype.reformatMessage = function(message){
+
     const dims =  this.potential.shape;
     const states = message.val.flatten().arraySync(); // TODO: solve this for multi-variate distribution case
     const whichAxis  = this.connections.indexOf(message.fromNode); // select the axis of the node who sends this message.
@@ -192,3 +193,69 @@ Factor.prototype.maximum = function(p, node){
 
 
 
+
+function Variable(name,size){
+    Node.call(this, name);
+
+    this.bfmarginal = NaN;
+    this.size = size;
+    
+}
+
+// extending the Variable to Node object.
+Variable.prototype = Object.create(Node.prototype);
+
+// use the constructor of Variable function.
+Variable.prototype.constructor = Variable;
+
+
+
+/**
+ * 
+ * @summary this function marginalize w.r.t this variable by using message from all its connections in the current iteration step.
+ */
+Variable.prototype.marginal = function(){
+    // here, we also used the max(log) trick. in order to prevent any numberical unstablilities.
+    if ( this.inbox.length){
+        const messages = this.inbox[this.inbox.length -1];
+        const logVals = tf.log(messages.map((m) => {return m.val.arraySync()}));
+        const validLogVals = tfNan2Num(logVals);
+        const sumLogs = tf.sum(validLogVals, axis=0);
+        const validSumLogs = sumLogs.sub(tf.max(sumLogs));// IMPORTANT for numerical stabality
+        const prod = tf.exp(validSumLogs);
+
+        return prod.div(tf.sum(prod));
+    }
+    else{
+        // for first iteration use the simple uniform distribution.
+        return tf.ones([1, this.size]).div(this.size);
+    }
+}
+
+Variable.prototype.maximalState = function(){
+    return tf.max(this.marginal());
+}
+
+/**
+ * @param {Factor} recipient reciver of this message.
+ * @summary create a message by summing over all the messages that are not from the recipient Factor node.
+ */
+Variable.prototype.makeMessage = function(recipient){
+    if (this.connections.length > 1){
+
+        const originalMessages = this.inbox[this.inbox.length -1];
+        // collect all the messages that are not from the recipient node
+        const messages = originalMessages.filter((msg) => {if(msg.fromNode !== recipient)return msg});
+
+        // summing over this variable
+        const logVals = tf.tensor( messages.map( function(m){return tf.log(m.val).arraySync();} ));
+        return tf.exp(
+                tf.sum(logVals, axis=0) 
+        );
+    }
+    else{
+        // if there is only one factor connected to this node, then just propagate the probability =1 
+        return tf.ones([1, this.size]);
+    }
+
+}

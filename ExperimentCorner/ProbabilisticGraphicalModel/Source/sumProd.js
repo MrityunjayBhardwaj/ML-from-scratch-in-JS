@@ -259,3 +259,127 @@ Variable.prototype.makeMessage = function(recipient){
     }
 
 }
+
+function FactorGraph(firstNode=NaN, silent=false, debug=false){
+
+    this.nodes = {};
+
+    // adding dict like functionality
+    Object.setPrototypeOf(this.nodes, {
+        getKeys : 
+            function(){
+                const keys = [];
+                // console.log(this);
+                for(let k in this.nodes){
+                    
+                    if (this.nodes.hasOwnProperty(k))
+                        keys.push(k);
+                }
+                return keys
+            }.bind(this)
+        ,
+        getValues :
+            function(){
+                const vals = [];
+                for(let k in this.nodes){
+
+                    if (this.nodes.hasOwnProperty(k))
+                        vals.push(this.nodes[k]);
+                }
+                return vals;
+            }.bind(this)
+    });
+
+
+
+    this.isSilent = silent;
+    this.debug = debug;
+
+    if (firstNode){
+        this.nodes[firstNode.name] = firstNode;
+    }
+
+    this.add = function(node){
+        this.nodes[node.name] = node;
+    }
+    this.connect = function(name1, name2){
+        this.nodes[name1].push(this.nodes[name2]);
+    }
+    this.append = function(fromNodeName, toNode){
+        const toNodeName = toNode.name;
+
+        if (!(this.nodes[toNodeName])){
+            this.nodes[toNodeName] = toNode;
+        }
+        this.nodes[fromNodeName].connect(this.nodes[toNodeName]);
+
+        return this;
+    }
+
+    this.leafNode = function(){
+        return this.nodes.getValues().filter((node) => {if(node.connections === 1)return node});
+    }
+
+    // TODO: add observation support
+
+    this.exportMarginals = function(){
+         
+        const retVal = {};
+        for(let n in this.nodes){
+
+            const cNode = this.nodes[n];
+            if ( cNode instanceof Variable){
+                retVal[cNode.name] = cNode.marginal();
+                cNode.bfmarginal = retVal[cNode.name];
+            }
+        }
+
+        // console.log(retVal);
+        return retVal;
+
+    }
+    this.compareMarginals = function(marginalA, marginalB){
+
+
+        let sum = 0;
+        for(let nodeName in marginalA){
+
+            if (marginalA[nodeName] && marginalB[nodeName])
+                sum +=tf.sum(tf.abs(marginalA[nodeName].sub(marginalB[nodeName]))).flatten().arraySync()[0];
+        }
+
+        return sum;
+    }
+    this.computeMarginals = function(maxItrs=10, tolerance=1e-3, errorFunc){
+        // belief propagation
+
+        // for keeping track of the state
+        let marginalDiffs = [1];
+        let step = 0;
+
+
+        // clearning the inbox before all the calculations.
+        for (let node in this.nodes){
+            this.nodes[node].inbox = []; 
+        }
+
+        let currMarginals = this.exportMarginals();
+
+        // initialization
+        for(let nodeKey in this.nodes){
+            const node = this.nodes[nodeKey];
+            if(  node instanceof Variable ){
+                const message = new Message(node, tf.ones([1, node.size]));
+                for(let recipient of node.connections){
+                    recipient.deliver(step, message);
+                }
+            }
+
+        }
+
+
+        // TODO: add belief propagation
+
+        
+
+}

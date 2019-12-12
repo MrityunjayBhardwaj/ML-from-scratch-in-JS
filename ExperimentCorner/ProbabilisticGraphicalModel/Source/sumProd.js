@@ -380,6 +380,59 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
 
         // TODO: add belief propagation
 
-        
+        while( step < maxItrs && tolerance < marginalDiffs[marginalDiffs.length -1]){
+            const lastMarginals = currMarginals;
+            step += 1
+            if (!this.silent){
+            }
+
+            const factors = this.nodes.getValues().filter((node) => {if(node instanceof Factor)return node});
+            const variables = this.nodes.getValues().filter((node) => {if(node instanceof Variable)return node});
+
+            const senders = factors.concat(variables);// collect factors first then variables.
+
+            for( sender of senders){
+                const nextRecipients = sender.connections;
+                for (recipient of nextRecipients){
+                    const val = sender.makeMessage(recipient);
+                    const message = new Message(sender, val);
+                    if(this.debug){
+                        console.log( 
+                            step + " " + sender.name + " --> " +   recipient.name + 
+                            " message: "+ message.val.arraySync()
+                        );
+                    }
+                    recipient.deliver(step, message);
+                }
+            }
+            currMarginals = this.exportMarginals();
+
+            if (errorFunc){
+                marginalDiffs.push(
+                    errorFunc(currMarginals, lastMarginals)
+                );
+
+            }else{
+                marginalDiffs.push(
+                    this.compareMarginals(currMarginals, lastMarginals)
+                );
+
+            }
+            if (1){
+
+                console.log(marginalDiffs[marginalDiffs.length -1]);
+            }
+        }
+
+        // console.log(currMarginals);
+
+
+    }
+
+    // this.query(nodeName,evidence) = () =>{
+
+
+    // }
+    
 
 }

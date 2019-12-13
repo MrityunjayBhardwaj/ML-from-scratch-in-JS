@@ -426,6 +426,9 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
 
         // console.log(currMarginals);
 
+        window.currMarginals = currMarginals;
+
+        return marginalDiffs.slice(1); // skipping only the first entry.
 
     }
 

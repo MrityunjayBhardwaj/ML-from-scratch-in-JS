@@ -322,6 +322,25 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
 
     // TODO: add observation support
 
+    this.observe = async function(nameName, state){
+
+        for(let j=0;j<nameName.length;j++){
+
+            const node = this.nodes[nameName[j]];
+
+            const factors = node.connections.filter((node) => {if (node instanceof Factor)return node;});
+
+            if (state>=node.size)
+                throw new Error('specified state must not exceed the size of the node');
+
+            const factorArray = [];
+            for(let factor of factors){
+
+
+            }
+        }
+
+    }
     this.exportMarginals = function(){
          
         const retVal = {};

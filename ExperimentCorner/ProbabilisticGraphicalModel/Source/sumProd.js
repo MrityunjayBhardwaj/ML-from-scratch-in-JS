@@ -320,8 +320,6 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
         return this.nodes.getValues().filter((node) => {if(node.connections === 1)return node});
     }
 
-    // TODO: add observation support
-
     this.observe = async function(nameName, state){
 
         for(let j=0;j<nameName.length;j++){
@@ -336,6 +334,20 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
             const factorArray = [];
             for(let factor of factors){
 
+
+                // detechining all the connections between each factors and this node.
+                const deleteAxis = factor.connections.indexOf(node);
+                const deleteDims = tf.linspace(0, node.size-1, node.size).flatten().arraySync();
+                deleteDims.splice(state[j], 1);
+            
+                const v = await tfDeleteAsync(factor.potential, deleteDims, deleteAxis);
+                factor.potential = tf.squeeze(v)[0];
+                factor.connections.splice(deleteAxis, 1);
+
+                console.log('factor '+factor.name+' updated')
+
+                // detechining all the connections of this node, soo that they won't be able to pass message.
+                node.connections = [];
 
             }
         }

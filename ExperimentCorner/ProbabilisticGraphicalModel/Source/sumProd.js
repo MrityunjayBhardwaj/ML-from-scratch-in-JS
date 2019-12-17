@@ -341,7 +341,7 @@ function FactorGraph(firstNode=NaN, silent=false, debug=false){
                 deleteDims.splice(state[j], 1);
             
                 const v = await tfDeleteAsync(factor.potential, deleteDims, deleteAxis);
-                factor.potential = tf.squeeze(v)[0];
+                factor.potential = tf.squeeze(v);
                 factor.connections.splice(deleteAxis, 1);
 
                 console.log('factor '+factor.name+' updated')

@@ -26,3 +26,10 @@ function sumProd(FG){
     }
 
 }
+
+
+
+
+
+
+        

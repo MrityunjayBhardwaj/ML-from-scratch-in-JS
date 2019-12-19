@@ -7,7 +7,10 @@ let darkModeCols = {
   purple: (alpha = 1) => `rgba(153, 102, 255,${alpha})`,
   grey: (alpha = 1) => `rgba(231,233,237,  ${alpha})`,
   magenta: (alpha = 1) => `rgba(255,0,255,  ${alpha})`,
-  violet: (alpha = 1) => `rgba(255,0,255,   ${alpha})`
+  violet: (alpha = 1) => `rgba(255,0,255,   ${alpha})`,
+  black: (alpha = 1) => `rgba(0,0,0,   ${alpha})`,
+  white: (alpha = 1) => `rgba(255,255,255,   ${alpha})`,
+  darkBlue: (alpha = 1) => `#222633`,
 };
 
 function convert2dArray(ndArr) {

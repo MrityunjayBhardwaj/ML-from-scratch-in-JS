@@ -314,9 +314,9 @@ function meshGridRange(
 
 /**
  *
- * @param {Array} a
- * @param {Array} b
- * @description calculates the meshgrid just like in Matlab
+ * @param {Array} a array of values in axis=0
+ * @param {Array} b array of values in axis=1
+ * @throws will throw an error if (a.length != b.length).
  * @returns returns multidim js-array.
  */
 function meshGrid(a, b) {

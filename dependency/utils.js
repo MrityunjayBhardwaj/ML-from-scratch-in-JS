@@ -546,16 +546,18 @@ function optimize(
  */
 function normalizeData(data, unitVariance=0) {
 
-  const meanCenteredData = data.sub( data.mean((axis = 0)) );
-  const variance = meanCenteredData.pow(2);
-  const stdev = tf.sum(variance.pow(1/2), 0).div(meanCenteredData.shape[0]);
+  let meanCenteredData = data.sub( data.mean(axis = 0) );
+
+  if(!unitVariance)
+    return meanCenteredData;
+
+  const stdev = normalizeData(meanCenteredData, 0).pow(2).mean().sqrt();
 
   // z-score
   const standardForm = meanCenteredData.div(stdev);
-  if (unitVariance)
-    return standardForm;
 
-  return meanCenteredData;
+  return standardForm;
+
 
 }
 

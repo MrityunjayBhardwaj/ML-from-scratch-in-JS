@@ -323,16 +323,34 @@ function meshGrid(a, b) {
   // input must be an array
   // if(a.length !== b.length)throw new Error ( "Error: Input must be of same length.");
 
+  // // TODO: remove this error function when we fixed its use in all the codes.
+  // console.error("MESH GRID FUNCTION HAS BEEN MODIFIED.. check for compactiblity!");
+
+
+  if(a.length !== b.length)
+    throw new Error (`mismatched size, array must be of same size but give : \n a.length= ${a.length} and b.length =${b.length} `)
+
   const gridArray = [];
-  for (let i = 0; i < a.length; i++) {
-    const cRow = []; // current row
-    const cVal_i = a[i];
-    for (let j = 0; j < b.length; j++) {
-      const cVal_j = b[j];
-      cRow.push(cVal_j);
+  // for (let i = 0; i < a.length; i++) {
+  //   const cRow = []; // current row
+  //   const cVal_i = a[i];
+  //   for (let j = 0; j < b.length; j++) {
+  //     const cVal_j = b[j];
+  //     cRow.push(cVal_j);
+  //   }
+  //   gridArray.push([cRow, Array(cRow.length).fill(cVal_i)]);
+  // }
+
+  for(let i=0;i< a.length;i++){
+    const cRow = [];
+    for(let j=0;j<b.length;j++){
+
+      cRow.push([a[i], b[j]]);
     }
-    gridArray.push([cRow, Array(cRow.length).fill(cVal_i)]);
+
+    gridArray.push(cRow);
   }
+
 
   return gridArray;
 }

@@ -561,6 +561,14 @@ function normalizeData(data, unitVariance=0) {
 
 }
 
+function tfCov(tensor){
+
+  return tensor.transpose().matMul(tensor).div(tensor.shape[0] -1)
+}
+
+
+
+
 //NOTE: currently support only the [m,k] vector in [m,n] matrix where, k <= (start - n)
 function insert2Tensor(originalTensor, insertTensor, start = [], end = []) {
   // const end = insertTensor.shape();

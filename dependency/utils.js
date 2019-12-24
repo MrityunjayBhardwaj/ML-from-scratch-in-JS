@@ -570,7 +570,7 @@ function tfCov(tensor){
 
 
 //NOTE: currently support only the [m,k] vector in [m,n] matrix where, k <= (start - n)
-function insert2Tensor(originalTensor, insertTensor, start = [], end = []) {
+function insert2Tensor(originalTensor, insertTensor, start = []) {
   // const end = insertTensor.shape();
   // originalTensor.slice(start,end);
 

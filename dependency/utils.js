@@ -812,6 +812,10 @@ function oneHot2Class(oneHotTensor){
   return oneHotTensor.matMul( tf.linspace(0, oneHotTensor.shape[1]-1, oneHotTensor.shape[1]).expandDims(1) )
 }
 
+/**
+ * 
+ * @param {object} classTensor Tensor must be of Size NxM where, M = no. of classes N = no. of data points
+ */
 function class2OneHot(classTensor){
 
    const nClasses = tf.max(classTensor);

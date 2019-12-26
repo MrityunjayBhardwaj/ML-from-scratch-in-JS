@@ -812,6 +812,29 @@ function oneHot2Class(oneHotTensor){
   return oneHotTensor.matMul( tf.linspace(0, oneHotTensor.shape[1]-1, oneHotTensor.shape[1]).expandDims(1) )
 }
 
+function class2OneHot(classTensor){
+
+   const nClasses = tf.max(classTensor);
+
+   let oneHotTensor = tf.tensor([]);
+   for(let i=0;i< nClasses;i++){
+
+      const thCenter  = tf.sub( i,( classTensor ) ).pow(2);
+      const cClass    = tf.sub(1, tf.clipByValue(tf.mul(thCenter, 10000000 ), 0, 1 ));
+   
+      if( i === 0){
+        oneHot2Class = cClass;
+
+        continue;
+      }
+      oneHotTensor = oneHot2Class.concat(cClass, axis=1);
+
+   }
+
+   return oneHotTensor;
+
+}
+
 
 /**
  * 

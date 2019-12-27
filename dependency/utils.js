@@ -867,3 +867,18 @@ function tfdet(x) {
 
   return tf.tensor(tensorArray[0][0]*tensorArray[1][1] - tensorArray[0][1]*tensorArray[1][0]);
 }
+
+
+function pred2Class(predTensor, threshold=0.5, oneHot=true){
+
+  const thCenter  = tf.sub( predTensor,( threshold ) );
+  const predClass = tf.pow( tf.clipByValue(tf.mul(thCenter, 10000000 ), 0, 1 ), 1 );
+
+  if (oneHot){
+
+    return class2OneHot(predClass);
+
+  }
+  return predClass;
+
+}

@@ -882,3 +882,22 @@ function pred2Class(predTensor, threshold=0.5, oneHot=true){
   return predClass;
 
 }
+
+function index2Coords(index, shape, size){
+
+    size = size || shape.reduce((accumulator,currentValue)=> accumulator*currentValue, 1);
+
+    const coords = [];
+
+    let oldFac = size;
+    for(let i=0;i<shape.length -1;i++){
+        const cFac = (oldFac/shape[i]);
+        const cCoords = Math.floor(  (index % oldFac)/cFac );
+        coords.push(cCoords);
+        oldFac = cFac;
+    }
+    
+    coords.push(index%shape[shape.length-1]);
+    
+    return coords;
+}

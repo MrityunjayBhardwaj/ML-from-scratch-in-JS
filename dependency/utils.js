@@ -883,6 +883,35 @@ function pred2Class(predTensor, threshold=0.5, oneHot=true){
 
 }
 
+/**
+ * 
+ * @param {Number} index index
+ * @param {Array} shape shape of the tensor
+ * @param {Number} size total number of values in a tensor
+ * 
+ * @description given the index number of a tensor, this function coverts that index number to tensor's coordinates
+ * 
+ * @example 
+ * 
+ * const tensor = 
+    [
+      [
+        [0.3,0.5,0.2],
+        [0.1,0.1,0.8]
+      ],
+      [
+        [0.9,0.05,0.05],
+        [0.2,0.7,0.1]
+      ]
+    ];
+
+    const index = 5; // lets say, we need to find the coords of '0.8' whose index is 5
+    const tensorShape = [2, 2, 3];
+    const tensorSize = 2*2*3;
+
+    const coords = index2Coords(index, tensorShape, tensorSize );
+    console.log(coords); // > [0, 1, 2]
+ */
 function index2Coords(index, shape, size){
 
     size = size || shape.reduce((accumulator,currentValue)=> accumulator*currentValue, 1);

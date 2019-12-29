@@ -930,3 +930,15 @@ function index2Coords(index, shape, size){
     
     return coords;
 }
+
+function ndIndex(shape){
+
+    const size = shape.reduce((accumulator,currentValue)=> accumulator*currentValue, 1);
+    const coordsArray = [];
+     for(let i=0;i< size;i++){
+         const currCoords = index2Coords(i,shape);
+         coordsArray.push(currCoords);
+     }
+
+     return coordsArray;
+}

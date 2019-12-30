@@ -931,6 +931,43 @@ function index2Coords(index, shape, size){
     return coords;
 }
 
+/**
+ * 
+ * @param {Array} shape shape of a tensor
+ * @description given the shape of the tensor, this function generates all the coordinates for all the values inside the tensor.
+ * 
+ * @example 
+ * const tensor = 
+    [
+      [
+        [0.3,0.5,0.2],
+        [0.1,0.1,0.8]
+      ],
+      [
+        [0.9,0.05,0.05],
+        [0.2,0.7,0.1]
+      ]
+    ];
+
+    const tensorShape = [2, 2, 3];
+    const coordsArray = ndIndex(tensorShape)
+
+    console.log(coordsArray); 
+    // > [ 0, 0, 0 ]
+    // > [ 0, 0, 1 ]
+    // > [ 0, 0, 2 ]
+    // > [ 0, 1, 0 ]
+    // > [ 0, 1, 1 ]
+    // > [ 0, 1, 2 ]
+    // > [ 1, 0, 0 ]
+    // > [ 1, 0, 1 ]
+    // > [ 1, 0, 2 ]
+    // > [ 1, 1, 0 ]
+    // > [ 1, 1, 1 ]
+    // > [ 1, 1, 2 ]
+
+ * 
+ */
 function ndIndex(shape){
 
     const size = shape.reduce((accumulator,currentValue)=> accumulator*currentValue, 1);

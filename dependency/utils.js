@@ -979,3 +979,15 @@ function ndIndex(shape){
 
      return coordsArray;
 }
+
+/**
+ * 
+ * @param {tf.tensor} tensor 
+ * @param {Number} number
+ *
+ * @description converts the nan values in the given tensor to a specified number
+ */
+function tfNan2Num(tensor, number=0){
+    return tf.tensor(tensorMap(tensor.arraySync(), tensor.shape, (n)=>{if(isNaN(n)){return number;}return n;}).tensor);
+}
+

@@ -991,3 +991,33 @@ function tfNan2Num(tensor, number=0){
     return tf.tensor(tensorMap(tensor.arraySync(), tensor.shape, (n)=>{if(isNaN(n)){return number;}return n;}).tensor);
 }
 
+
+/**
+ * 
+ * @param {Array} tensor A multi-dimensional array
+ * @param {Array} shape shape of our tensor
+ * @param {function} func 
+ * @param {Number} lastIndex 
+ * @param {Array} indexArray 
+ * 
+ * @description given a multi-dimensional array, this function recusively applies the given function to each values of this tensor and returns the modified multi-dim array 
+ */
+function tensorMap(tensor, shape, func=(n,i, d)=>{/**console.log(n,i,d); */ return n}, index=0){
+
+    const len = tensor.length;
+
+    for(let i=0;i<len;i++){
+      // indexNum +=1;
+        if(!(tensor[i][0])){
+            tensor[i] = func(tensor[i], index2Coords(index, shape));
+            index++;
+        }
+        else{
+            const retVal = tensorMap(tensor[i], shape, func, index);
+            tensor[i] = retVal.tensor; //[0];
+            index = retVal.index
+        }
+    }
+
+    return {tensor: tensor,index: index}; // TODO: understand why we can't just return the tensor array. by using chrom dev tools
+}

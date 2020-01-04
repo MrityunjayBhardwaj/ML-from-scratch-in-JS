@@ -1021,3 +1021,26 @@ function tensorMap(tensor, shape, func=(n,i, d)=>{/**console.log(n,i,d); */ retu
 
     return {tensor: tensor,index: index}; // TODO: understand why we can't just return the tensor array. by using chrom dev tools
 }
+
+/**
+ * 
+ * @param {Array} coord coordinate of the tensor
+ * @param {Array} shape shape of the tensor
+ * 
+ * @summary this function simply converts a coordinate of multi-dim tensor into its corresponding index using shape information.
+ */
+function coord2Index(coord,shape){
+
+    const size = shape.reduce((accumulator,currentValue)=> accumulator*currentValue, 1);
+
+    let index = 0;
+    let divSum = shape[0];
+    for(let i = 0;i<shape.length-1;i++){
+      index += (size/divSum)*coord[i];
+      divSum += shape[i];
+    }
+
+    return index+coord[coord.length -1];
+
+}
+

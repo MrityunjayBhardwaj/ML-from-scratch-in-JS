@@ -1044,3 +1044,16 @@ function coord2Index(coord,shape){
 
 }
 
+
+async function tfDeleteAsync(inputTensor, dim=0, axis=0){
+// NOTE: currently, it only works for aixs=0;
+
+  dim = ((typeof dim) !== "number")?dim: [dim];
+
+  const shape = inputTensor.shape;
+
+  const mask = tf.ones([1, shape[axis]]).flatten().arraySync();
+  for(let i=0;i< dim.length;i++){
+    if (dim[i] < shape[axis])
+      mask[dim[i]] = 0;
+  }

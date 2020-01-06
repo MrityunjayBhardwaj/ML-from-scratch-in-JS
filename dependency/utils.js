@@ -1045,6 +1045,46 @@ function coord2Index(coord,shape){
 }
 
 
+/**
+ * 
+ * @param {tf.tensor} inputTensor
+ * @param {Array, Number} dim which dimension we want to delete along a specified axis (could be an array)
+ * @param {Number} axis along which axis we want to delete
+ * 
+ * @summary deletes the specified dimensions along the specified axis
+ * @example
+ * 
+ * const myTensor = tf.tensor([
+    [
+        [0.3, 0.5, 0.2], [0.1, 0.1, 0.8]
+    ], [
+        [0.9, 0.05, 0.05], [0.2, 0.7, 0.1]
+    ]
+  ]);
+ * let modifiedTensor = await tfDeleteAsync(myTensor, dim=1, axis=1);
+ * modifiedTensor.print();
+  //>    [ [[0.3, 0.5 , 0.2 ],],
+  //
+  //   [[0.9, 0.05, 0.05],]]
+
+ * modifiedTensor = await tfDeleteAsync(myTensor, dim=[0, 2], axis=2);
+ * modifiedTensor.print();
+  //>  [[[0.3, 0.2 ],
+  //    [0.1, 0.8 ]],
+  //
+  //   [[0.9, 0.05],
+  //    [0.2, 0.1 ]]]
+
+ * modifiedTensor = await tfDeleteAsync(myTensor, dim=[0, 2], axis=2);
+ * modifiedTensor.print();
+  // >  [[[0.5 ],
+   //   [0.1 ]],
+   //
+   //  [[0.05],
+   //   [0.7 ]]]
+   
+ * @return returns a promise of modified tensor
+ */
 async function tfDeleteAsync(inputTensor, dim=0, axis=0){
 // NOTE: currently, it only works for aixs=0;
 
@@ -1057,3 +1097,8 @@ async function tfDeleteAsync(inputTensor, dim=0, axis=0){
     if (dim[i] < shape[axis])
       mask[dim[i]] = 0;
   }
+  const tensorMask = tf.tensor1d(mask, 'bool');
+
+  return tf.booleanMaskAsync(inputTensor, tensorMask, axis) ;
+}
+

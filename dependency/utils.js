@@ -1102,3 +1102,37 @@ async function tfDeleteAsync(inputTensor, dim=0, axis=0){
   return tf.booleanMaskAsync(inputTensor, tensorMask, axis) ;
 }
 
+
+function tfDeleteSync(inputTensor, dim=0, axis=0){
+// NOTE: currently, it only works for aixs=0;
+
+  dim = ((typeof dim) !== "number")?dim: [dim];
+
+  const shape = inputTensor.shape;
+
+  const mask = tf.ones([1, shape[axis]]).flatten().arraySync();
+  for(let i=0;i< dim.length;i++){
+    if (dim[i] < shape[axis])
+      mask[dim[i]] = 0;
+  }
+
+  const tensorMask = tf.tensor1d(mask, 'bool');
+
+  let output = 0;
+  async function getBooleanMask() {
+
+    // wait until the promise returns us a value
+    output = await tf.booleanMaskAsync(inputTensor, tensorMask, axis) ;
+  
+    // "Now it's done!"
+    return output
+    console.log('calculated BooleanMask');
+  };
+  return getBooleanMask();
+
+  return output; 
+
+  // const output = await tf.booleanMaskAsync(inputTensor, tensorMask, axis) ;
+
+  // return output;
+}

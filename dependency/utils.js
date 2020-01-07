@@ -1136,3 +1136,47 @@ function tfDeleteSync(inputTensor, dim=0, axis=0){
 
   // return output;
 }
+
+/**
+ * 
+ * @param {tf.tensor} matrix input 2d-Tensor
+ * 
+ * @description given a 2d-tensor(matrix) the function returns the determinant of the given matrix
+ */
+function tfDet(tensor){
+  // based on this article: https://integratedmlai.com/find-the-determinant-of-a-matrix-with-pure-python-without-numpy-or-scipy/
+
+  if (tensor.shape.length > 2)throw new Error('tfDet only support 2d-tensors');
+
+  // if the matrix is singular then the determinant is 0
+  if(tensor.shape[0] !== tensor.shape[1])return 0;
+ 
+  const n = tensor.shape[0];
+
+  const Matrix = tensor.arraySync();
+
+  for(let i=0;i< n;i++){
+    for(let j=i+1;j<n;j++){
+
+      // id diagonal is zero then change it to a slight non-zero value so that we don't have to div by zero in future calculation
+      if(Matrix[i][i] === 0){
+        Matrix[i][i] = 1.0e-18;
+      }
+
+      const currRowFac = Matrix[j][i]/Matrix[i][i];
+
+      for(let k=0; k<n;k++){
+        Matrix[j][k] = Matrix[j][k] - currRowFac * Matrix[i][k];
+      }
+
+    }
+  }
+
+  let determinant = 1.0;
+
+  for(let i=0;i<n;i++){
+    determinant *= Matrix[i][i]
+  }
+
+  return tf.tensor(determinant);
+}

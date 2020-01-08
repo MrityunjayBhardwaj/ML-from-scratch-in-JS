@@ -1180,3 +1180,47 @@ function tfDet(tensor){
 
   return tf.tensor(determinant);
 }
+
+
+function multivariateGaussian(mean=tf.zeros([2,1]),covariance=tf.zeros([2,2])){
+
+
+  if (!mean.shape || !(covariance.shape))
+    throw new Error('mean and variance must be a tf.tensor object')
+
+  this.setMean = function(newMean){
+    mean = newMean;
+  }
+
+  this.setVariance = function(newCovarianceMatrix){
+    covariance = newCovarianceMatrix;
+  }
+
+  this.getMean = function(){
+    return mean;
+  }
+  this.getVariance = function(){
+    return covariance;
+  }
+
+  this.getProbability = function(x){
+
+
+    let k = covariance.shape[0];
+    let det = tfDet(covariance).flatten().arraySync()[0];
+    let covInv = tfpinv(covariance);
+
+    let fac = 1/( ((2*Math.PI)**(k) * det )**(1/2) );
+
+    let meanCenteredData = x.sub(mean);
+    // let prob = tf.exp( meanCenteredData.matMul(covInv).matMul(meanCenteredData.transpose()));
+
+    let tileArray = (new Array(x.shape.length + 1)).fill(1)
+    tileArray[0] = x.shape[0];
+
+    let prob = tf.exp( meanCenteredData.expandDims().reshape([x.shape[0],1 , x.shape[1]]).matMul(covInv.expandDims().tile(tileArray)).matMul(meanCenteredData.expandDims().reshape([x.shape[0],x.shape[1], 1]).mul(-1/2)).squeeze());
+
+    return prob.mul(fac);
+  }
+
+}

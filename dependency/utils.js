@@ -1224,3 +1224,16 @@ function multivariateGaussian(mean=tf.zeros([2,1]),covariance=tf.zeros([2,2])){
   }
 
 }
+
+
+function tfEigen_R(tensor){
+
+  let matrix = tensor.arraySync();
+  matrix = nd.array(matrix);
+
+  const eigVecs = JSON.parse( nd.la.eigen(matrix)[1].toString() );
+  const eigVals = JSON.parse( nd.la.eigen(matrix)[0].toString() );
+
+  return {eigenVectors: tf.tensor(eigVecs), eigenValues: tf.tensor(eigVals)};
+}
+

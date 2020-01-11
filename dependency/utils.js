@@ -1237,3 +1237,79 @@ function tfEigen_R(tensor){
   return {eigenVectors: tf.tensor(eigVecs), eigenValues: tf.tensor(eigVals)};
 }
 
+
+/**
+ * 
+ * @param {tf.tensor} tensor input tf.tensor object
+ * @param {number} epsilon convergence criterion
+ * @param {number} maxItrs maximum allowed iteration of power method
+ * 
+ * @description given a tensor, this function return the eigenVectors and eigenVals of the matrix using power Iteration method
+ */
+function tfEigen(tensor, epsilon=.0001, maxItrs=10000){
+
+  function shiftingRedirection(M, eigenValue, eigenVector){
+   /* 
+    Apply shifting redirection to the matrix to compute next eigenpair: M = M-lambda v
+  */
+
+    return (M.sub(eigenValue.mul(tf.matMul(eigenVector.transpose(), eigenVector))));
+  }
+
+  function powerMethod(M, epsilon=0.0001, maxItrs=10000){
+
+
+    // initialize
+    let eigenVecArray = (new Array(maxItrs)).fill(null);
+    eigenVecArray[0] = tf.randomNormal([M.shape[0], 1])
+
+    eigenVecArray[1] =  tf.matMul(M, eigenVecArray[0]).div(tf.norm(tf.matMul(M, eigenVecArray[0])));
+
+    let count = 1;
+
+    while(   ((tf.norm(eigenVecArray[count].sub(eigenVecArray[count-1])).flatten().arraySync()[0]) > epsilon) && (count < maxItrs)){
+
+      // Computing eigenvector
+
+      eigenVecArray[count+1] = tf.matMul(M, eigenVecArray[count]).div(tf.norm(tf.matMul(M, eigenVecArray[count])));
+      count++;
+
+    }
+
+    // Compute eigenValue
+    const  eigenValue = tf.matMul(tf.matMul(eigenVecArray[count].transpose(), M), eigenVecArray[count]);
+
+    return {eigenVec: eigenVecArray[count], eigenVal: eigenValue}
+
+  }
+
+  function eigenPairs(M, epsilon= 0.00001, maxItrs = 100){
+
+    // initialize
+    let eigenVectors = (new Array(M.shape[0])).fill(null);
+    let eigenValues = tf.zeros(M.shape).arraySync();
+  
+    for(let i=0;i< M.shape[0]; i++){
+      const {  eigenVec : currEigenVec ,  eigenVal : currEigenVal } = powerMethod(M, epsilon, maxItrs);
+
+      eigenVectors[i] = currEigenVec.flatten().arraySync();
+      eigenValues[i][i]  = currEigenVal.flatten().arraySync()[0];
+
+    // remove the currently calculated eigen vector direction from the original matrix so that it doesn't get recalculated again
+      M = shiftingRedirection(M, currEigenVec, currEigenVal);
+    }
+
+    return {eigenVectors: tf.tensor(eigenVectors), eigenValues: tf.tensor(eigenValues)};
+  }
+
+
+  if (tensor.shape.length > 2)
+    throw new Error('input must be a 2-dimensional tensor(a.k.a matrix) given a tensor of shape: '+tensor.shape);
+
+  if (( tensor.shape[0] != tensor.shape[1]))
+    throw new Error('input must be a square matrix, given a matrix of size: '+ tensor.shape)
+
+
+  return eigenPairs(tensor,epsilon, maxItrs)
+
+}

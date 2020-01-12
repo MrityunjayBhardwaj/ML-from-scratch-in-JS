@@ -1313,3 +1313,19 @@ function tfEigen(tensor, epsilon=.0001, maxItrs=10000){
   return eigenPairs(tensor,epsilon, maxItrs)
 
 }
+
+
+// a template for quickly creating a d3 viz which can be used as input space visualization
+function inputViz(){
+
+  this.components = {
+
+  }
+
+  this.init = function(divContainer, svgSettings={width: 500, height: 500, rangeX:[-10, 10], rangeY: [-10, 10], }){
+
+  }
+
+
+
+}

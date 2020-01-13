@@ -1223,6 +1223,20 @@ function multivariateGaussian(mean=tf.zeros([2,1]),covariance=tf.zeros([2,2])){
     return prob.mul(fac);
   }
 
+  this.getSamples = function(sampleSize){
+    // return the samples generated from this multivariate gaussian distribution
+
+    const sphericalGaussianSamples = tf.randomNormal([sampleSize, mean.shape[0]]);
+
+    const { eigenVectors : covEignVecs, eigenValues :covEignVals} = tfEigen_R(covariance);
+
+    let gaussianSamples = covEignVals.pow(1/2).mul(covEignVecs).matMul(sphericalGaussianSamples.transpose()).transpose();
+
+    return gaussianSamples.add(mean);
+
+  }
+
+
 }
 
 

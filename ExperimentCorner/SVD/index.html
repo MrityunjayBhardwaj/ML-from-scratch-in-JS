@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Experiment Corner</title>
-    <summary>this is a place where I test new ideas</summary>
-
     <!-- <script src="../dependency/plotlyJS/plotly-latest.min.js"></script> -->
     <script src="../../dependency/plotlyJS/plotly.js"></script>
     <script src="../../dependency/ndjs/dist/nd.js"></script>
@@ -22,7 +20,7 @@
       let imgData;
       function preload(){
       //  myImg = loadImage('https://cdna.artstation.com/p/users/avatars/000/124/816/large/1263ab299a3faf4a4f2529e2237b0eeb.jpg?1487945305', ()=>{ console.log("it Works!")},()=>{ console.log("it Works!")});
-        myImg = loadImage("../../Assets/Images/mrityunjaypic.jpg", ()=>{ console.log("it Works!")},()=>{ console.log("it doesn't Works!")});
+        myImg = loadImage("Assets/Images/MLTMeetupSq3.jpg", ()=>{ console.log("it Works!")},()=>{ console.log("it doesn't Works!")});
 
       }
       function setup(){
@@ -33,6 +31,46 @@
 
       }
     </script>
+
+    <style>
+      body{
+        font-family: Arial, Helvetica, sans-serif;
+        color: white;
+        background: #222633;
+      }
+
+      .slider {
+        -webkit-appearance: none;
+        width:400px;
+        height: 15px;
+        border-radius: 5px;  
+        background: #1d1d1d;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+      }
+      
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%; 
+        background: magenta;
+        cursor: pointer;
+      }
+      
+      .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: magenta;
+        cursor: pointer;
+      }
+
+    </style>
+
 </head>
 <body>
 
@@ -43,8 +81,8 @@
   <canvas id="myCvs"></canvas>
     <br>
 
-    <div id="tester" style="width:500px;height:500px;display:inline-block;"></div>
-    <div id="screePlot" style="width:500;height:300; display:inline-block;"></div>
+    <!-- <div id="tester" style="width:800px;height:800px;display:inline-block;"></div> -->
+    <!-- <div id="screePlot" style="width:500;height:300; display:inline-block;"></div> -->
 
     <div id="SVDContainer" >
       <div id="leftEigenVector" style= "width:400px;height:400px; display:inline-block;"></div>
@@ -57,18 +95,31 @@
     <hr>
     <h1 style="font-family: Arial, Helvetica, sans-serif">SVD Compression </h1>
 
+
     <div id="compViz0" style="width:500px;height:500px;display:inline-block;"></div>
     <div id="cummCompViz" style="width:500px;height:500px;display:inline-block;"></div>
-    <div id="pctDiff"style="width:300px;display:inline-block;font-size:100px;font-family: Arial, Helvetica, sans-serif">90%</div>
+    <div id="tester" style="width:500px;height:500px;display:inline-block;"></div>
+    <!-- <div id="cummCompViz" style="width:200;height:120px;display:inline-block;"></div> -->
+    <br>
 
-    <div>
-  <input type="range" min="0" max="1" value=".1" step=".01" class="slider" id="compNum">
+    <div style="margin-left: 3.5em;" width=400>
+
+  <input width="400px" type="range" min="0" max="1" value=".1" step=".01" class="slider" id="compNum">
     <div id='currCompNum'></div>
+
+    </div>
+
+    <div style="display: flex;">
+      <div style="width:150px;margin: 1.5em;font-size:40px;font-family: Arial, Helvetica, sans-serif">Reconstruction accuracy:</div>
+      <div id="pctDiff"style="width:400px;margin-top: 1em;font-size:100px;font-family: Arial, Helvetica, sans-serif">90%</div>
+      <div width="10px">
+
+        <div id="screePlot" width="100px" height="300px" style="margin-top: -100px; margin-left: 40px"></div>
+
+      </div>
+    </div>
+    <div>
 </div>
-
-<div id="img" style="width:300px;height:300px"></div>
-
-
   <script src="Source/app.js"></script>
   
 </body>

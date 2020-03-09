@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Lagrange Multipliers</title>
+
+    <script src="../../../dependency/tensorflowJS/tf.min.js"></script>
+    <script src="../../../dependency/utils.js"></script>
+    <script src="../../../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <script src="../../../dependency/d3.js"></script>
+
+    <style>
+        .VizContrainer{
+            display: flex;
+            flex-direction: row;
+
+
+            padding: 1em;
+
+        }
+
+         .VizControls{
+
+
+             
+        }
+
+        .vizSketch{
+            margin: auto;
+            padding: 1em;
+        }
+
+        .pt1{
+            stroke-width: 2px;
+        }
+        .pt2{
+            stroke-width: 2px;
+        }
+
+
+        #viz3_2Sketch{
+            margin: 50px
+        }
+
+
+        
+    </style>
+</head>
+<body>
+
+    <div class="VizContrainer" id="viz1Container">
+        <div class="VizControls" id="viz1Controls">
+            <div class="slidecontainer">
+                    <input type="range" orient="vertical" min="1" max="100" value="50" class="slider" id="contourSlider1">
+            </div>
+        </div>
+        <div class="VizSketch" id="viz1Sketch"></div>
+    </div>
+
+    <div class="VizContrainer" id="viz2Container">
+        <div class="VizControls" id="viz2Controls">
+            <div class="slidecontainer">
+                    <input type="range" orient="vertical" min="1" max="100" value="50" class="slider" id="contourSlider2">
+            </div>
+        </div>
+        <div class="VizSketch" id="viz2Sketch"></div>
+    </div>
+
+    <div class="VizContrainer" id="viz3Container">
+        <div class="VizControls" id="viz3Controls">
+            <div class="slidecontainer">
+                    <input type="range" orient="vertical" min="1" max="100" value="50" class="slider" id="contourSlider3">
+            </div>
+        </div>
+        <div class="VizSketch" id="viz3Sketch"></div>
+        <svg class="VizSketch" id="viz3_2Sketch"></svg>
+    </div>
+   
+    <!-- <script src="Source/main.js"></script> -->
+    <script src="Source/viz1.js"></script>
+    <script src="Source/viz2.js"></script>
+    <script src="Source/viz3.js"></script>
+    <script src="Source/viz3_2.js"></script>
+
+</body>
+</html>

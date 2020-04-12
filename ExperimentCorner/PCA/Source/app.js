@@ -1,72 +1,193 @@
+/* display eigen vectors and standardized data */
 
-const csvUrl =
-'https://storage.googleapis.com/tfjs-examples/multivariate-linear-regression/data/boston-housing-train.csv';
+// range2 of the plot
+const range2 = {min: -5, max: 5};
+
+// append the svg2 object to the body of the page
+let svg2 = d3.select("#componentViz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .on("click", click)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")")
 
 
-async function run() {
-  // We want to predict the column "medv", which represents a median value of
-  // a home (in $1000s), so we mark it as a label.
-  const csvDataset = tf.data.csv(
-    csvUrl, {
-      columnConfigs: {
-        medv: {
-          isLabel: true
-        }
-      }
-    });
+// Add X axis
+let x2 = d3.scaleLinear()
+  .domain([range2.min, range2.max])
+  .range([ 0, width ]);
+svg2.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x2));
 
-  // Number of features is the number of column names minus one for the label
-  // column.
-  const numOfFeatures = (await csvDataset.columnNames()).length - 1;
 
-  // Prepare the Dataset for training.
-  const flattenedDataset =
-    csvDataset
-    .map(({xs, ys}) =>
-      {
-        // Convert xs(features) and ys(labels) from object form (keyed by
-        // column name) to array form.
-        return {xs:Object.values(xs), ys:Object.values(ys)};
-      })
-    .batch(10);
+// Add Y axis
+let y2 = d3.scaleLinear()
+  .domain([range2.min, range2.max])
+  .range([ height, 0]);
+svg2.append("g")
+  .call(d3.axisLeft(y2));
+
+// converting the pixel coordinate back to the desired range2
+let x2Inv = d3.scaleLinear()
+  .domain([ 0, width ])
+  .range([range2.min, range2.max]);
+
+let y2Inv = d3.scaleLinear()
+  .domain([ height, 0])
+  .range([range2.min, range2.max]);
+
+
+let gridIntervels2 = tf.linspace(range2.min+1, range2.max-1, 8).flatten().arraySync();
+
+var lineGenerator2 = d3.line();
+
+// vertical grid lines 
+svg2.append('g')
+  .selectAll('path')
+  .data(gridIntervels2)
+  .enter()
+  .append('path')
+  .attr( 'd', function(d) {return lineGenerator2([[x2(d),y2(range2.min)],[x2(d),y2(range2.max)]])} )
+  .style('stroke', "gray")
+  .attr('opacity', 0.5)
+
+// vertical grid lines 
+svg2.append('g')
+  .selectAll('path')
+  .data(gridIntervels2)
+  .enter()
+  .append('path')
+  .attr( 'd', function(d) {return lineGenerator2([[x2(range2.min),y2(d)],[x2(range2.max),y2(d)]])} )
+  .style('stroke', "gray")
+  .attr('opacity', 0.5)
+
+
+const originAxis2 = svg2.append('g').attr('class', 'originAxis')
+// origin x2-axis
+
+originAxis2
+  .append('path')
+  .attr( 'd', lineGenerator2([[x2(range2.min),y2(0)],[x2(range2.max),y2(0)]]) )
+  .attr('stroke-width', 3)
+  .attr('opacity', 0.5)
+  .attr('stroke', 'blue');
+
+// origin y2-axis
+originAxis2
+  .append('path')
+  .attr( 'd', lineGenerator2([[x2(0),y2(range2.min)],[x2(0),y2(range2.max)]]) )
+  .attr('stroke-width', 3)
+  .attr('opacity', 0.5)
+  .attr('stroke', 'red');
+
+// initializing PCA
+const pca = new myPCA();
+
+const svgEigVecs = svg2.append('g').attr('id', 'eigVecs');
+const svgNormData = svg2.append('g').attr('id', 'normalizedData')
+
+const cov = svg2.append('g')
+.attr('id', 'covariance')
+
+
+// update the visualization
+function calcPCA(){
+
+  console.log("button clicked")
+
+  const dataPoints = [];
+
+  // extract the data points svg2 object
+  const pointsGroup = d3.selectAll('.dataPoints')._groups[0][0].childNodes;
+
+  for(let i=0; i<pointsGroup.length;i++){
+    const currPoint = [d3.select(pointsGroup[i]).attr('cx')*1, d3.select(pointsGroup[i]).attr('cy')*1]
+
+    // converting these corrdinates back to the data range2
+    currPoint[0] = x2Inv(currPoint[0]);
+    currPoint[1] = y2Inv(currPoint[1]);
+
+    dataPoints.push(currPoint)
+  }
+
+
+  console.log("dataPoints", tf.tensor(dataPoints).print())
+
+  // Training PCA
+  pca.fit(tf.tensor(dataPoints));
+
+  const eigVec0 = pca.model.covSVD[2].slice([0,0],[1,-1]).mul(pca.getExplainedVariance().slice([0,0],[1,1]).sqrt().mul(2)).expandDims(1).flatten().arraySync();
+  const eigVec1 = pca.model.covSVD[2].slice([1,0],[1,-1]).mul(pca.getExplainedVariance().slice([1,1],[1,1]).sqrt().mul(2)).expandDims(1).flatten().arraySync();
+
+
+  console.log('eig: ', eigVec0, eigVec1)
+
+  const currSvgData = svgEigVecs.selectAll('path')
+    .data([eigVec0, eigVec1]);
+
+  // updating our eigenVecs
+  currSvgData.enter()
+    .append('path')
+    .merge(currSvgData)
+    .transition()
+		.duration(500)
+    .attr('d', function(d){
+      console.log(d);
+      return lineGenerator2([ [x2(0),y2(0)], [x2(d[0]),y2(d[1])] ])}
+      )
+    .attr('stroke-width', 4)
+    .attr('stroke', 'red')
+		.style('fill', function(d) {return d.fill;});
+
+    const covData = [
+      (pca.getExplainedVariance().slice([1,1],[1,1]).sqrt().mul(2).flatten().arraySync()[0]),
+      (pca.getExplainedVariance().slice([0,0],[1,1]).sqrt().mul(2).flatten().arraySync()[0])
+    ];
+
+
+
+
+    // visualizing covariance
+    cov.selectAll('ellipse')
+    .data([covData, covData])
+    .enter()
+    .append('ellipse')
+    .merge(cov.selectAll('ellipse'))
+    .transition()
+		.duration(500)
+    .attr('cx', x2(0))
+    .attr('cy', y2(0))
+    .attr('rx', function(d){ return  Math.abs(x2(0) - x2(d[0])) } )
+    .attr('ry', function(d){ return  Math.abs(y2(0) - y2(d[1])) } )
+    .attr('transform', 'rotate('+( Math.atan2(eigVec1[0], eigVec1[1])/(2*Math.PI)*360 + 90) +','+x2(0)+','+y2(0)+')')
+    .attr('fill', function(d, i){ return (i===0)? 'teal': 'none'})
+    .attr('opacity', function(d, i){return (i===0)? 0.2 : 1 })
+    .attr('stroke-width', function(d,i){return (i==0)? 0 : 2.5})
+    .attr('stroke-dasharray', "10 5")
+    .attr('stroke', "black")
+
+
+
+    // visualizing mean centered data
+    const normalizedData = normalizeData(tf.tensor(dataPoints), 1).arraySync();
+
+    const normalizedSvgData = svgNormData.selectAll('circle')
+    .data(normalizedData)
+
+    normalizedSvgData.enter()
+    .append('circle')
+    .merge(normalizedSvgData)
+    .transition()
+		.duration(500)
+    .attr('cx', function(d) { return x2(d[0])})
+    .attr('cy', function(d) { return y2(d[1])})
+    .attr('r', 5)
+    .attr('opacity', 12)
+    .attr('fill', "blue")
+    .attr('stroke-width', 2)
+
+
 }
-
-run();
-
-
-function normal() {
-    var x = 0,
-        y = 0,
-        rds, c;
-    do {
-        x = Math.random() * 2 - 1;
-        y = Math.random() * 2 - 1;
-        rds = x * x + y * y;
-    } while (rds == 0 || rds > 1);
-    c = Math.sqrt(-2 * Math.log(rds) / rds); // Box-Muller transform
-    return x * c; // throw away extra sample y * c
-}
-
-var N = 2000,
-  a = -1,
-  b = 1.2;
-
-var step = (b - a) / (N - 1);
-var t = new Array(N), x = new Array(N), y = new Array(N);
-
-for(var i = 0; i < N; i++){
-  t[i] = a + step * i;
-  x[i] = (Math.pow(t[i], 1))*1 + (.8 * normal() );
-  y[i] = (Math.pow(t[i], 1))*1 + (.3 * normal() );
-
-  x[i] = [x[i],y[i]];
-}
-
-
-let data0 = tf.randomNormal([1,500],0,1).transpose();
-let data1 = tf.randomNormal([1,500],0,1).transpose();
-
-
-let data = data0.concat(data1,axis=1).arraySync();
-
-PCA({x: x ,y:[]})

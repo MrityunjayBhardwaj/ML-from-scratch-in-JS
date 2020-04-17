@@ -1,2 +1,14 @@
 {
+    "vim.useCtrlKeys": false,
+
+    "workbench.colorCustomizations" : {
+        "terminal.foreground" : "#fd0076",
+        "terminal.background" : "#090811"
+    },
+    "editor.mouseWheelZoom": true,
+
+    "editor.fontLigatures":true,
+    "[javascript]": {
+        "editor.fontLigatures": "'ss02',  'ss19'",
+    }
 }

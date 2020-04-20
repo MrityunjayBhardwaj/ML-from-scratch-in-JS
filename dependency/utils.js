@@ -707,7 +707,7 @@ function tfDiag(V) {
  * @param {object} Y input must be a tf.tensor and it must be a one hot encoded vector
  * @param {array} percent specify the percentage of train / test data spliting or if 2 values are specified then the second value corresponds to the additional cross-validation set split.
  */
-function trainTestSplit(X, Y, percent) {
+function trainTestSplit(X, Y, percent=0.8, shuffle=true) {
   /**
    * TODO:-
    * 1. split the data according to there corresponding classes
@@ -720,22 +720,18 @@ function trainTestSplit(X, Y, percent) {
 
   percent = percent.length ? percent : [percent]; // if the percent is just a number then convert it into array of length 1
 
-  //  * 1. split the data according to there corresponding classes
-
-  // const classwiseX = classwiseDataSplit(X, Y);
-
-  // for(let i=0;i<classwiseX.length;i++){
-  //   classwiseX = classwiseX.x.concat(classwiseX.y, axis=1);
-  // }
-
   let classwiseX = X.concat(Y, axis=1);
 
 
   //  * 2. shuffle the data points of each class
 
+  if (shuffle){
     const currClassXArray = classwiseX.arraySync();
     tf.util.shuffle(currClassXArray);
     classwiseX = tf.tensor(currClassXArray);
+
+  }
+
 
   //  * 3. take _percent_ data as a training data and rest of them as test data.
 
@@ -773,7 +769,7 @@ function trainTestSplit(X, Y, percent) {
                   }];
 
   if (percent.length === 2) {
-    // include corss-validation set
+    // include corss-validation set as well
     retVal.push({
                   x: classwiseXCV.slice([0, 0], [-1, X.shape[1]]), 
                   y: classwiseXCV.slice([0,X.shape[1]], [-1, -1])

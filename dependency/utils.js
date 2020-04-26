@@ -684,7 +684,7 @@ function replace2Tensor(originalTensor, replacedTensor, start = [0, 0]) {
  * @summary given a tensor of shape [n, 1] this function convert it into diagonal matrix inwhich the diagonal entries corresponding to
  * each values in the input tensor 'X' or  given a square matrix[n, n] this function extracts its diagonal and returns a tensor of shape [n, 1]
  */
-function tfDiag(V) {
+function tfDiag(X) {
   if (!X.shape[1]) {
     X = X.expandDims(1);
   } else {
@@ -719,6 +719,13 @@ function trainTestSplit(X, Y, percent=0.8, shuffle=true) {
    */
 
   percent = percent.length ? percent : [percent]; // if the percent is just a number then convert it into array of length 1
+
+  let totalPercent = 0;
+  for(let i=0;i< percent;i++)
+    totalPercent += percent[i]
+
+  if (totalPercent >= 1.0)
+    throw new Error('the total percent must be equal to 1')
 
   let classwiseX = X.concat(Y, axis=1);
 
@@ -777,6 +784,12 @@ function trainTestSplit(X, Y, percent=0.8, shuffle=true) {
   }
 
   // add test set
+
+  // if the percent is 1.0 then don't include the test set.
+  if (percent[0] === 1.0)
+    return retVal
+
+
   retVal.push({
                 x: classwiseXTest.slice([0, 0], [-1, X.shape[1]]),
                 y: classwiseXTest.slice([0,X.shape[1]], [-1, -1])
@@ -1332,10 +1345,130 @@ function inputViz(){
 
   }
 
-  this.init = function(divContainer, svgSettings={width: 500, height: 500, rangeX:[-10, 10], rangeY: [-10, 10], }){
+  this.init = function(divContainer, 
+                       svgSettings={width: 500, 
+                                    height: 500, 
+                                    margin: {top: 0, right: 0, bottom: 0, left: 0},
+                                    rangeX:{min: -10,max: 10}, 
+                                    rangeY:{min: -10,max: 10}, 
+                                    gridIntervel: 8}){
+    svgSettings = {width: svgSettings.width || 500, 
+                                    height: svgSettings.height || 500, 
+                                    margin: {top: svgSettings.margin.top || 0,
+                                             right: svgSettings.margin.right ||  0, 
+                                             bottom: svgSettings.margin.bottom || 0, 
+                                             left: svgSettings.margin.left || 0},
+                                    rangeX:{min: svgSettings.rangeX.min || -10,max: svgSettings.rangeX.max || 10}, 
+                                    rangeY:{min: svgSettings.rangeY.min || -10,max: svgSettings.rangeY.max || 10}, 
+                                    gridIntervel: svgSettings.gridIntervel || 8}
+    
+    // range of the plot
+    const range = {x : {min: svgSettigs.rangeX.min || 5, max: svgSettigs.rangeX.max || 5}, 
+                   y : {min: svgSettigs.rangeY.min || -5, max: svgSettigs.rangeY.max || 5}};
 
+    // append the svg object
+    let svg = ( ((typeofdivContainer) === 'object' )? divContainer : d3.select(divContainer) )
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .on("click", click)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")")
+
+
+    // Add X axis
+    let x = d3.scaleLinear()
+      .domain([range.x.min, range.x.max])
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+      
+
+    // Add Y axis
+    let y = d3.scaleLinear()
+      .domain([range.y.min, range.y.max])
+      .range([ height, 0]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // converting the pixel coordinate back to the desired range2
+    let xInv = d3.scaleLinear()
+      .domain([ 0, width ])
+      .range([range.x.min, range.x.max]);
+
+    let yInv = d3.scaleLinear()
+      .domain([ height, 0])
+      .range([range.y.min, range.y.max]);
+
+
+    let gridIntervelsX = tf.linspace(range.x.min+1, range.x.max-1, svgSettings.gridIntervel).flatten().arraySync();
+    let gridIntervelsY = tf.linspace(range.y.min+1, range.y.max-1, svgSettings.gridIntervel).flatten().arraySync();
+
+    var lineGenerator = d3.line();
+
+    // vertical grid lines 
+    svg.append('g')
+      .selectAll('path')
+      .data(gridIntervelsX)
+      .enter()
+      .append('path')
+      .attr( 'd', function(d) {return lineGenerator([[x(d),y(range.y.min)],[x(d),y(range.y.max)]])} )
+      .style('stroke', "gray")
+      .attr('opacity', 0.5)
+
+    // horizontal grid lines 
+    svg.append('g')
+      .selectAll('path')
+      .data(gridIntervelsY)
+      .enter()
+      .append('path')
+      .attr( 'd', function(d) {return lineGenerator([[x(range.x.min),y(d)],[x(range.x.max),y(d)]])} )
+      .style('stroke', "gray")
+      .attr('opacity', 0.5)
+
+
+    const originAxis = svg.append('g').attr('class', 'originAxis')
+
+    // origin x-axis
+    originAxis
+      .append('path')
+      .attr( 'd', lineGenerator([[x(range.x.min),y(0)],[x(range.x.max),y(0)]]) )
+      .attr('stroke-width', 3)
+      .attr('opacity', 0.5)
+      .attr('stroke', 'blue');
+
+    // origin y-axis
+    originAxis
+      .append('path')
+      .attr( 'd', lineGenerator([[x(0),y(range.min)],[x(0),y(range.max)]]) )
+      .attr('stroke-width', 3)
+      .attr('opacity', 0.5)
+      .attr('stroke', 'red');
+
+
+      // save all the components for future use...
+      this.components = {
+        svg, originAxis, ConversionFns: {x,y,xInv,yInv}
+      }
+
+      return svg;
   }
 
 
 
 }
+
+
+
+
+/**
+ * inputViz(divContainerName | divElement ,  svgSettings={width: 500, height: 500, 
+ *                                           rangeX:[-10, 10], 
+ *                                           rangeY: [-10, 10], })
+ * 
+ * return svg;
+ * 
+ *  compoents := originAxis, ConversionFns={x, y, xInv, yInv},
+ */

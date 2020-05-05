@@ -179,8 +179,8 @@ function svm(){
             // calculating the lower and upper bound for our box constraints
             let lowerBound = 0; let upperBound = C;
             if(dataI.y === dataJ.y){
-                lowerBound = Math.min(0, alphaI + alphaJ - C);
-                upperBound = Math.max(C, alphaI + alphaJ);
+                lowerBound = Math.max(0, alphaI + alphaJ - C);
+                upperBound = Math.min(C, alphaI + alphaJ);
             }
             else{
                 lowerBound = Math.max(0, alphaJ - alphaI);

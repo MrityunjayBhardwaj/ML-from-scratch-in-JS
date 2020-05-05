@@ -141,6 +141,18 @@ function svm(){
       
       let passes = 0;// count the no of steps passes since we get no alpha updates
 
+      let js =[[6, 6, 9, 7, 8, 7, 5, 9, 5, 8],
+      [2, 7, 9, 8, 8, 3, 0, 8, 1, 0],
+      [3, 5, 9, 2, 7, 9, 1, 8, 1, 1],
+      [3, 9, 8, 2, 7, 2, 9, 0, 1, 0],
+      [5, 3, 8, 1, 8, 1, 5, 4, 1, 1],
+      [7, 2, 5, 6, 9, 8, 7, 4, 0, 1],
+      [4, 5, 0, 7, 8, 9, 0, 3, 1, 7],
+      [1, 9, 8, 7, 8, 1, 4, 3, 5, 8],
+      [6, 2, 4, 1, 9, 1, 3, 0, 9, 1],
+      [9, 8, 4, 5, 2, 4, 4, 1, 9, 0]
+    ]
+      epoch =10;
       for(let e=0; (e<epoch) && (passes < 10);e++){
         
         let alphaChanged = 0;
@@ -153,13 +165,16 @@ function svm(){
           let alphaI = alpha[i];
 
             // residuals of our ith data point
-          let ErrorI = this.marginOne(data.y, pairKernels[i]) - dataI.y
+          let ErrorI = this.marginOne( pairKernels[i]) - dataI.y
 
           if ( (dY[i]*(ErrorI) < -tol && alphaI < C) || (dY[i]*ErrorI > tol && alphaI > 0) ){
 
             // selecting our pair
             let j = i;
-            while(j === i) j = Math.floor( Math.random()*N );
+            // while(j === i) j = Math.floor( Math.random()*N );
+            j = js[e][i];
+
+            console.log('j: ',e, j,i, )
 
             let dataJ = {x: dX[j],
                           y: dY[j][0],
@@ -172,7 +187,7 @@ function svm(){
 
 
             // residuals of our jth data point
-            let ErrorJ = this.marginOne(data.y, pairKernels[j]) - (dataJ.y);
+            let ErrorJ = this.marginOne(pairKernels[j]) - (dataJ.y);
 
             let alphaJ = alpha[j];
 
@@ -187,14 +202,14 @@ function svm(){
                 upperBound = Math.min(C, alphaJ - alphaI + C);
             }
 
-            if (tf.abs(lowerBound - upperBound)< .0001)continue;
+            if (Math.abs(lowerBound - upperBound)< .0001)continue;
 
             
             let newAlphaJ = alphaJ - dataJ.y*(ErrorI - ErrorJ)/eta;
 
             // forcing our alpha to remain inside our box constriant
             if (newAlphaJ > upperBound) newAlphaJ = upperBound;
-            if (newAlphaJ < upperBound) newAlphaJ = lowerBound;
+            if (newAlphaJ < lowerBound) newAlphaJ = lowerBound;
             if( Math.abs(alphaJ - newAlphaJ) < 0.0001)continue;
 
             let newAlphaI = alphaI + dataI.y*dataJ.y*(alphaJ - newAlphaJ);
@@ -250,13 +265,13 @@ function svm(){
       // }
 
 
-      let combinedData = data.x.concat(data.y,axis=1);
+      let combinedData = data.x.concat(data.y,axis=1).concat(supportVectors.alpha, axis=1);
 
-      combinedData = await tf.booleanMaskAsync(combinedData, supportVectors.alpha.greater(0).flatten())
+      combinedData = await tf.booleanMaskAsync(combinedData, supportVectors.alpha.greater(0.0001).flatten())
 
       supportVectors.x = combinedData.slice([0,0],[-1, data.x.shape[1]]);
-      supportVectors.y = combinedData.slice([0,data.x.shape[1]],[-1, -1]);
-      supportVectors.alpha = tf.ones([combinedData.shape[0], 1]);
+      supportVectors.y = combinedData.slice([0,data.x.shape[1]],[-1, 1]);
+      supportVectors.alpha = combinedData.slice([0,combinedData.shape[1]-1], [-1, -1]);
 
       combinedData.print();
 
@@ -279,8 +294,9 @@ function svm(){
 //         }
 //       }
 
-      if (kernelType === 'linear')
+      if (kernelType === 'linear'){
         model.weights = supportVectors.alpha.mul(supportVectors.y).mul(supportVectors.x).sum(axis=0).expandDims();
+      }
 
         console.log('final alphas: '+ supportVectors.alpha.print())
 
@@ -288,7 +304,9 @@ function svm(){
 
       },
 
-      this.marginOne = function (labels, preKernel){
+      this.marginOne = function ( preKernel){
+
+        let labels = model.data.y;
 
         let f = model.bias;
         for(var i=0;i<labels.length;i++) {

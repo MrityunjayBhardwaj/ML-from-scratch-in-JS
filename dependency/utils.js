@@ -691,12 +691,15 @@ function tfDiag(X) {
     if (X.shape[0] === X.shape[1]){
          return X.mul( tf.eye(X.shape[0],X.shape[0])).matMul(tf.ones([X.shape[0],1]))
 
-    }else{
-      throw new Error(
-        `input must either be of shape [n,1] or of size [n,n] but given ${v.shape}`
-      );
-
     }
+    
+    if(X.shape[1] !== 1) 
+    {
+      throw new Error(
+        `input must either be of shape [n,1] or of size [n,n] but given ${X.shape}`
+      );
+    }
+
   }
   return X.mul(tf.eye(X.shape[0]));
 }
@@ -1339,67 +1342,82 @@ function tfEigen(tensor, epsilon=.0001, maxItrs=10000){
 
 
 // a template for quickly creating a d3 viz which can be used as input space visualization
-function inputViz(){
-
-  this.components = {
-
-  }
-
-  this.init = function(divContainer, 
+function inputViz(divContainer, 
                        svgSettings={width: 500, 
                                     height: 500, 
                                     margin: {top: 0, right: 0, bottom: 0, left: 0},
                                     rangeX:{min: -10,max: 10}, 
                                     rangeY:{min: -10,max: 10}, 
-                                    gridIntervel: 8}){
+                                    gridIntervel: 8,
+                                    isGrid: true,
+                                    isAxisLine: true
+                                  }, eventHandlers={onClick: ()=>{}, onDrag: ()=>{}}){
+
+
+  let components = {};
+  // const svgIds = [];
+
+  this.getComponents = () =>{ return components}
+
+  // this.getSvgId = () =>{return }
+   function init(){
     svgSettings = {width: svgSettings.width || 500, 
                                     height: svgSettings.height || 500, 
-                                    margin: {top: svgSettings.margin.top || 0,
-                                             right: svgSettings.margin.right ||  0, 
-                                             bottom: svgSettings.margin.bottom || 0, 
-                                             left: svgSettings.margin.left || 0},
-                                    rangeX:{min: svgSettings.rangeX.min || -10,max: svgSettings.rangeX.max || 10}, 
-                                    rangeY:{min: svgSettings.rangeY.min || -10,max: svgSettings.rangeY.max || 10}, 
-                                    gridIntervel: svgSettings.gridIntervel || 8}
+                                    margin: {top: (svgSettings.margin)? svgSettings.margin.top || 40 : 40 ,
+                                             right: (svgSettings.margin)? svgSettings.margin.right ||  40 : 40 , 
+                                             bottom: (svgSettings.margin)? svgSettings.margin.bottom || 40 : 40, 
+                                             left: (svgSettings.margin)? svgSettings.margin.left || 40 : 40 },
+                                    rangeX: svgSettings.rangeX || {min: -10, max: 10},
+                                    rangeY: svgSettings.rangeY || {min: -10, max: 10},
+                                    gridIntervel: svgSettings.gridIntervel || 8,
+                                    isGrid: (svgSettings.isGrid === undefined)? true : svgSettings.isGrid  ,
+                                    isAxisLine: (svgSettings.isAxisLine === undefined)? true : svgSettings.isAxisLine  ,
+                                  }
+
+                                    console.log(svgSettings)
     
     // range of the plot
-    const range = {x : {min: svgSettigs.rangeX.min || 5, max: svgSettigs.rangeX.max || 5}, 
-                   y : {min: svgSettigs.rangeY.min || -5, max: svgSettigs.rangeY.max || 5}};
+    const range = {x : {min: svgSettings.rangeX.min || 5, max: svgSettings.rangeX.max || 5}, 
+                   y : {min: svgSettings.rangeY.min || -5, max: svgSettings.rangeY.max || 5}};
 
+                   console.log(typeof divContainer)
     // append the svg object
-    let svg = ( ((typeofdivContainer) === 'object' )? divContainer : d3.select(divContainer) )
+    let svgOriginal = ( ((typeof divContainer) === 'object' )? divContainer : d3.select(divContainer) )
       .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .on("click", click)
+      .attr('id', 'svgContainer')
+        .attr("width", svgSettings.width + svgSettings.margin.left + svgSettings.margin.right)
+        .attr("height", svgSettings.height + svgSettings.margin.top + svgSettings.margin.bottom)
+        .on('click', eventHandlers.onClick)
+     
+     let svg =  svgOriginal
       .append("g")
         .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")")
+              "translate(" + svgSettings.margin.left + "," + svgSettings.margin.top + ")")
+
+        // console.log(svg)
+
+    let beforeGridSpace = svg.append('g').attr('id', 'beforeGrid');
+
+
 
 
     // Add X axis
     let x = d3.scaleLinear()
       .domain([range.x.min, range.x.max])
-      .range([ 0, width ]);
-    svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .range([ 0, svgSettings.width ]);
       
-
     // Add Y axis
     let y = d3.scaleLinear()
       .domain([range.y.min, range.y.max])
-      .range([ height, 0]);
-    svg.append("g")
-      .call(d3.axisLeft(y));
+      .range([ svgSettings.height, 0]);
 
     // converting the pixel coordinate back to the desired range2
     let xInv = d3.scaleLinear()
-      .domain([ 0, width ])
+      .domain([ 0, svgSettings.width ])
       .range([range.x.min, range.x.max]);
 
     let yInv = d3.scaleLinear()
-      .domain([ height, 0])
+      .domain([ svgSettings.height, 0])
       .range([range.y.min, range.y.max]);
 
 
@@ -1408,55 +1426,104 @@ function inputViz(){
 
     var lineGenerator = d3.line();
 
-    // vertical grid lines 
-    svg.append('g')
-      .selectAll('path')
-      .data(gridIntervelsX)
-      .enter()
-      .append('path')
-      .attr( 'd', function(d) {return lineGenerator([[x(d),y(range.y.min)],[x(d),y(range.y.max)]])} )
-      .style('stroke', "gray")
-      .attr('opacity', 0.5)
+    if(svgSettings.isGrid){
 
-    // horizontal grid lines 
-    svg.append('g')
-      .selectAll('path')
-      .data(gridIntervelsY)
-      .enter()
-      .append('path')
-      .attr( 'd', function(d) {return lineGenerator([[x(range.x.min),y(d)],[x(range.x.max),y(d)]])} )
-      .style('stroke', "gray")
-      .attr('opacity', 0.5)
+      // vertical grid lines 
+      svg.append('g')
+        .selectAll('path')
+        .data(gridIntervelsX)
+        .enter()
+        .append('path')
+        .attr( 'd', function(d) {return lineGenerator([[x(d),y(range.y.min)],[x(d),y(range.y.max)]])} )
+        .style('stroke', "gray")
+        .attr('opacity', 0.5)
 
+      // horizontal grid lines 
+      svg.append('g')
+        .selectAll('path')
+        .data(gridIntervelsY)
+        .enter()
+        .append('path')
+        .attr( 'd', function(d) {return lineGenerator([[x(range.x.min),y(d)],[x(range.x.max),y(d)]])} )
+        .style('stroke', "gray")
+        .attr('opacity', 0.5)
 
+    }
+
+    let afterGridSpace = svg.append('g').attr('id', 'afterGrid');
+
+    // create frame so that even if the elements in the 'spaces' (like in beforeGridSpace and afterGridSpace) overflows, this doesn't overlap with our axis scales
+
+   const frame = svg.append('g').attr('id', 'frame');
+
+   frame
+   .append('rect')
+   .attr('transform', `translate(${-svgSettings.margin.left}, ${-svgSettings.margin.top})`)
+   .attr('width', svgSettings.width + svgSettings.margin.left + svgSettings.margin.right)
+   .attr('height',svgSettings.margin.top)
+  //  .attr('fill', 'white');
+
+   frame
+   .append('rect')
+   .attr('transform', `translate(${-svgSettings.margin.left}, ${0})`)
+   .attr('width', svgSettings.margin.left)
+   .attr('height',svgSettings.height + svgSettings.margin.bottom)
+  //  .attr('fill', 'blackkk');
+
+   frame
+   .append('rect')
+   .attr('transform', `translate(${0},${svgSettings.height}) `)
+   .attr('width', svgSettings.width)
+   .attr('height',svgSettings.margin.bottom)
+  //  .attr('fill', 'white');
+
+   frame
+   .append('rect')
+   .attr('transform', `translate(${svgSettings.width},${0}) `)
+   .attr('width', svgSettings.margin.right)
+   .attr('height',svgSettings.height + svgSettings.margin.right)
+  //  .attr('fill', 'white');
+
+    svg.append("g")
+      .attr("transform", "translate(0," + svgSettings.height + ")")
+      .call(d3.axisBottom(x));
+
+    svg.append("g")
+      .call(d3.axisLeft(y));
+      
     const originAxis = svg.append('g').attr('class', 'originAxis')
 
-    // origin x-axis
-    originAxis
-      .append('path')
-      .attr( 'd', lineGenerator([[x(range.x.min),y(0)],[x(range.x.max),y(0)]]) )
-      .attr('stroke-width', 3)
-      .attr('opacity', 0.5)
-      .attr('stroke', 'blue');
+    if(svgSettings.isAxisLine){
 
-    // origin y-axis
-    originAxis
-      .append('path')
-      .attr( 'd', lineGenerator([[x(0),y(range.min)],[x(0),y(range.max)]]) )
-      .attr('stroke-width', 3)
-      .attr('opacity', 0.5)
-      .attr('stroke', 'red');
+      // origin x-axis
+      originAxis
+        .append('path')
+        .attr( 'd', lineGenerator([[x(range.x.min),y(0)],[x(range.x.max),y(0)]]) )
+        .attr('stroke-width', 3)
+        .attr('opacity', 0.5)
+        .attr('stroke', 'blue');
+
+      // origin y-axis
+      originAxis
+        .append('path')
+        .attr( 'd', lineGenerator([[x(0),y(range.y.min)],[x(0),y(range.y.max)]]) )
+        .attr('stroke-width', 3)
+        .attr('opacity', 0.5)
+        .attr('stroke', 'red');
 
 
-      // save all the components for future use...
-      this.components = {
-        svg, originAxis, ConversionFns: {x,y,xInv,yInv}
-      }
 
-      return svg;
+    }
+
+        // save all the components for future use...
+        components = {
+          svg, svgSettings, originAxis, conversionFns: {x,y,xInv,yInv}, spaces: {beforeGridSpace, afterGridSpace}, frame
+        }
   }
 
+  init( );
 
+// return this;
 
 }
 

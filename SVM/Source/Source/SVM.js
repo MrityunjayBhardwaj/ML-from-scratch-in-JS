@@ -190,6 +190,10 @@ function svm(){
 
       let alphaArray = legrangeMultipliers.arraySync();
 
+      // let dX = dataX.dataSync();
+      // let dY = dataX.dataSync();
+      // let alpha = legrangeMultipliers.dataSync();
+
       // let index2Use = [1,0,4,2,5,3]
       // let index2Use = [ 3, 0, 1, 2, 0, 1 ];
       let stopLoop = 0;

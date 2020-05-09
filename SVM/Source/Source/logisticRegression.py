@@ -127,3 +127,80 @@ for i in range(epoch):
 print('awesome!!', weights, bias)
 # for i in range(epoch):
 #     for i in range(len(X)):
+
+
+
+decision_boundary_p1_x = np.min([x[:,0],y[:,0]])
+decision_boundary_p2_x = np.max([x[:,0],y[:,0]])
+# Line form: (-a[0] * x - b ) / a[1]
+decision_boundary_p1_y = (-a.value[0]*decision_boundary_p1_x + b.value ) / a.value[1]
+decision_boundary_p2_y = (-a.value[0]*decision_boundary_p2_x + b.value ) / a.value[1]
+
+margin_left_p1_y = (-a.value[0]*decision_boundary_p1_x + b.value + margin_length ) / a.value[1]
+margin_left_p2_y = (-a.value[0]*decision_boundary_p2_x + b.value + margin_length ) / a.value[1]
+margin_right_p1_y = (-a.value[0]*decision_boundary_p1_x + b.value - margin_length ) / a.value[1]
+margin_right_p2_y = (-a.value[0]*decision_boundary_p2_x + b.value - margin_length ) / a.value[1]
+
+data = [
+        go.Scatter(
+          x = x[:,0].flatten(),
+          y = x[:,1].flatten(),
+          mode="markers",
+          name="class 1 data",   
+          marker=dict(color="blue")  
+                 
+        ),
+        go.Scatter(
+          x = y[:,0].flatten(),
+          y = y[:,1].flatten(),
+           mode="markers",
+          name="class 2 data",  
+          marker=dict(color="orange")               
+        ),
+        go.Scatter(
+            x= [decision_boundary_p1_x.flatten()[0], decision_boundary_p2_x.flatten()[0]],
+            y= [decision_boundary_p1_y, decision_boundary_p2_y],
+            line=dict(color="black"),
+            name="decision Boundary"
+        ),
+        go.Scatter(
+            x = [decision_boundary_p1_x, decision_boundary_p2_x],
+            y = [margin_left_p1_y, margin_left_p2_y],
+            legendgroup= 'a',
+            name="margins",
+            line=dict(color="gray", dash="dash"),
+            showlegend = False,
+            
+        ),
+        go.Scatter(
+            x = [decision_boundary_p1_x, decision_boundary_p2_x],
+            y = [margin_right_p1_y, margin_right_p2_y],
+            legendgroup= 'a',
+            name="margins",
+            line=dict(color="gray", dash='dash'),
+            showlegend = False,
+            
+        )
+]
+
+# plt.plot(data=data)
+fig = go.Figure(data)
+
+
+# some visual stuffs.
+fig.update_layout(title='Support Vector Machine', autosize=False,
+                  # scene_camera_eye=dict(x=optimalPt[0]*1, y=optimalPt[1]*1, z=optimalVal*1),
+                  width=600, height=600,
+                  margin=dict(l=65, r=50, b=65, t=90),
+                  scene={
+                      "xaxis": {"title": "x"},
+                      "yaxis": {"title": "y"},
+                  }
+                  
+)
+
+fig.update_yaxes(range=(-4, 6))
+
+
+# [decision_boundary_p1_x,decision_boundary_p2_x],[margin_left_p1_y[0,0],margin_left_p2_y[0,0]]
+fig.show()

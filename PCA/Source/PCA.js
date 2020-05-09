@@ -40,6 +40,21 @@ function myPCA(){
            .matMul(sVals.slice([0,0],[noOfComponents, noOfComponents]))
            .matMul(rVecs.slice([0,0],[noOfComponents, -1]));
 
+  },
+
+  this.dimReduction = function(noOfComponents){
+
+
+    // Extracting U S V matrixes
+    const lVecs = this.model.covSVD[0];
+    const sVals = this.model.covSVD[1];
+
+    if (noOfComponents > lVecs.shape[1])
+      throw new Error('number of components must be less then'+lVecs.shape[1]);
+
+    return lVecs.slice([0,0],[-1,noOfComponents])
+           .matMul(sVals.slice([0,0],[noOfComponents, noOfComponents]));
+
   }
 
   

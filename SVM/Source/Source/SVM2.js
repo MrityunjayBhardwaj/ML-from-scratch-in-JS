@@ -141,19 +141,22 @@ function svm(){
       
       let passes = 0;// count the no of steps passes since we get no alpha updates
 
-      let js =[[6, 6, 9, 7, 8, 7, 5, 9, 5, 8],
-      [2, 7, 9, 8, 8, 3, 0, 8, 1, 0],
-      [3, 5, 9, 2, 7, 9, 1, 8, 1, 1],
-      [3, 9, 8, 2, 7, 2, 9, 0, 1, 0],
-      [5, 3, 8, 1, 8, 1, 5, 4, 1, 1],
-      [7, 2, 5, 6, 9, 8, 7, 4, 0, 1],
-      [4, 5, 0, 7, 8, 9, 0, 3, 1, 7],
-      [1, 9, 8, 7, 8, 1, 4, 3, 5, 8],
-      [6, 2, 4, 1, 9, 1, 3, 0, 9, 1],
-      [9, 8, 4, 5, 2, 4, 4, 1, 9, 0]
-    ]
-      epoch =10;
+      // for diagnosis
+    //   let js =[[6, 6, 9, 7, 8, 7, 5, 9, 5, 8],
+    //   [2, 7, 9, 8, 8, 3, 0, 8, 1, 0],
+    //   [3, 5, 9, 2, 7, 9, 1, 8, 1, 1],
+    //   [3, 9, 8, 2, 7, 2, 9, 0, 1, 0],
+    //   [5, 3, 8, 1, 8, 1, 5, 4, 1, 1],
+    //   [7, 2, 5, 6, 9, 8, 7, 4, 0, 1],
+    //   [4, 5, 0, 7, 8, 9, 0, 3, 1, 7],
+    //   [1, 9, 8, 7, 8, 1, 4, 3, 5, 8],
+    //   [6, 2, 4, 1, 9, 1, 3, 0, 9, 1],
+    //   [9, 8, 4, 5, 2, 4, 4, 1, 9, 0]
+    // ]
+    //   epoch =10;
       for(let e=0; (e<epoch) && (passes < 10);e++){
+
+
         
         let alphaChanged = 0;
         for(let i=0;i<N;i++){
@@ -171,10 +174,8 @@ function svm(){
 
             // selecting our pair
             let j = i;
-            // while(j === i) j = Math.floor( Math.random()*N );
-            j = js[e][i];
-
-            console.log('j: ',e, j,i, )
+            while(j === i) j = Math.floor( Math.random()*N );
+            // j = js[e][i];
 
             let dataJ = {x: dX[j],
                           y: dY[j][0],
@@ -202,7 +203,7 @@ function svm(){
                 upperBound = Math.min(C, alphaJ - alphaI + C);
             }
 
-            if (Math.abs(lowerBound - upperBound)< .0001)continue;
+            if (Math.abs(lowerBound - upperBound) < .0001)continue;
 
             
             let newAlphaJ = alphaJ - dataJ.y*(ErrorI - ErrorJ)/eta;
@@ -249,22 +250,6 @@ function svm(){
 
       }
 
-
-      // collecting only those poits whose alphas > 0
-      // let newSupportVectors = {x: tf.tensor([]), y: tf.tensor([]), alpha: tf.tensor([])};
-      // for(let i=0;i< N;i++){
-      //       let dataI = {x: data.x.slice([i,0], [1, -1]), 
-      //                    y: data.y.slice([i,0], [1, -1])};
-      //       let alphaI = supportVectors.alpha.slice([i,0], [1, -1]);
-      //       if(alphaI.greater(0).dataSync()[0]){
-      //           newSupportVectors.x = newSupportVectors.x.concat( dataI.x );
-      //           newSupportVectors.y = newSupportVectors.y.concat( dataI.y );
-      //           newSupportVectors.alpha = newSupportVectors.alpha.concat( alphaI );
-
-      //       }
-      // }
-
-
       let combinedData = data.x.concat(data.y,axis=1).concat(supportVectors.alpha, axis=1);
 
       combinedData = await tf.booleanMaskAsync(combinedData, supportVectors.alpha.greater(0.0001).flatten())
@@ -274,25 +259,6 @@ function svm(){
       supportVectors.alpha = combinedData.slice([0,combinedData.shape[1]-1], [-1, -1]);
 
       combinedData.print();
-
-      // // if(!useSaved)
-      //   model.supportVectors = newSupportVectors;
-
-      // console.log('final alphas: ', model.supportVectors.alpha.print())
-
-//  if(this.kernelType === "linear") {
-
-//         // compute weights and store them
-//         this.w = new Array(this.D);
-//         for(var j=0;j<this.D;j++) {
-//           var s= 0.0;
-//           for(var i=0;i<this.N;i++) {
-//             s+= this.alpha[i] * labels[i] * data[i][j];
-//           }
-//           this.w[j] = s;
-//           this.usew_ = true;
-//         }
-//       }
 
       if (kernelType === 'linear'){
         model.weights = supportVectors.alpha.mul(supportVectors.y).mul(supportVectors.x).sum(axis=0).expandDims();
@@ -316,20 +282,7 @@ function svm(){
         return f;
       }
 
-    this.margin = (data, preK /* precalculated kernel*/) =>{
-
-      // if its a array then convert it into tf.tensor
-        if (data[0]) data = tf.tensor(data).expandDims();
-
-
-        if (data.shape[0] === 1){
-        
-           return model.supportVectors.alpha.mul(model.supportVectors.y)
-            // .mul(model.kernel(model.supportVectors.x, data.tile([model.supportVectors.x.shape[0], 1]) ))
-            .mul(preK || model.kernel(model.supportVectors.x, data.tile([model.supportVectors.x.shape[0], 1]) )) // use precalculated kernel values in order to save computation (if provided)
-            .sum().add( model.bias );
-        }
-
+    this.margin = (data ) =>{
         if(model.kernelType === 'linear'){
           console.log(data.shape, model.weights.shape )
           return tf.matMul(data, model.weights.transpose() ).add(model.bias);
@@ -337,7 +290,9 @@ function svm(){
 
         const nSupportVectors = model.supportVectors.x.shape[0];
 
-        let output = model.supportVectors.alpha.slice([0, 0],[1, -1])
+        let output = tf.tensor([]);
+        if(nSupportVectors)
+        output = model.supportVectors.alpha.slice([0, 0],[1, -1])
                     .mul(model.supportVectors.y.slice([0, 0], [1, -1]))
                     .mul(
                           model.kernel(

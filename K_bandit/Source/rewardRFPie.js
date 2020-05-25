@@ -6,9 +6,9 @@ var width = 350
 // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
 var radius = Math.min(width, height) / 2 - margin
 
-
+const rewardRFPieVizElem = document.getElementById("rewardRFPieViz")
 // append the rewardRFPieSvg object to the div called 'my_dataviz'
-var rewardRFPieSvg = d3.select("#rewardRFPieViz")
+var rewardRFPieSvg = d3.select(rewardRFPieVizElem)
   .append("svg")
     .attr("width", width)
     .attr("height", height)
@@ -95,7 +95,14 @@ rewardRFPieGroup
 
 
 
-function updateRewardRFPie(cAction,array){
+function updateRewardRFPie(cAction,array, highlightInterval=1000){
+
+
+    rewardRFPieVizElem.style.borderColor="red"; 
+    setTimeout(()=>{
+
+        rewardRFPieVizElem.style.borderColor="";
+    }, highlightInterval);
 
     // array = normalize(array);
     let rewardRFData = array.map((d,i)=>{let a = {}; a[i] = d; return a});

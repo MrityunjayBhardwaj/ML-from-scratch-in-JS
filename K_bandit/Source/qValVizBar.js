@@ -3,8 +3,11 @@ var margin = {top: 20, right: 30, bottom: 40, left: 35},
     qValVizWidth = 470 - margin.left - margin.right,
     qValVizHeight = 200 - margin.top - margin.bottom;
 
+const qValBarVizElem = document.getElementById("qValBarViz");
+const viz3Elem = document.getElementById('viz3');
+
 // append the svg object to the body of the page
-var qValBarSvg = d3.select("#qValBarViz")
+var qValBarSvg = d3.select(qValBarVizElem)
   .append("svg")
     .attr("width", qValVizWidth + margin.left + margin.right)
     .attr("height", qValVizHeight + margin.top + margin.bottom)
@@ -94,7 +97,13 @@ let qValBarData = qValBarArray.map((d,i)=>{ return {x: .3,y:i}})
 
 
 
-function updateQValBar(cAction,array){
+function updateQValBar(cAction,array,highlightInterval=1000){
+
+    viz3Elem.style.borderColor="red"; 
+    setTimeout(()=>{
+
+        viz3Elem.style.borderColor="";
+    }, highlightInterval);
 
    qValBarScaleY = d3.scaleLinear()
     .domain([d3.min(array)-.6, d3.max(array)+.6])

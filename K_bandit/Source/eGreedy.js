@@ -41,10 +41,24 @@ function eGreedy(params={epsilon,valueFn,getReward, customValueFunction, nAction
 
         updateCallback: params.updateCallback || (()=>{}),
 
+    }
 
+    let updateAnalysis = {
+        cEpisode: 0,
+        cStep: 0,
+
+        cRandomVal: 0,
+        isGreedyStep: 0,
+
+        cAction: 0,
+        cReward: 0, 
     }
 
     let cStep = 1;
+
+    this.getUpdateAnalysis = function(){
+        return updateAnalysis;
+    }
 
     this.getEstActionValue = function(){
 
@@ -59,6 +73,10 @@ function eGreedy(params={epsilon,valueFn,getReward, customValueFunction, nAction
          model.estActionValues = newEstActionValues;
     }
 
+    this.getModel = function(){
+        return model;
+    }
+
     this.updateRewards = function(cAction,cReward, valueFnParams ){
 
         model.estActionValues[cAction] = model.valueFunction(cAction, cReward, model.estActionValues);
@@ -70,11 +88,16 @@ function eGreedy(params={epsilon,valueFn,getReward, customValueFunction, nAction
         let cAction = 0;
         let cReward = 0;
 
-        if(model.epsilon >= Math.random()){
+        let randomVal = Math.random();
+        let greedyAction = 0;
+
+        if(model.epsilon >= randomVal){
             let maxEstVal = d3.max(model.estActionValues);
 
             cAction =(model.estActionValues.indexOf(maxEstVal));
             cReward = model.getReward(cAction);
+
+            greedyAction = 1;
 
             this.updateRewards(cAction, cReward);
         }else{
@@ -85,6 +108,12 @@ function eGreedy(params={epsilon,valueFn,getReward, customValueFunction, nAction
 
             this.updateRewards(cAction, cReward);
         }
+
+        updateAnalysis.cAction = cAction;
+        updateAnalysis.cReward = cReward;
+        updateAnalysis.randomVal = randomVal;
+        updateAnalysis.isGreedyStep = greedyAction;
+        updateAnalysis.cStep = cStep;
 
         if(model.updateCallback){
             // console.log("casldkfj: ", cAction, cReward);

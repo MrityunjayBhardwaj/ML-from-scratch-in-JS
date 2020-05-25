@@ -22,12 +22,6 @@
             justify-content: center;
         }
 
-        #viz3{
-            display: flex;
-            flex-wrap: nowrap;
-            flex-direction: row;
-
-        }
     </style>
 
 
@@ -252,7 +246,7 @@ text{
   height:300px;
   position:absolute;
   z-index: 1;
-  margin-top: -55px;
+  margin-top: -50px;
 }
 
 #slotMachine_body{
@@ -297,6 +291,11 @@ text{
   
 }
 
+#rewardText{
+  transform: translate(100px,110px);
+font-weight: bold;
+font-size: 20px;
+}
 </style>
 
     <link rel="stylesheet" href="./Source/jQuery-SlotMachine-master/dist/jquery.slotmachine.css" type="text/css" media="screen" />
@@ -320,11 +319,11 @@ text{
             <div>2. &emsp;\( Q(a) \leftarrow 0 \)</div>
             <div>3. &emsp;\( N(a) \leftarrow 0 \)</div>
             <div>4. Loop forever:</div>
-            <div>5. &emsp; if( \( ( 1-\epsilon ) \) > rand() ): </div>
-            <div>6.  &emsp; &emsp;\(A = \operatorname{argmax}_a Q(a) \)</div>
+            <div>5. &emsp; if(  ( 1- <span>\(\epsilon\)</span> )  > <span>rand()</span> ): <span></span></div>
+            <div>6.  &emsp; &emsp;\(A\) = <span> \(\operatorname{argmax}_a Q(a) \)</span> <span></span></div>
             <div>7. &emsp;else:</div>
-            <div>8. &emsp; &emsp;\(A\) = a random action </div>
-            <div>9. &emsp;\(R \leftarrow bandit(A) \) </div>
+            <div>8. &emsp; &emsp;\(A\) = <span>a random action</span> <span></span> </div>
+            <div>9. &emsp;\(R \leftarrow\) <span> \( bandit(A) \)</span> <span></span> </div>
             <div>10. &emsp;\(N(A) \leftarrow N(A) + 1\)</div>
             <div>11. &emsp;\(Q(A) \leftarrow Q(A) + \frac{1}{N(A)} {[R - Q(A)]}\)</div>
           </div>
@@ -335,7 +334,7 @@ text{
             <hr>
 
             <h2  class="vizTitle">Current Expected Reward:</h2>
-            <div style=" margin-top: 0px;">
+            <div style=" margin-top: 0px;" id="viz3">
               <div style="display: flex;">
                 <div style="margin-top: 80px;">\( Q(A):\)</div>
             <div id="qValBarViz"></div>
@@ -350,10 +349,7 @@ text{
     <div id="slotMachine" style="display: flex;">
     <!-- Slot machine example -->
 
-    <div id="banditsList" >
-    </div>
-
-    <div style="margin-left:30px">
+    <div style="margin-right:30px">
     <h2 id="slotMachineTitle" >Slot Machine #1</h2>
 
     <div id="casino" style="padd0ng-top:0px;">
@@ -429,13 +425,20 @@ text{
           </div>
 
           <div class="btn-group btn-group-justified" role="group">
-            <button id="casinoShuffle" type="button" class="btn btn-primary btn-lg">Shuffle!</button>
+            <!-- <button id="casinoShuffle" type="button" class="btn btn-primary btn-lg">Shuffle!</button> -->
           </div>
         </div>
       </div>
   </div>
 
+  <div id="rewardText">
+    REWARD
+  </div>
 </div>
+
+    <div id="banditsList" >
+    </div>
+
       <!-- <div class="container">
         <div class="row">
           <div class="col-sm-10 col-md-5 offset-sm-1 offset-md-1">
@@ -485,6 +488,10 @@ function shuffle(t=10) {
 
      <!-- <div id="viz3"></div> -->
 
+     <div id="vizMid" style="width: 50px;">
+
+
+     </div>
         <div id="viz2">
           <h2 class="vizTitle">Environment:</h2>
           <div id="my_dataviz"></div>

@@ -1,10 +1,13 @@
+
+let rewardDisVizContainerElem = document.getElementById("my_dataviz")
+
 // set the dimensions and margins of the graph
 var margin = {top: 40, right: 30, bottom: 50, left:20},
     width = 460 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
+var svg = d3.select(rewardDisVizContainerElem)
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -209,7 +212,14 @@ function kernelEpanechnikov(k) {
 }
 
 
-function updateRewardDistViz(action, estActionVal){
+function updateRewardDistViz(action, estActionVal, highlightInterval=1000){
+
+ 
+  rewardDisVizContainerElem.style.borderColor="red"
+  setTimeout(()=>{
+
+  rewardDisVizContainerElem.style.borderColor=""
+  }, highlightInterval)
 
   let bgRectSelect = bgRectGroup.selectAll('rect');
 

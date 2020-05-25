@@ -3,8 +3,9 @@ var margin = {top: 10, right: 30, bottom: 30, left: 20},
     timelineVizWidth = 470 - margin.left - margin.right,
     timelineVizHeight = 180 - margin.top - margin.bottom;
 
+let timelineVizElem = document.getElementById("timelineViz")
 // append the svg object to the body of the page
-var timelineSvg = d3.select("#timelineViz")
+var timelineSvg = d3.select(timelineVizElem)
   .append("svg")
     .attr("width", timelineVizWidth + margin.left + margin.right)
     .attr("height", timelineVizHeight + margin.top + margin.bottom)
@@ -111,8 +112,15 @@ let rewardData = rewardArray.map((d,i)=>{ return {x: i,y:d}})
 
 // })
 
-function updateTimeline(rewardArray){
+function updateTimeline(rewardArray, highlightInterval=1000){
    
+    timelineVizElem.style.borderColor="red";
+    setTimeout(()=>{
+
+
+        timelineVizElem.style.borderColor="";
+    }, highlightInterval);
+
     const pathSelect = rewardGroup.selectAll('path');
 
     const r = rewardArray.map((d,i)=>{ return {x: i+1,y:d}})

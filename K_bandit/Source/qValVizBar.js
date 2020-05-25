@@ -18,6 +18,8 @@ let qValBarAxisLeftGroup = qValBarSvg.append('g').attr('id', 'axisLeft');
 
 let qValBarAxisMidGroup = qValBarSvg.append('g').attr('id', 'axisMid');
 
+const qValBarValueGroup = qValBarSvg.append('g').attr('id', 'qValues');
+
 // contain normalized relative frequency...
 let qValBarArray = Array(nArms).fill(0);
 
@@ -68,6 +70,13 @@ let qValBarData = qValBarArray.map((d,i)=>{ return {x: .3,y:i}})
     .attr('height', "2px")
     .attr('fill', 'white');
 
+    qValBarValueGroup.selectAll('text')
+    .data(qValBarData)
+    .enter()
+    .append('text')
+    .text("5.0")
+    .attr('transform', (d,i)=>{return `translate(${qValBarScaleX(i)+margin.left-7}, ${qValBarScaleY(0)})`})
+    .style("text-anchor", "end");
 
   //Bars
     qValBarGroup.selectAll('myRect')
@@ -82,10 +91,13 @@ let qValBarData = qValBarArray.map((d,i)=>{ return {x: .3,y:i}})
     // .attr("fill", "#69b3a2")
 
 
+
+
+
 function updateQValBar(cAction,array){
 
    qValBarScaleY = d3.scaleLinear()
-    .domain([d3.min(array)-.5, d3.max(array)+.5])
+    .domain([d3.min(array)-.6, d3.max(array)+.6])
     .range([ qValVizHeight, 0 ]);
 
     qValBarAxisLeftGroup
@@ -98,10 +110,30 @@ function updateQValBar(cAction,array){
   qValBarAxisMidGroup.select('rect')
     .attr('y', qValBarScaleY(0))
 
-        // .call(d3.axisBottom(qValBarScaleX))
-    // array = normalize(array);
+
+
+
 
     let qValBarData = array.map((d,i)=>{ return {x:i,y: d}});
+
+    // updating qValues text
+    const qValBarValueGroupTextSelect = qValBarValueGroup.selectAll('text')
+
+    qValBarValueGroupTextSelect
+    .data(qValBarData)
+    .enter()
+    .append('text')
+    .merge(
+    qValBarValueGroupTextSelect
+    )
+    .text((d,i)=>{return d.y.toFixed(1)})
+    .attr('transform', (d,i)=>{return `translate(${qValBarScaleX(i)+margin.left-7}, ${ (d.y >= 0)? qValBarScaleY(d.y*1)-5 :  qValBarScaleY(d.y*1)+15})`})
+    .style("fill", (d,i)=>{return( (i === cAction)? "red" : 'whitesmoke')})
+    .style('stroke-width', 0)
+    .style('font-weight', 'bold')
+    .style("text-anchor", "end");
+        // .call(d3.axisBottom(qValBarScaleX))
+    // array = normalize(array);
 
     let qValBarRectSelect = qValBarGroup.selectAll("rect");
 

@@ -136,9 +136,8 @@ function updateTimeline(rewardArray){
     .datum(r).enter()
     .append("path")
     .merge(pathSelect)
-    .attr("fill", "none")
     .attr('stroke', darkModeCols.green(1.0))
-    .attr("stroke-timelineVizWidth", 1.5)
+    .attr("stroke-width", 1.2)
     .attr("d", d3.line()
         .x(function(d, i) {
             return timelineX(d.x) })

@@ -11,7 +11,9 @@ for(let i=0;i< nArms;i++){
 
     l.style.backgroundColor = myColor(allMeans[i]);
     l.style.strokeWidth = '5px'
-    l.innerHTML = `SlotMachine ${i}`; 
+    l.style.fontWeight = 'bold'
+    l.style.color='white'
+    l.innerHTML = `SlotMachine #${i}`; 
     listMaster.appendChild(l)
 }
 

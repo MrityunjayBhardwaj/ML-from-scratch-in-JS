@@ -39,11 +39,10 @@ function onUpdateCallback(action, reward){
 
 const eGreedyModel = new eGreedy({epsilon: 0.6, getReward: genReward, nActions: 10, updateCallback: onUpdateCallback});
 
-
 let steps = 0;
 const maxSteps = 150;
 
-/* our main loop */
+// /* our main loop */
 let intervelPromise = setInterval(
 
     // callback function
@@ -64,3 +63,11 @@ let intervelPromise = setInterval(
     }
 
 , timeInterval)
+
+// const vizStepFunction = [
+
+// ];
+
+// let vizStep
+
+

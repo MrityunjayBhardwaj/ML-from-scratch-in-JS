@@ -28,7 +28,7 @@ var color = d3.scaleOrdinal()
 // Compute the position of each group on the pie:
 var pie = d3.pie()
   .padAngle(.02)
-  .value(function(d) {return d.value; })
+  .value(function(d) {return d.value; }).sort(null);
 var data_ready = pie(d3.entries(rewardRFPieData))
 
 // The arc generator
@@ -51,7 +51,7 @@ rewardRFPieGroup
   .append('path')
   .attr('d', arc
   )
-  .attr('fill', function(d){ return(myColor(d.data.key)) })
+  .attr('fill', function(d){ return(myColor(allMeans[d.data.key])) })
   .attr("stroke", "none")
   .style("stroke-width", "1px")
   // .style("opacity", 0.7)
@@ -116,9 +116,8 @@ function updateRewardRFPie(cAction,array){
     .append('path').merge(rewardRFPiePathSelect)
     .attr('d', arc
     )
-    .attr('stroke', function(d, i){if(i === cAction)return 'red'; return(myColor(d.data.key)) })
-    // .attr("stroke", "black")
-    .style("stroke-width", "5px")
+    .attr('stroke', function(d, i){if(i === cAction)return 'red'; return 'none' })
+    .style("stroke-width", "3px")
 
 
 // Add the polylines between chart and labels:
@@ -129,7 +128,7 @@ rewardRFPiePolyLineSelect
   .merge(rewardRFPiePolyLineSelect)
     .attr("stroke", "white")
     .style("fill", "none")
-    .attr("stroke-width", 1)
+    .attr("stroke-width", 1.5)
     .attr('points', function(d) {
       var posA = arc.centroid(d) // line insertion in the slice
       var posB = outerArc.centroid(d) // line break: we use the other arc generator that has been built only for that
@@ -145,12 +144,13 @@ rewardRFPieTextSelect
   .enter()
   .append('text')
   .merge(rewardRFPieTextSelect)
-    .text( function(d) {  return `${d.data.key}` } )
+    .text( function(d) {  return `#${d.data.key}` } )
     .attr('fill', function(d, i){if(i === cAction)return 'red'; return "white"; return (myColor(d.data.key)) })
     .attr('transform', function(d) {
         var pos = outerArc.centroid(d);
         // var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
         // pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
+        pos[0] += 5;
         return 'translate(' + pos + ')';
     })
     .style('text-anchor', function(d) {
@@ -159,6 +159,7 @@ rewardRFPieTextSelect
     })
     .style('text-decoration', 'underline')
     .style('font-size', '20px')
+    .style('font-weight', 'bold')
     .style('stroke', 'none')
 
 

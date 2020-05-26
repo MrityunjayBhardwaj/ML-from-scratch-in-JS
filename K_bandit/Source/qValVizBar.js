@@ -136,7 +136,7 @@ function updateQValBar(cAction,array,highlightInterval=1000){
     qValBarValueGroupTextSelect
     )
     .text((d,i)=>{return d.y.toFixed(1)})
-    .attr('transform', (d,i)=>{return `translate(${qValBarScaleX(i)+margin.left-7}, ${ (d.y >= 0)? qValBarScaleY(d.y*1)-5 :  qValBarScaleY(d.y*1)+15})`})
+    .attr('transform', (d,i)=>{return `translate(${qValBarScaleX(i)+margin.left+30}, ${ (d.y >= 0)? qValBarScaleY(d.y*1)-5 :  qValBarScaleY(d.y*1)+15})`})
     .style("fill", (d,i)=>{return( (i === cAction)? "red" : 'whitesmoke')})
     .style('stroke-width', 0)
     .style('font-weight', 'bold')
@@ -159,4 +159,27 @@ function updateQValBar(cAction,array,highlightInterval=1000){
     .attr("fill", (d,i)=>{return( (i === cAction)? "red" : myColor(allMeans[i]) )});
     // .attr('fill', (d, i)=>{ return myColor(allMeans[i])})
 
+}
+
+function resetQValBarViz(){
+
+    const qValBarValueGroupTextSelect = qValBarValueGroup.selectAll('text')
+
+    qValBarValueGroupTextSelect
+    .data(qValBarData)
+    .enter()
+    .append('text')
+    .merge(
+    qValBarValueGroupTextSelect
+    )
+    .style("fill", (d,i)=>{'whitesmoke'})
+
+
+    let qValBarRectSelect = qValBarGroup.selectAll("rect");
+
+    qValBarRectSelect
+    .data(qValBarData)
+    .enter()
+    .append("rect").merge(qValBarRectSelect)
+    .attr("fill", (d,i)=>{return myColor(allMeans[i]) });
 }

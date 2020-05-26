@@ -25,18 +25,17 @@
     </style>
 
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" type="text/css" />
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="../dependency/bootstrap/bootstrap.min.css" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" type="text/css" /> -->
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="../dependency/JQuery/jquery-3.2.1.slim.min.js"></script>
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
     <script src="./Source/jQuery-SlotMachine-master/dist//slotmachine.js"></script>
     <script src="./Source/jQuery-SlotMachine-master/dist//jquery.slotmachine.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script>
-    <!-- <link rel="stylesheet" type="text/css" href="slotMachine.css"> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/javascript.min.js"></script> -->
+    <!-- <script defer src="https://use.fontawesome.com/releases/v5.0.10/js/all.js" integrity="sha384-slN8GvtUJGnv6ca26v8EzVaR9DC58QEwsIk9q1QXdCU8Yu8ck/tL/5szYlBbqmS+" crossorigin="anonymous"></script> -->
 
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -296,6 +295,12 @@ text{
 font-weight: bold;
 font-size: 20px;
 }
+
+#vizMid{
+  width: 50px;
+  margin-left: -30px;
+  margin-right: -30px;
+}
 </style>
 
     <link rel="stylesheet" href="./Source/jQuery-SlotMachine-master/dist/jquery.slotmachine.css" type="text/css" media="screen" />
@@ -303,8 +308,8 @@ font-size: 20px;
 <body>
 
     <!-- Load d3.js -->
-    <script src="https://d3js.org/d3.v4.js"></script>
-    <!-- <script src="../dependency/d3.js"></script> -->
+    <!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+    <script src="../dependency/d3.js"></script>
 
 <div id="master">
 
@@ -489,9 +494,10 @@ function shuffle(t=10) {
      <!-- <div id="viz3"></div> -->
 
      <div id="vizMid" style="width: 50px;">
-
-
+     <!-- <div id="vizMid2" style="width: 50px;"> -->
      </div>
+
+
         <div id="viz2">
           <h2 class="vizTitle">Environment:</h2>
           <div id="my_dataviz"></div>
@@ -522,6 +528,8 @@ function shuffle(t=10) {
     <script src="Source/QValViz.js"></script>
     <script src="Source/qValVizBar.js"></script>
     <script src="Source/codeViz.js"></script>
+
+    <script src="interConnectionViz.js"></script>
 
     <script src="Source/main.js"></script>
 

@@ -94,7 +94,6 @@ rewardRFPieGroup
     .attr('font-size',25)
 
 
-
 function updateRewardRFPie(cAction,array, highlightInterval=1000){
 
 
@@ -105,21 +104,21 @@ function updateRewardRFPie(cAction,array, highlightInterval=1000){
     }, highlightInterval);
 
     // array = normalize(array);
-    let rewardRFData = array.map((d,i)=>{let a = {}; a[i] = d; return a});
+    rewardRFPieData = array.map((d,i)=>{let a = {}; a[i] = d; return a});
 
-    rewardRFData = {}
+    rewardRFPieData = {}
     for(let i=0;i< array.length;i++){
-        rewardRFData[i] = array[i];
+        rewardRFPieData[i] = array[i];
     }
 
     let rewardRFPiePathSelect = rewardRFPieGroup.selectAll("path");
     let rewardRFPiePolyLineSelect = rewardRFPieGroup.selectAll("polyline");
     let rewardRFPieTextSelect = rewardRFPieGroup.selectAll("text");
 
-    rewardRFData = pie(d3.entries(rewardRFData));
+    rewardRFPieData = pie(d3.entries(rewardRFPieData));
 
-    // console.log(rewardRFData, rewardRFScaleX(4), rewardRFScaleY(5))
-    rewardRFPiePathSelect.data(rewardRFData).enter()
+    // console.log(rewardRFPieData, rewardRFScaleX(4), rewardRFScaleY(5))
+    rewardRFPiePathSelect.data(rewardRFPieData).enter()
     .append('path').merge(rewardRFPiePathSelect)
     .attr('d', arc
     )
@@ -129,7 +128,7 @@ function updateRewardRFPie(cAction,array, highlightInterval=1000){
 
 // Add the polylines between chart and labels:
 rewardRFPiePolyLineSelect
-  .data(rewardRFData)
+  .data(rewardRFPieData)
   .enter()
   .append('polyline')
   .merge(rewardRFPiePolyLineSelect)
@@ -147,7 +146,7 @@ rewardRFPiePolyLineSelect
 
 // Add the polylines between chart and labels:
 rewardRFPieTextSelect
-  .data(rewardRFData)
+  .data(rewardRFPieData)
   .enter()
   .append('text')
   .merge(rewardRFPieTextSelect)
@@ -168,6 +167,66 @@ rewardRFPieTextSelect
     .style('font-size', '20px')
     .style('font-weight', 'bold')
     .style('stroke', 'none')
+
+
+}
+
+function resetRewardRFPieViz(){
+
+    let rewardRFPiePathSelect = rewardRFPieGroup.selectAll("path");
+    let rewardRFPiePolyLineSelect = rewardRFPieGroup.selectAll("polyline");
+    let rewardRFPieTextSelect = rewardRFPieGroup.selectAll("text");
+
+
+    // console.log(rewardRFPieData, rewardRFScaleX(4), rewardRFScaleY(5))
+    rewardRFPiePathSelect.data(rewardRFPieData).enter()
+    .append('path').merge(rewardRFPiePathSelect)
+    .attr('d', arc
+    )
+    .attr('stroke', 'none')
+    .style("stroke-width", "3px")
+
+
+// Add the polylines between chart and labels:
+rewardRFPiePolyLineSelect
+  .data(rewardRFPieData)
+  .enter()
+  .append('polyline')
+  .merge(rewardRFPiePolyLineSelect)
+    .attr("stroke", "white")
+    .style("fill", "none")
+    .attr("stroke-width", 1.5)
+    .attr('points', function(d) {
+      var posA = arc.centroid(d) // line insertion in the slice
+      var posB = outerArc.centroid(d) // line break: we use the other arc generator that has been built only for that
+      var posC = outerArc.centroid(d); // Label position = almost the same as posB
+      var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2 // we need the angle to see if the X position will be at the extreme right or extreme left
+      // posC[0] = radius * 0.95 * (midangle < Math.PI ? 1 : -1); // multiply by 1 or -1 to put it on the right or on the left
+      return [posA, posB, posC]
+    })
+
+// Add the polylines between chart and labels:
+rewardRFPieTextSelect
+  .data(rewardRFPieData)
+  .enter()
+  .append('text')
+  .merge(rewardRFPieTextSelect)
+    .attr('fill', 'white')
+    // .attr('transform', function(d) {
+    //     var pos = outerArc.centroid(d);
+    //     // var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
+    //     // pos[0] = radius * 0.99 * (midangle < Math.PI ? 1 : -1);
+    //     pos[0] += 5;
+    //     return 'translate(' + pos + ')';
+    // })
+    // .style('text-anchor', function(d) {
+    //     var midangle = d.startAngle + (d.endAngle - d.startAngle) / 2
+    //     return (midangle < Math.PI ? 'start' : 'end')
+    // })
+    // .style('text-decoration', 'underline')
+    // .style('font-size', '20px')
+    // .style('font-weight', 'bold')
+    // .style('stroke', 'none')
 
 
 }

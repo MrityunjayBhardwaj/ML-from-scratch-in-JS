@@ -68,7 +68,7 @@ function updateSlotMachine(action, reward, highlightInterval=1000){
         console.log('inside it', cOpactity)
         if (cOpactity < 0)
             clearInterval(rewardAnimOpacity)
-    }, highlightInterval/500)
+    }, highlightInterval/200)
 
     }, highlightInterval);
 
@@ -84,8 +84,15 @@ function updateSlotMachine(action, reward, highlightInterval=1000){
             listMaster.childNodes[action].style.border = "5px solid red";
     }
 
+    updateInterConnectionViz(action, highlightInterval);
 
+}
 
+function resetSlotMachine(){
+
+    for(let i=0;i<nArms;i++){
+        listMaster.childNodes[i].style.border = "";
+    }
 }
 
 

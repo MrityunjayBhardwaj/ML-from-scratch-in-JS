@@ -229,14 +229,22 @@ function updateRewardDistViz(action, estActionVal, highlightInterval=1000){
 
   let estActValSelect = estActValGroup.selectAll('rect');
 
-  estActValSelect.data(estActionVal).enter()
-  .append('rect').merge(estActValSelect)
-  .attr('x', (d,i)=>{
-    return x(d)
-  })
-  .attr('fill', (_,i)=>{ if(i === action)return'red'; return 'blue' } )
+  // estActValSelect.data(estActionVal).enter()
+  // .append('rect').merge(estActValSelect)
+  // .attr('x', (d,i)=>{
+  //   return x(d)
+  // })
+  // .attr('fill', (_,i)=>{ if(i === action)return'red'; return 'blue' } )
   // .attr('width', (_,i)=>{ if(i === action)return'red' } )
 
 }
 
 updateRewardDistViz(3)
+function resetRewardDistViz(){
+
+  let bgRectSelect = bgRectGroup.selectAll('rect');
+
+  bgRectSelect.datum([1]).enter()
+  .append('rect').merge(bgRectSelect)
+  .attr('stroke', (d,i) =>{ return 'none'})
+}

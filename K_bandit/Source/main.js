@@ -111,7 +111,8 @@ const vizStepFunction = [
 let vizStep = 0;
 
 let cCycle = 0;
-let maxCycle = 5;
+
+let maxCycle = 100; // steps in an episode
 
 let vizInterval = Array(10).fill(baseIntervalTime);
 
@@ -155,6 +156,16 @@ let intervelPromise = setInterval(
 
             eGreedyModel.update();
             resetCodeViz();
+
+            resetInterConnectionViz();
+
+            resetSlotMachine();
+
+            resetRewardDistViz();
+
+            resetQValBarViz();
+
+            resetRewardRFPieViz();
 
         }
 

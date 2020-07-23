@@ -6,21 +6,104 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Linear Regression in JS</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
       <!-- Import tfjs-vis -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis" ></script> -->
     <script src="../dependency/ndjs/dist/nd.js"></script>
-    <script src="../dependency/plotlyJS/plotly-latest.min.js"></script>
+    <!-- <script src="../dependency/plotlyJS/plotly-latest.min.js"></script> -->
         
-    <script src="Source/utils.js"></script>
-    <script src="Source/Linear-Regression.js"></script>
-    <script src="Source/Polynomial-Regression.js"></script>
-    <script src="Source/Classification/BayesClassifier.js"></script>
+    <!-- <script src="Source/utils.js"></script> -->
+    <script src="../dependency/utils.js"></script>
+
+    <script src="../dependency/d3.js"></script>
+    <!-- <script src="Source/Linear-Regression.js"></script> -->
+    <!-- <script src="Source/Polynomial-Regression.js"></script> -->
+    <!-- <script src="Source/Classification/BayesClassifier.js"></script> -->
+
+    <!-- <link rel="stylesheet" type="text/css" href="../dependency/css/Skeleton-2.0.4/css/skeleton.css" /> -->
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
 </head>
 <body>
 
-  <div id="linearRegressionViz" style="width: 500px;height: 500px; display: inline-block"></div>
-<script src="app.js"></script>
+
+
+  <div class="container">
+    <h1 id="title">Linear Regression</h1>
+
+    <summary>
+      Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime incidunt molestias placeat velit tempora, fugiat, quisquam ut dolorem adipisci similique explicabo sequi, provident fuga praesentium rem iusto ducimus! Illum, animi.
+    </summary>
+
+    <div id="linearRegressionViz" >
+
+
+      <h2 class="vizTitle">
+        Data Space
+      </h2>
+      <div id="inputSpaceViz" class="vizContainer"></div>
+
+      <h2>Parameters:</h2>
+      <div id="paramContainer">
+        <div>
+          Epoch:
+        <div class="number-input">
+          <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" >-</button>
+          <input class="quantity" id="epoch" min="0" name="quantity" value="1" type="number">
+          <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus">+</button>
+        </div>
+          <!-- Epoch: <input type="number" min="0" value="1000" id="epoch" ></input> -->
+        </div>
+        <div>
+          LearningRate: <input type="number" value="0" id="learningRateValue"></input> 
+          <input type="range" min="0" max="5" step=".0001" value=".001" id="learningRate" ></input>
+        </div>
+        <div>
+          Threshold: <input type="number" value=".01" id="thresholdValue"></input>
+          <input type="range" min="0" max="1" step=".0001" value=".01" id="threshold" ></input>
+        </div>
+        <div>
+          useBias: 
+          <label class="switch">
+            <input type="checkbox"  value="0" id="useBias" ></input>
+            <span class="slider round"></span>
+          </label>
+          
+        </div>
+      </div>
+
+
+      <button class="btn" id="button">Recalculate</button>
+
+      <div style="display: flex;">
+        <div class="vizContainer" style="display: flex;">
+          <div>
+            <h2 id="loss" class="vizTitle">
+              Loss:  
+            </h2>
+            <div id="lossViz" class="vizContainer">
+            </div>
+          </div>
+
+          <div>
+            <h2 id="metric" class="vizTitle">
+              <!-- Metric:   -->
+            </h2>
+            <div id="metricViz" class="vizContainer">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  <summary>
+    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Maxime incidunt molestias placeat velit tempora, fugiat, quisquam ut dolorem adipisci similique explicabo sequi, provident fuga praesentium rem iusto ducimus! Illum, animi.
+  </summary>
+  </div>
+<script type="module" src="appAsync.js"></script>
+
+<script>
+</script>
 
 </body>
 </html>

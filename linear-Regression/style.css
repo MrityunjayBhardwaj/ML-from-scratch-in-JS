@@ -1,0 +1,249 @@
+#linearRegressionViz{
+}
+html{
+    min-height: 100%;
+    position: relative;
+    margin: 0px;
+}
+body{
+    height: 100%;
+    margin: 0px;
+
+    font-family:  "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+}
+
+summary{
+    margin: 2em 0;
+}
+
+.container{
+    width: 900px;
+    /* background-color: red; */
+    display: block;
+    margin: 0 auto;
+    border: 10px;
+    box-shadow: 0px 1px .4em gray;
+    position: relative;
+    height: 100%;
+    border-radius: 0 0 10px 10px;
+    padding: .2em 2em;
+    border-top: none;
+}
+
+#title{
+    margin-top: 1em;
+    font-weight: 400;
+    font-size: 3.0em;
+    text-decoration: underline;
+    color: rgb(255, 0, 140);
+}
+
+h2{
+    font-weight: lighter;
+    color: gray;
+}
+
+
+.tick {
+    color: black;
+}
+
+.domain {
+    color: black;
+}
+
+#paramContainer{
+    display: flex;
+    margin-left: 1em;
+    margin-bottom: 1em;
+}
+
+#paramContainer div{
+    padding: 0 .1em;
+    font-size: larger;
+    margin: 1em auto;
+
+}
+
+#paramContainer input[type="range"]{
+  text-align: center;
+  height: 50%;
+}
+
+/* #epoch { */
+#paramContainer input[type="number"] {
+    -webkit-appearance: textfield;
+        -moz-appearance: textfield;
+            appearance: textfield;
+            width: 5em;
+            text-align: center;
+    }
+    
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    }
+/* } */
+
+
+  /* * number input style */
+
+.number-input {
+    border: 2px solid #ddd;
+    display: inline-flex;
+    border-radius: 4px;
+  }
+  
+  .number-input,
+  .number-input * {
+    box-sizing: border-box;
+  }
+  
+  .number-input button {
+    outline:none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    border: none;
+    align-items: center;
+    justify-content: center;
+    /* width: .0em;
+    height: 1em; */
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+    font-size: 1.0em;
+    text-align: center;
+  }
+
+
+
+  /* * slider style */
+
+  .slidecontainer {
+    width: 100%; /* Width of the outside container */
+  }
+  
+  /* The slider itself */
+  .slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;  
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; 
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+
+
+   /* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  /* top: 0; */
+  left: 0;
+  /* right: 0;
+  bottom: 0; */
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  height: 35px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+} 
+
+.btn{
+ padding: .7em 2em;
+ background-color: transparent;
+
+ border: 2px solid #999;
+ border-radius: .3em;
+
+ font-weight: bold;
+ color: #333;
+ text-transform: uppercase;
+ letter-spacing: .1em;
+ display: inline-block;
+ font-size: 11px;
+
+ cursor: pointer;
+}
+.btn:hover{
+  /* background-color: #eee; */
+  border-color: #555;
+  color: #000;
+}
+
+#svgContainer{
+
+  margin: 0 auto;
+  display: block;
+}
